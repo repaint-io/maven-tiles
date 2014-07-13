@@ -69,7 +69,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected static final String TILE_PROPERTY_PREFIX = "tile.";
 
 	protected final MavenXpp3Reader reader = new MavenXpp3Reader();
-	protected final ModelMerger modelMerger = new TilesModelMerger();
+	protected final ModelMerger modelMerger = new ModelMerger();
 
 	@Requirement
 	protected Logger logger;

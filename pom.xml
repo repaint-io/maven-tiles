@@ -20,9 +20,39 @@
 	<version>1.1-SNAPSHOT</version>
 	<name>Maven Tiles Plugin</name>
 
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+
+	<developers>
+		<developer>
+			<id>talios</id>
+			<email>mark@talios.com</email>
+			<name>Mark Derricutt</name>
+		</developer>
+		<developer>
+			<id>richard</id>
+			<email>richard@bluetrainsoftware.com</email>
+			<name>Richard Vowles</name>
+		</developer>
+		<!-- from original fork -->
+		<developer>
+			<id>maoo</id>
+			<email>maurizio@session.it</email>
+		</developer>
+		<developer>
+			<id>tony.franca</id>
+			<email>tonylampada@gmail.com</email>
+		</developer>
+	</developers>
 
 	<properties>
-		<mavenVersion>3.0.4</mavenVersion>
+		<mavenVersion>3.2.1</mavenVersion>
 		<asciidoclet.version>0.1.4</asciidoclet.version>
 	</properties>
 

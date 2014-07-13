@@ -52,11 +52,11 @@ import java.util.StringTokenizer;
  *
  * [source,xml]
  * --
- * <properties>
- * <tiles.1>it.session.maven.tiles:maven-compile-tiles:0.8-SNAPSHOT</tiles.1>
- * <tiles.2>it.session.maven.tiles:maven-eclipse-tiles:0.8-SNAPSHOT</tiles.2>
- * <tiles.3>it.session.maven.tiles:maven-jetty-tiles:0.8-SNAPSHOT</tiles.3>
- * </properties>
+ *   <properties>
+ *     <tiles.1>it.session.maven.tiles:maven-compile-tiles:0.8-SNAPSHOT</tiles.1>
+ *     <tiles.2>it.session.maven.tiles:maven-eclipse-tiles:0.8-SNAPSHOT</tiles.2>
+ *     <tiles.3>it.session.maven.tiles:maven-jetty-tiles:0.8-SNAPSHOT</tiles.3>
+ *   </properties>
  * --
  *
  * Dependencies are fetched using Aether {@link RepositorySystem}

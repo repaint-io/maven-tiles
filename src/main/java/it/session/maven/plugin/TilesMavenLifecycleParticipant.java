@@ -45,13 +45,17 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Fetches all dependencies defined in the POM <properties> as follows:
- * <properties>
- * <tiles.1>it.session.maven.tiles:maven-compile-tiles:0.8-SNAPSHOT</tiles.1>
- * <tiles.2>it.session.maven.tiles:maven-eclipse-tiles:0.8-SNAPSHOT</tiles.2>
- * <tiles.3>it.session.maven.tiles:maven-jetty-tiles:0.8-SNAPSHOT</tiles.3>
- * </properties>
- * <p/>
+ * Fetches all dependencies defined in the POM `<properties>` as follows:
+ *
+ * [source,xml]
+ * --
+ *   <properties>
+ *     <tiles.1>it.session.maven.tiles:maven-compile-tiles:0.8-SNAPSHOT</tiles.1>
+ *     <tiles.2>it.session.maven.tiles:maven-eclipse-tiles:0.8-SNAPSHOT</tiles.2>
+ *     <tiles.3>it.session.maven.tiles:maven-jetty-tiles:0.8-SNAPSHOT</tiles.3>
+ *   </properties>
+ * --
+ *
  * Dependencies are fetched using Aether {@link RepositorySystem}
  * Merging operation is delegated to {@link ModelMerger}
  */
@@ -147,7 +151,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
   /**
    * Invoked after all MavenProject instances have been created.
-   * <p/>
+   *
    * This callback is intended to allow extensions to manipulate MavenProjects
    * before they are sorted and actual build execution starts.
    */

@@ -17,30 +17,29 @@
 package it.session.maven.plugin;
 
 import org.apache.maven.MavenExecutionException;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.DefaultRepositorySystemSession;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
@@ -51,21 +50,22 @@ import static org.mockito.Mockito.when;
 public class TilesMavenLifecycleParticipantTest {
 
 	TilesMavenLifecycleParticipant participant;
-	RepositorySystem mockRepositorySystem;
-	RepositorySystemSession defaultRepositorySystemSession;
+	ArtifactResolver mockResolver;
 
-	private final static String TILE_TEST_COORDINATES = "it.session.maven.tiles:session-repositories-tile:0.8-SNAPSHOT";
+	private final static String TILE_TEST_COORDINATES = "it.session.maven.tiles:session-license-tile:0.8-SNAPSHOT";
 	private final static String TILE_TEST_POM_PATH = "src/test/resources/licenses-tile-pom.xml";
 	private final static String TILE_TEST_PROPERTY_NAME = "tile.test";
 
 	@Before
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant();
-		this.mockRepositorySystem = mock(RepositorySystem.class);
-		this.defaultRepositorySystemSession = new DefaultRepositorySystemSession();
-		participant.setRepositorySystem(mockRepositorySystem);
+		mockResolver = mock(ArtifactResolver.class);
+		participant.resolver = mockResolver;
 	}
 
+	public Artifact getTileTestCoordinates() {
+		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "0.8-SNAPSHOT");
+	}
 
 	@Test
 	public void testGetArtifactFromCoordinates() {
@@ -77,53 +77,38 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	@Test
-	public void testGetArtifactRequestFromArtifact() {
-		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "1");
-		MavenProject mockMavenProject = mock(MavenProject.class);
-		ArtifactRequest request = participant.getArtifactRequestFromArtifact(artifact, mockMavenProject);
-		assertNotNull(request);
-	}
-
-	@Test
-	public void testResolveArtifact() throws ArtifactResolutionException, MojoExecutionException, IOException {
-		MavenProject emptyMavenProject = new MavenProject();
-
-		DefaultArtifact dummyArtifact = new DefaultArtifact("dummy:dummy:1");
+	public void testResolveArtifact() throws MojoExecutionException, IOException, ArtifactNotFoundException, ArtifactResolutionException {
+		Artifact dummyArtifact = participant.getArtifactFromCoordinates("dummy", "dummy", "1");
 
 		this.mockRepositoryWithProvidedArtifact(dummyArtifact);
 
-		File artifactFile = this.participant.resolveArtifact(emptyMavenProject, "dummy", "dummy", "1", this.defaultRepositorySystemSession);
+		File artifactFile = this.participant.resolveArtifact("dummy", "dummy", "1");
 		assertNotNull(artifactFile);
 	}
 
 	@Test
-	public void testMergeTile() throws MavenExecutionException, IOException, ArtifactResolutionException {
+	public void testMergeTile() throws MavenExecutionException, IOException, ArtifactNotFoundException, ArtifactResolutionException {
 		MavenProject mavenProject = new MavenProject();
 		mavenProject.getProperties().setProperty(TILE_TEST_PROPERTY_NAME, TILE_TEST_COORDINATES);
 
-		DefaultArtifact dummyArtifact = new DefaultArtifact(TILE_TEST_COORDINATES);
+		Artifact dummyArtifact = getTileTestCoordinates();
 
 		this.mockRepositoryWithProvidedArtifact(dummyArtifact);
 
 		assertTrue(mavenProject.getLicenses().size() == 0);
-		participant.mergeTile(mavenProject, TILE_TEST_PROPERTY_NAME, defaultRepositorySystemSession);
+		participant.mergeTile(mavenProject, TILE_TEST_PROPERTY_NAME);
 		assertTrue(mavenProject.getLicenses().size() != 0);
 	}
 
-	private void mockRepositoryWithProvidedArtifact(Artifact artifact)
-		throws ArtifactResolutionException {
-		ArtifactResult expectedResult = new ArtifactResult(new ArtifactRequest());
-		expectedResult.setArtifact(artifact.setFile(new File(TILE_TEST_POM_PATH)));
+	private void mockRepositoryWithProvidedArtifact(Artifact artifact) throws ArtifactNotFoundException, ArtifactResolutionException {
+		ArtifactResolutionResult expectedResult = new ArtifactResolutionResult();
+		expectedResult.addArtifact(artifact);
 
-		when(
-			this.mockRepositorySystem.resolveArtifact(
-				same(defaultRepositorySystemSession),
-				argThat(new MatchesArtifact(artifact)))
-		)
-			.thenReturn(expectedResult);
+		doNothing().when(this.mockResolver).resolve(argThat(new MatchesArtifact(artifact)),
+			anyList(), Mockito.any(ArtifactRepository.class));
 	}
 
-	class MatchesArtifact extends ArgumentMatcher<ArtifactRequest> {
+	class MatchesArtifact extends ArgumentMatcher<Artifact> {
 
 		private Artifact myArtifact;
 
@@ -133,11 +118,17 @@ public class TilesMavenLifecycleParticipantTest {
 
 		@Override
 		public boolean matches(Object oRequest) {
-			ArtifactRequest artifactRequest = (ArtifactRequest) oRequest;
-			Artifact theirArtifact = artifactRequest.getArtifact();
-			return myArtifact.getGroupId().equals(theirArtifact.getGroupId()) &&
+			Artifact theirArtifact = (Artifact) oRequest;
+
+			if (myArtifact.getGroupId().equals(theirArtifact.getGroupId()) &&
 				myArtifact.getArtifactId().equals(theirArtifact.getArtifactId()) &&
-				myArtifact.getVersion().equals(theirArtifact.getVersion());
+				(myArtifact.getVersion().equals(theirArtifact.getVersion()) ||
+					myArtifact.getVersionRange().equals(theirArtifact.getVersionRange()))) {
+				theirArtifact.setFile(new File(TILE_TEST_POM_PATH));
+				return true;
+			}
+
+			return false;
 		}
 
 	}

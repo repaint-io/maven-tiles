@@ -25,11 +25,6 @@
 					<role-hint>default</role-hint>
 					<field-name>logger</field-name>
 				</requirement>
-				<requirement>
-					<role>org.sonatype.aether.RepositorySystem</role>
-					<role-hint/>
-					<field-name>repositorySystem</field-name>
-				</requirement>
 			</requirements>
 		</component>
 	</components>

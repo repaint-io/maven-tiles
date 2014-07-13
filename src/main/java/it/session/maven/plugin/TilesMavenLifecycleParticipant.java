@@ -18,23 +18,26 @@ package it.session.maven.plugin;
 
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.merge.ModelMerger;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,42 +75,36 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected Logger logger;
 
 	@Requirement
-	protected RepositorySystem repositorySystem;
+	ArtifactResolver resolver;
 
-	/**
-	 * Only used for unit testing dependency injection
-	 */
-	public void setRepositorySystem(RepositorySystem repositorySystem) {
-		this.repositorySystem = repositorySystem;
-	}
+	@Parameter(property = "project.remoteArtifactRepositories", readonly = true, required = true)
+	List<ArtifactRepository> remoteRepositories;
+
+	@Parameter(property = "localRepository")
+	ArtifactRepository localRepository;
 
 	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String version) {
-		return new DefaultArtifact(groupId, artifactId, TILE_EXTENSION, version);
+		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
+			TILE_EXTENSION, "", new DefaultArtifactHandler(TILE_EXTENSION));
 	}
 
-	protected ArtifactRequest getArtifactRequestFromArtifact(Artifact tileArtifact, MavenProject mavenProject) {
-		ArtifactRequest request = new ArtifactRequest();
-		request.setArtifact(tileArtifact);
-		request.setRepositories(mavenProject.getRemoteProjectRepositories());
-		return request;
-	}
-
-	protected File resolveArtifact(MavenProject currentProject,
-	                               String groupId,
+	protected File resolveArtifact(String groupId,
 	                               String artifactId,
-	                               String version,
-	                               RepositorySystemSession repositorySystemSession) throws MojoExecutionException {
+	                               String version) throws MojoExecutionException {
+		Artifact tileArtifact = getArtifactFromCoordinates(groupId, artifactId, version);
+
 		try {
-			Artifact tileArtifact = getArtifactFromCoordinates(groupId, artifactId, version);
-			ArtifactRequest request = getArtifactRequestFromArtifact(tileArtifact, currentProject);
-			ArtifactResult result = this.repositorySystem.resolveArtifact(repositorySystemSession, request);
-			return result.getArtifact().getFile();
+			resolver.resolve(tileArtifact, remoteRepositories, localRepository);
 		} catch (ArtifactResolutionException e) {
-			throw new MojoExecutionException(String.format("Error resolving artifact %s:%s:%s", groupId, artifactId, version));
+			throw new MojoExecutionException(e.getMessage(), e);
+		} catch (ArtifactNotFoundException e) {
+			throw new MojoExecutionException(e.getMessage(), e);
 		}
+
+		return tileArtifact.getFile();
 	}
 
-	protected void mergeTile(MavenProject currentProject, String propertyName, RepositorySystemSession repositorySystemSession) throws MavenExecutionException {
+	protected void mergeTile(MavenProject currentProject, String propertyName) throws MavenExecutionException {
 		String propertyValue = currentProject.getProperties().getProperty(propertyName);
 		StringTokenizer propertyTokens = new StringTokenizer(propertyValue, ":");
 
@@ -122,12 +119,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				version);
 
 		try {
-			File artifactFile = this.resolveArtifact(
-				currentProject,
+			File artifactFile = resolveArtifact(
 				groupId,
 				artifactId,
-				version,
-				repositorySystemSession);
+				version);
 
 			Model tileModel = this.reader.read(new FileInputStream(artifactFile));
 			this.modelMerger.merge(currentProject.getModel(), tileModel, false, null);
@@ -165,20 +160,20 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			//We're in a multi-module build, we need to trigger model merging on all sub-modules
 			for (MavenProject subModule : mavenSession.getProjects()) {
 				if (subModule != topLevelProject) {
-					mergeTiles(subModule, mavenSession);
+					mergeTiles(subModule);
 				}
 			}
 		} else {
-			mergeTiles(topLevelProject, mavenSession);
+			mergeTiles(topLevelProject);
 		}
 	}
 
-	private void mergeTiles(MavenProject currentProject, MavenSession mavenSession) throws MavenExecutionException {
+	private void mergeTiles(MavenProject currentProject) throws MavenExecutionException {
 		Enumeration propertyNames = currentProject.getProperties().propertyNames();
 		while (propertyNames.hasMoreElements()) {
 			String propertyName = (String) propertyNames.nextElement();
 			if (propertyName.startsWith(TILE_PROPERTY_PREFIX)) {
-				mergeTile(currentProject, propertyName, mavenSession.getRepositorySession());
+				mergeTile(currentProject, propertyName);
 			}
 		}
 	}

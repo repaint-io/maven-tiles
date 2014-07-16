@@ -16,27 +16,20 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.session.maven.tiles</groupId>
-	<artifactId>session-repositories-tile</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<groupId>com.bluetrainsoftware.maven.tiles</groupId>
+	<artifactId>session-license-tile</artifactId>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Maven Tile - session Repositories</name>
+	<name>Maven Tile - Lilcense</name>
+
+	<properties>
+		<one>1</one>
+		<two>2</two>
+		<tile.ant1>groupid:antrun1-tile:1.1-SNAPSHOT</tile.ant1>
+		<tile.ant2>groupid:antrun2-tile:1.1-SNAPSHOT</tile.ant2>
+	</properties>
+
 	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>

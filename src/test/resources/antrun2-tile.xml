@@ -16,9 +16,9 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.session.maven.tiles</groupId>
+	<groupId>groupid</groupId>
 	<artifactId>antrun2-tile</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Maven Tile - Antrun 2</name>
 

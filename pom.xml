@@ -30,11 +30,13 @@
 
 
 	<developers>
+		<!-- reviewer -->
 		<developer>
 			<id>talios</id>
 			<email>mark@talios.com</email>
 			<name>Mark Derricutt</name>
 		</developer>
+		<!-- developer -->
 		<developer>
 			<id>richard</id>
 			<email>richard@bluetrainsoftware.com</email>
@@ -62,6 +64,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>[2.3.4, 2.3.99)</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
 			<version>${mavenVersion}</version>
@@ -78,20 +85,15 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<groupId>com.bluetrainsoftware.composite</groupId>
+			<artifactId>composite-unit-test</artifactId>
+			<version>[1.1,2)</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- allow us to be used by Java 6, even though really, I mean -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -113,26 +115,36 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- not supporting mixed java/groovy compilation -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9.1</version>
+				<groupId>org.codehaus.gmavenplus</groupId>
+				<artifactId>gmavenplus-plugin</artifactId>
+				<version>1.2</version>
 				<executions>
 					<execution>
-						<id>attach-javadocs</id>
 						<goals>
-							<goal>jar</goal>
+							<goal>addSources</goal>
+							<goal>addTestSources</goal>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<doclet>org.asciidoctor.Asciidoclet</doclet>
-					<docletArtifact>
-						<groupId>org.asciidoctor</groupId>
-						<artifactId>asciidoclet</artifactId>
-						<version>${asciidoclet.version}</version>
-					</docletArtifact>
-				</configuration>
+			</plugin>
+			<!-- groovydoc doesn't support asciidoc, yet -->
+			<plugin>
+				<groupId>com.bluetrainsoftware.maven</groupId>
+				<artifactId>groovydoc-maven-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>attach-docs</id>
+						<goals>
+							<goal>attach-docs</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -146,6 +158,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

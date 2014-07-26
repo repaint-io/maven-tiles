@@ -79,6 +79,7 @@ dependencies works as expected.
 merge.
 - The tiles-maven-plugin is _not a plugin the traditional sense_. It does not implement any Mojos and has no Goals. It
   only executes as a Lifecycle Participant, and as such it has no sensible executions, so they are not supported.
+- The plugin works fine with alternative packaging. It has been tested with war, grails-plugin and grails-app.
 
 
 == Final Notes

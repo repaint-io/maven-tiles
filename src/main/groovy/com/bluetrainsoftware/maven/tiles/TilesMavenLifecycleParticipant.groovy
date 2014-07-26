@@ -99,9 +99,18 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * We store the groupId:artifactId -> Artifact of those tiles we have discovered in our meanderings through
 	 * the
 	 */
-	Map<String, ArtifactModel> processedTiles = new HashMap<String, ArtifactModel>()
-	List<String> tileDiscoveryOrder = new ArrayList<String>()
-	Map<String, Artifact> unprocessedTiles = new HashMap<String, Artifact>()
+	Map<String, ArtifactModel> processedTiles = [:]
+	List<String> tileDiscoveryOrder = []
+	Map<String, Artifact> unprocessedTiles = [:]
+
+	/**
+	 * reactor builds can/will have their own tile structures
+	 */
+	protected void resetTiles() {
+		processedTiles = [:]
+		tileDiscoveryOrder = []
+		unprocessedTiles = [:]
+	}
 
 	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String version) {
 		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
@@ -121,13 +130,18 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return tileArtifact
 	}
 
-	protected Artifact turnPropertyIntoUnprocessedTile(String propertyValue) {
+	protected Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile)
+	  throws MavenExecutionException {
 
-		StringTokenizer propertyTokens = new StringTokenizer(propertyValue, ":")
+		String[] gav = artifactGav.tokenize(":")
 
-		String groupId = propertyTokens.nextToken()
-		String artifactId = propertyTokens.nextToken()
-		String version = propertyTokens.nextToken()
+		if (gav.size() != 3) {
+			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range", pomFile)
+		}
+
+		String groupId = gav[0]
+		String artifactId = gav[1]
+		String version = gav[2]
 
 		return getArtifactFromCoordinates(groupId, artifactId, version)
 	}
@@ -164,6 +178,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			//We're in a multi-module build, we need to trigger model merging on all sub-modules
 			for (MavenProject subModule : mavenSession.getProjects()) {
 				if (subModule != topLevelProject) {
+					resetTiles()
 					orchestrateMerge(subModule)
 				}
 			}
@@ -186,7 +201,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Model propertyCollectionModel = project.getModel().clone()
 
 		// collect the first set of tiles
-		collectTiles(propertyCollectionModel)
+		collectTiles(propertyCollectionModel, project.getFile())
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
 		resolveTiles()
@@ -303,7 +318,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
 
-			collectTiles(tileModel)
+			collectTiles(tileModel, resolvedTile.getFile())
 		}
 	}
 
@@ -319,7 +334,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 	}
 
-	protected void collectTiles(Model model) {
+	protected void collectTiles(Model model, File pomFile) {
 		Xpp3Dom configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP &&
@@ -327,15 +342,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
-				if (tile.getName() == "tile") {
-					collectConfigurationTile(model, tile.getValue())
+				if (tile.name == "tile") {
+					collectConfigurationTile(model, tile.value, pomFile)
 				}
 			}
 		}
 	}
 
-	protected void collectConfigurationTile(Model model, String tileDependencyName) {
-		Artifact unprocessedTile = turnPropertyIntoUnprocessedTile(tileDependencyName)
+	protected void collectConfigurationTile(Model model, String tileDependencyName, File pomFile) {
+		Artifact unprocessedTile = turnPropertyIntoUnprocessedTile(tileDependencyName, pomFile)
 
 		String depName = artifactName(unprocessedTile)
 

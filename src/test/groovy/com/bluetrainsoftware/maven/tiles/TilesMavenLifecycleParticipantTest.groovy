@@ -34,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
 
 import static org.mockito.Mockito.mock
+import static groovy.test.GroovyAssert.shouldFail
 
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
@@ -99,25 +100,36 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	@Test
-	public void testMerge() throws MavenExecutionException {
-		Model model = new Model()
+	public void testBadGav() {
+		Model model = createBasicModel()
+		addTileAndPlugin(model, "groupid:artifactid")
+		participant = new TilesMavenLifecycleParticipant()
+		MavenProject project = new MavenProject(model)
 
-		model.setGroupId("com.bluetrainsoftware.maven")
-		model.setArtifactId("maven-tiles-example")
-		model.setVersion("1.1-SNAPSHOT")
+		Throwable failure = shouldFail {
+			participant.orchestrateMerge(project)
+		}
 
-		Properties model1Properties = new Properties()
-		model1Properties.setProperty("property1", "property1")
-		model.setProperties(model1Properties)
+		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range"
+	}
 
+	public void addTileAndPlugin(Model model, String gav) {
 		// add our plugin
 		model.build = new Build()
 		model.build.addPlugin(new Plugin())
 		model.build.plugins[0].with {
 			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
 			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
-			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${TILE_TEST_COORDINATES}</tile></tiles></configuration>"))
+			// bad GAV
+			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${gav}</tile></tiles></configuration>"))
 		}
+	}
+
+
+	@Test
+	public void testMerge() throws MavenExecutionException {
+		Model model = createBasicModel()
+		addTileAndPlugin(model, TILE_TEST_COORDINATES)
 
 		Model pureModel = model.clone()
 
@@ -165,5 +177,18 @@ public class TilesMavenLifecycleParticipantTest {
 			assert executions.size() == 2
 			assert executions*.id.intersect(["print-antrun1", "print-antrun2"])
 		}
+	}
+
+	protected Model createBasicModel() {
+		Model model = new Model()
+
+		model.setGroupId("com.bluetrainsoftware.maven")
+		model.setArtifactId("maven-tiles-example")
+		model.setVersion("1.1-SNAPSHOT")
+
+		Properties model1Properties = new Properties()
+		model1Properties.setProperty("property1", "property1")
+		model.setProperties(model1Properties)
+		model
 	}
 }

@@ -20,30 +20,65 @@ parts of a Maven POM; every tile can contain
 - release aspects, for example the distribution management section
 - references to other tiles
 
-This could, for example, allow you to have build aspects consistent across your company and open sourced, and the
+This could, for example, allow you to have build aspects consistent across your organisation and open sourced, and the
 distribution of internal vs external artifacts kept in a single tile. In the current single parent hierarchy, this
 is all duplicated.
+
+== Composing a Maven Tile
+
+A Maven Tile is made up of a pom.xml and a tile.xml. The pom.xml contains the normal release information. When using
+tiles, this would be the name/groupId/artifactId/version/description/packaging(tile) and generally only a declaration
+of the Maven Tiles plugin. Only if you are using a tile (and generally you use at least one - the release tile) will
+you specify a configuration.
 
 [source,xml,indent=0]
 .pom.xml
 ----
-<build>
-  <plugins>
-    <plugin>
-      <groupId>com.bluetrainsoftware.maven</groupId>
-      <artifactId>tiles-maven-plugin</artifactId>
-      <version>1.1</version>
-      <extensions>true</extensions>
-      <configuration>
-        <tiles>
-          <tile>com.bluetraisoftware.tiles:github-release-tile:[1.1, 2)</tile>
-          <tile>com.bluetraisoftware.tiles:servlet3-tile:[1.1, 2)</tile>
-        </tiles>
-      </configuration>
-    </plugin>
-  </plugins>
-</build>
+<project>
+  <groupId>com.bluetrainsoftware.tiles</groupId>
+  <artifactId>license-tile</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>tile</packaging>
+  <description>Contains consistent license information.</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.bluetrainsoftware.maven</groupId>
+        <artifactId>tiles-maven-plugin</artifactId>
+        <version>1.1</version>
+        <extensions>true</extensions>
+        <configuration>
+          <tiles>
+            <tile>com.bluetraisoftware.tiles:github-release-tile:[1.1, 2)</tile>
+          </tiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
 ----
+
+With the packaging _tile_, the plugin will look for the attached tile.xml, do some basic validation on it and
+attach it as an artifact.
+
+[source.xml,indent=0]
+.tile.xml
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+</project>
+----
+
+A tile can define the tiles plugin if it wishes to cascade tile inclusion.
 
 == Composing Build functionality
 

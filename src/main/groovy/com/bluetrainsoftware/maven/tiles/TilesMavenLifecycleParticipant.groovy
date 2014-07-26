@@ -46,7 +46,6 @@ import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 
-
 /**
  * Fetches all dependencies defined in the POM `&lt;properties&gt;` as follows:
  *
@@ -112,15 +111,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		unprocessedTiles = [:]
 	}
 
+	/**
+	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
+	 * pom itself (because we don't care about that).
+	 */
 	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String version) {
 		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
-			TILE_EXTENSION, "", new DefaultArtifactHandler(TILE_EXTENSION))
+			"tile", "tile-pom", new DefaultArtifactHandler("pom"))
 	}
 
 	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
-
 		try {
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
+
 		} catch (ArtifactResolutionException e) {
 			throw new MavenExecutionException(e.getMessage(), e)
 		} catch (ArtifactNotFoundException e) {
@@ -150,7 +153,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		try {
 			Model tileModel = this.reader.read(new FileInputStream(artifact.getFile()))
 
-			logger.info(String.format("Loaded Maven Tile %s", modelGav(tileModel)))
+			logger.info(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
 
 			return tileModel
 		} catch (FileNotFoundException e) {
@@ -316,10 +319,30 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			Model tileModel = loadModel(resolvedTile)
 
-			processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
+			// ensure we have resolved the tile (it could come from a non-tile model)
+			if (tileModel) {
+				processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
 
-			collectTiles(tileModel, resolvedTile.getFile())
+				collectTiles(tileModel, resolvedTile.getFile())
+			}
 		}
+
+		ensureAllTilesDiscoveredAreAccountedFor()
+	}
+
+	/**
+	 * removes all invalid tiles from the discovery order
+	 */
+	void ensureAllTilesDiscoveredAreAccountedFor() {
+		List<String> missingTiles = []
+
+		tileDiscoveryOrder.each { String tile ->
+			if (!processedTiles[tile]) {
+				missingTiles.add(tile)
+			}
+		}
+
+		tileDiscoveryOrder.removeAll(missingTiles)
 	}
 
 	protected String artifactName(Artifact artifact) {
@@ -342,9 +365,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
-				if (tile.name == "tile") {
-					collectConfigurationTile(model, tile.value, pomFile)
-				}
+				collectConfigurationTile(model, tile.value, pomFile)
 			}
 		}
 	}

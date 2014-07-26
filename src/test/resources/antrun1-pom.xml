@@ -15,31 +15,19 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-	<properties>
-		<one>1</one>
-		<two>2</two>
-	</properties>
-
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>groupid</groupId>
+	<artifactId>antrun1-tile</artifactId>
+	<version>1.1-SNAPSHOT</version>
+	<packaging>tile</packaging>
+	<name>Maven Tile - Antrun 1</name>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>com.bluetrainsoftware.maven</groupId>
-				<artifactId>tiles-maven-plugin</artifactId>
-				<configuration>
-					<tiles>
-						<tile>groupid:antrun1-tile:1.1-SNAPSHOT</tile>
-						<tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>
-					</tiles>
-				</configuration>
+			<plugin> <!-- everything in the pom's tile is ignored from the tile perspective -->
+				<groupId>this</groupId>
+				<artifactId>is-not</artifactId>
+				<version>used</version>
 			</plugin>
 		</plugins>
 	</build>

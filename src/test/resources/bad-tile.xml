@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  All the bad stuff in one tile.
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.bluetrainsoftware.maven.tiles</groupId>
+		<artifactId>parent-tile</artifactId>
+		<version>1.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>com.bluetrainsoftware.maven.tiles</groupId>
+	<artifactId>session-license-tile</artifactId>
+	<version>1.1-SNAPSHOT</version>
+	<packaging>tile</packaging>
+	<name>Maven Tile - Lilcense</name>
+
+	<repositories>
+		<repository>
+			<id>never</id>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>do-this</id>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>group</groupId>
+				<artifactId>artifact</artifactId>
+				<version>version</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.bluetrainsoftware.maven</groupId>
+					<artifactId>tiles-maven-plugin</artifactId>
+					<version>1.1-SNAPSHOT</version>
+					<extensions>true</extensions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

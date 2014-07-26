@@ -15,11 +15,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-	<properties>
-		<one>1</one>
-		<two>2</two>
-	</properties>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.bluetrainsoftware.maven.tiles</groupId>
+	<artifactId>session-license-tile</artifactId>
+	<version>1.1-SNAPSHOT</version>
+	<packaging>tile</packaging>
+	<name>Maven Tile - Lilcense</name>
 
 	<licenses>
 		<license>
@@ -34,10 +35,11 @@
 			<plugin>
 				<groupId>com.bluetrainsoftware.maven</groupId>
 				<artifactId>tiles-maven-plugin</artifactId>
+				<version>1.1-SNAPSHOT</version>
+				<extensions>true</extensions>
 				<configuration>
 					<tiles>
-						<tile>groupid:antrun1-tile:1.1-SNAPSHOT</tile>
-						<tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>
+						<tile>i:dont:exist</tile>  <!-- should not be requested -->
 					</tiles>
 				</configuration>
 			</plugin>

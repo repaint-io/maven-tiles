@@ -116,6 +116,13 @@
 				</executions>
 			</plugin>
 
+			<!-- cloudbees is failing for some reasons with 2.10 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+			</plugin>
+
 			<!-- not supporting mixed java/groovy compilation -->
 			<plugin>
 				<groupId>org.codehaus.gmavenplus</groupId>
@@ -132,6 +139,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<!-- groovydoc doesn't support asciidoc, yet -->
 			<plugin>
 				<groupId>com.bluetrainsoftware.maven</groupId>
@@ -149,6 +157,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>2.3</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>

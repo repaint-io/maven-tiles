@@ -5,6 +5,11 @@
 The _tiles-maven-plugin_ is a Maven Plugin that tries to bringing the *composition* that is available to
 dependencies to the parent structure as well.
 
+https://buildhive.cloudbees.com/job/rvowles/job/maven-tiles/[Build Status]
+
+[[img-sunset]]
+image::https://buildhive.cloudbees.com/job/rvowles/job/maven-tiles/badge/icon[caption="Cloudbees Build Status"]
+
 == How do I make a Maven Tile?
 
 Tiles are https://github.com/maoo/maven-tiles-examples/tree/master/tiles[plain Maven pom artifacts] which contain
@@ -72,6 +77,9 @@ together (closest wins), and then reloads the poms and interpolates them. This m
 dependencies works as expected.
 - Plugin execution is merged - if you have the same plugin in two different tiles define two different executions, they will
 merge.
+- The tiles-maven-plugin is _not a plugin the traditional sense_. It does not implement any Mojos and has no Goals. It
+  only executes as a Lifecycle Participant, and as such it has no sensible executions, so they are not supported.
+
 
 == Final Notes
 

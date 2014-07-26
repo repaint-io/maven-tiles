@@ -1,0 +1,88 @@
+= Tiles Maven Plugin
+
+== Overview
+
+The _tiles-maven-plugin_ is a Maven Plugin that tries to bringing the *composition* that is available to
+dependencies to the parent structure as well.
+
+== How do I make a Maven Tile?
+
+Tiles are https://github.com/maoo/maven-tiles-examples/tree/master/tiles[plain Maven pom artifacts] which contain
+parts of a Maven POM; every tile can contain
+
+- build data, for example the license tags that a company wants to report on all their artifacts
+- build aspects, for example the configurations of a plugin, such as Groovy, Java or Clojure.
+- release aspects, for example the distribution management section
+- references to other tiles
+
+This could, for example, allow you to have build aspects consistent across your company and open sourced, and the
+distribution of internal vs external artifacts kept in a single tile. In the current single parent hierarchy, this
+is all duplicated.
+
+[source,xml,indent=0]
+.pom.xml
+----
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.bluetrainsoftware.maven</groupId>
+      <artifactId>tiles-maven-plugin</artifactId>
+      <version>1.1</version>
+      <extensions>true</extensions>
+      <configuration>
+        <tiles>
+          <tile>com.bluetraisoftware.tiles:github-release-tile:[1.1, 2)</tile>
+          <tile>com.bluetraisoftware.tiles:servlet3-tile:[1.1, 2)</tile>
+        </tiles>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+----
+
+== Composing Build functionality
+
+As a use case, an example of how it will be used for my projects.
+
+I will have:
+
+- *groovy-tile* - which defines the build structure necessary to build a Groovy project, including GMavenPlus, GroovyDoc
+and Source plugins
+- *java-tile* - for Java only projects which include all the Javadoc and Source plugins
+- *s3-tile* - for our Servlet3 modules, which includes Sass, JSP compilation and Karma plugins and depends on the groovy-tile
+- *github-release-tile* - for artifacts that release to Github (open source)
+- *nexus-release-tile* - for artifacts that release to our local Nexus (not open source)
+
+This allows me to open source all my tiles except for the nexus tile, and then decide in the final artifact where I will
+release it.
+
+== Additional Notes
+
+Some interesting notes:
+
+- Tiles support version ranges, so use them. [1.1, 2) allows you to update and release new versions of tiles and have them
+propagate out. Maven 3.2.2 allows this with the version ranges in parents, but it isn't a good solution because of single
+inheritance.
+- You can include as many tiles as you like in a pom and poms can refer to other tiles. The plugin will search through
+the poms, telling you which ones it is picking up and then load their configurations in *reverse order*. This means the
+poms _closer_ to your artifact get their definitions being the most important ones. If you have duplicate plugins, the one
+closest to your pom wins.
+- String interpolation for properties works. The plugin first walks the tree of tiles collecting all properties, merges them
+together (closest wins), and then reloads the poms and interpolates them. This means all string replacement in plugins and
+dependencies works as expected.
+- Plugin execution is merged - if you have the same plugin in two different tiles define two different executions, they will
+merge.
+
+== Final Notes
+
+Tiles-Maven works best when *you* and *your team* own the tiles. I don't recommend relying on open source tiles, always
+create your own versions and always lock down versions of third party tiles, just like you would third party dependencies.
+
+== Read More
+
+- https://github.com/maoo/maven-tiles[The Original Tiles Maven plugin] - although the essential start point is the same, the code is significantly different.
+- http://jira.codehaus.org/browse/MNG-5102[Mixin POM fragments]
+- http://stackoverflow.com/questions/11749375/import-maven-plugin-configuration-by-composition-rather-than-inheritance-can-it[Stack Overflow]
+- http://maven.40175.n5.nabble.com/Moving-forward-with-mixins-tc4421069.html[Maven Discussion]
+
+

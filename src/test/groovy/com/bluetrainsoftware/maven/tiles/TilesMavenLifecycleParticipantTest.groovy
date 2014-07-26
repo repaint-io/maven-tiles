@@ -21,10 +21,13 @@ import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.model.Build
 import org.apache.maven.model.Model
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.interpolation.ModelInterpolator
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
+import org.codehaus.plexus.util.xml.Xpp3DomBuilder
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +49,7 @@ public class TilesMavenLifecycleParticipantTest {
 	Logger logger
 	ModelInterpolator modelInterpolator
 
-	private final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
+	public final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
 	private final static String TILE_TEST_POM_PATH = "src/test/resources/licenses-tile-pom.xml"
 	private final static String TILE_TEST_PROPERTY_NAME = "tile.test"
 
@@ -104,9 +107,17 @@ public class TilesMavenLifecycleParticipantTest {
 		model.setVersion("1.1-SNAPSHOT")
 
 		Properties model1Properties = new Properties()
-		model1Properties.setProperty(TilesMavenLifecycleParticipant.TILE_PROPERTY_PREFIX + "sample", TILE_TEST_COORDINATES)
 		model1Properties.setProperty("property1", "property1")
 		model.setProperties(model1Properties)
+
+		// add our plugin
+		model.build = new Build()
+		model.build.addPlugin(new Plugin())
+		model.build.plugins[0].with {
+			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
+			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${TILE_TEST_COORDINATES}</tile></tiles></configuration>"))
+		}
 
 		Model pureModel = model.clone()
 
@@ -137,14 +148,18 @@ public class TilesMavenLifecycleParticipantTest {
 		assert participant.processedTiles.size() == 3
 		assert participant.tileDiscoveryOrder
 
-		assert model.properties.size() == 6
+		assert model.properties.size() == 3
 		assert model.properties["one"] == "1"
 		assert model.properties["two"] == "2"
 		assert model.properties["property1"] == "property1"
 
-		assert model.build.plugins.size() == 1
+		assert model.build.plugins.size() == 2 // tiles and ant-run
 
-		model.build.plugins[0].with {
+		Plugin antRun = model.build.plugins.find { Plugin plugin -> return plugin.artifactId == "maven-antrun-plugin"}
+
+		assert antRun
+
+		antRun.with {
 			assert artifactId == 'maven-antrun-plugin'
 			assert version == "1.7"
 			assert executions.size() == 2

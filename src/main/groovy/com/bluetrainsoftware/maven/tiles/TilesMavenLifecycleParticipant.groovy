@@ -30,6 +30,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.DefaultModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelProblemCollector
@@ -42,6 +43,7 @@ import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
+import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 
 
@@ -62,8 +64,9 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
-	protected static final String TILE_EXTENSION = "pom"
-	protected static final String TILE_PROPERTY_PREFIX = "tile."
+	protected static final String TILE_EXTENSION = 'pom'
+	public static final TILEPLUGIN_GROUP = 'com.bluetrainsoftware.maven'
+	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 
 	protected final MavenXpp3Reader reader = new MavenXpp3Reader()
 
@@ -317,31 +320,38 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected void collectTiles(Model model) {
-		Enumeration propertyNames = model.properties.propertyNames()
+		Xpp3Dom configuration = model?.build?.plugins?.
+			find({ Plugin plugin ->
+				return plugin.groupId == TILEPLUGIN_GROUP &&
+						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration as Xpp3Dom
 
-		while (propertyNames.hasMoreElements()) {
-			String propertyName = (String) propertyNames.nextElement()
-
-			if (propertyName.startsWith(TILE_PROPERTY_PREFIX)) {
-				Artifact unprocessedTile = turnPropertyIntoUnprocessedTile(model.properties.getProperty(propertyName))
-
-				String depName = artifactName(unprocessedTile)
-
-				if (!processedTiles.containsKey(depName)) {
-					if (unprocessedTiles.containsKey(depName)) {
-						logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
-							modelGav(model), artifactGav(unprocessedTile)))
-					} else {
-						logger.debug("Adding tile ${artifactGav(unprocessedTile)}")
-
-						unprocessedTiles.put(depName, unprocessedTile)
-						tileDiscoveryOrder.add(depName)
-					}
-				} else {
-					logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
-						modelGav(model), artifactGav(unprocessedTile)))
+		if (configuration) {
+			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
+				if (tile.getName() == "tile") {
+					collectConfigurationTile(model, tile.getValue())
 				}
 			}
+		}
+	}
+
+	protected void collectConfigurationTile(Model model, String tileDependencyName) {
+		Artifact unprocessedTile = turnPropertyIntoUnprocessedTile(tileDependencyName)
+
+		String depName = artifactName(unprocessedTile)
+
+		if (!processedTiles.containsKey(depName)) {
+			if (unprocessedTiles.containsKey(depName)) {
+				logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
+					modelGav(model), artifactGav(unprocessedTile)))
+			} else {
+				logger.debug("Adding tile ${artifactGav(unprocessedTile)}")
+
+				unprocessedTiles.put(depName, unprocessedTile)
+				tileDiscoveryOrder.add(depName)
+			}
+		} else {
+			logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
+				modelGav(model), artifactGav(unprocessedTile)))
 		}
 	}
 }

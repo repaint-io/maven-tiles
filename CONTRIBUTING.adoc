@@ -1,0 +1,56 @@
+= Tiles Maven Plugin
+
+== Contributing
+
+Please take a moment to review this document in order to make the contribution process
+easy and effective for everyone involved.
+
+=== Using the issue tracker
+
+The https://github.com/rvowles/maven-tiles/issues[issue tracker] is
+the preferred channel for reporting all bugs or feature requests for this fork of the
+plugin. Pull requests are accepted but will be managed via
+https://review.gerrithub.io/#/q/project:rvowles/maven-tiles[GerritHub.io] ( see below )
+but please respect the following restrictions:
+
+* Please **do not** use the issue tracker for personal support requests.
+
+* Please **do not** use the issue tracker for general http://maven.apache.org[Apache Maven]
+  related issues.
+
+* Please **do not** derail or troll issues. Keep the discussion on topic and
+  respect the opinions of others.
+
+=== GerritHub.io
+
+Rather than using Github's Pull Request model, the _tiles-maven-plugin_ is using the
+https://code.google.com/p/gerrit/[Gerrit] code review tool via the public http://gerrithub.io[GerritHub.io]
+service for pre-merge code review.
+
+Github pull requests will be automatically pulled into GerritHub as reviews, and any
+updated changes will be expected to be pushed/managed via GerritHub.io.
+
+==== Submission via GerritHub
+
+Clone the repository::
+[source,shell]
+----
+git clone https://review.gerrithub.io/rvowles/maven-tiles
+----
+Make changes and submit::
+[source,shell]
+----
+git add ...
+git commit ...
+git push origin HEAD:refs/for/master
+----
+Update changes and resubmit::
+[source,shell]
+----
+git add ...
+git commit --amend ...
+git push origin HEAD:refs/for/master
+----
+
+**IMPORTANT**: By submitting a patch, you agree to allow the project owners to
+license your work under the terms of the Apache 2.0 License.

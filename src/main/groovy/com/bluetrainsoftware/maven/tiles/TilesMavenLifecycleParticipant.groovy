@@ -36,7 +36,6 @@ import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.building.ModelProblemCollectorRequest
 import org.apache.maven.model.interpolation.ModelInterpolator
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.model.merge.ModelMerger
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
@@ -67,8 +66,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	public static final TILEPLUGIN_GROUP = 'com.bluetrainsoftware.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 
-	protected final MavenXpp3Reader reader = new MavenXpp3Reader()
-
 	@Requirement
 	Logger logger
 
@@ -86,11 +83,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	class ArtifactModel {
 		public Artifact artifact
-		public Model model
+		public TileModel tileModel
 
-		public ArtifactModel(Artifact artifact, Model model) {
+		public ArtifactModel(Artifact artifact, TileModel tileModel) {
 			this.artifact = artifact
-			this.model = model
+			this.tileModel = tileModel
 		}
 	}
 
@@ -149,13 +146,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return getArtifactFromCoordinates(groupId, artifactId, version)
 	}
 
-	protected Model loadModel(Artifact artifact) throws MavenExecutionException {
+	protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 		try {
-			Model tileModel = this.reader.read(new FileInputStream(artifact.getFile()))
+			TileModel modelLoader = new TileModel(artifact.getFile())
 
-			logger.info(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
+			logger.debug(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
 
-			return tileModel
+			return modelLoader
 		} catch (FileNotFoundException e) {
 			throw new MavenExecutionException(String.format("Error loading %s", artifactGav(artifact)), e)
 		} catch (XmlPullParserException e) {
@@ -218,7 +215,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Artifact artifact = getArtifactFromCoordinates(project.groupId, project.artifactId, project.version)
 		artifact.setFile(project.getFile())
 
-		Model ourPureModel = loadModel(artifact)
+		TileModel ourPureModel = loadModel(artifact)
 
 		mergePropertyModels(ourPureModel, propertyCollectionModel, project.getModel())
 
@@ -242,59 +239,61 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected void interpolateModels(Model pureModel, MavenProject project) {
+	protected void interpolateModels(TileModel pureModel, MavenProject project) {
 		ModelProblemCollector problemCollector = new OurModelProblemCollector()
 		DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
 
 		modelBuildingRequest.setSystemProperties(System.getProperties())
 		modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
 
-		modelInterpolator.interpolateModel(pureModel, project.getBasedir(), modelBuildingRequest, problemCollector)
+		modelInterpolator.interpolateModel(pureModel.model, project.getBasedir(), modelBuildingRequest, problemCollector)
 
 		for (String artifactName : tileDiscoveryOrder) {
 			ArtifactModel artifactModel = processedTiles.get(artifactName)
 
 			// all tile properties have been merged into our project now, so lets push them into the tile
 			// we have to do this otherwise we get duplicates appearing - particularly in dependencies
-			artifactModel.model.setProperties(project.getProperties())
+			artifactModel.tileModel.model.setProperties(project.getProperties())
 
 			// now we do our string substitution
-			modelInterpolator.interpolateModel(artifactModel.model, project.getBasedir(),
+			modelInterpolator.interpolateModel(artifactModel.tileModel.model, project.getBasedir(),
 				modelBuildingRequest, problemCollector)
 		}
 	}
 
-	protected void mergeModel(Model confusedModel, Model pureModel) {
+	protected void mergeModel(Model confusedModel, TileModel pureModel) {
 		TilesModelMerger modelMerger = new TilesModelMerger()
 
 		// start with this project and override it with tiles (now in reverse order)
 		for (String artifactName : tileDiscoveryOrder) {
 			ArtifactModel artifactModel = processedTiles.get(artifactName)
 
-			modelMerger.merge(confusedModel, artifactModel.model, true, null)
+			logger.info("Merging ${artifactGav(artifactModel.artifact)}")
+
+			modelMerger.merge(confusedModel, artifactModel.tileModel.model, true, null)
 		}
 
 		// finally override it with out own properties
-		modelMerger.merge(confusedModel, pureModel, true, null)
+		modelMerger.merge(confusedModel, pureModel.model, true, null)
 	}
 
 
-	protected void mergePropertyModels(Model pureModel, Model propertyCollectionModel, Model projectModel) {
+	protected void mergePropertyModels(TileModel pureModel, Model propertyCollectionModel, Model projectModel) {
 		PropertyModelMerger modelMerger = new PropertyModelMerger()
 
 		// start with this project and override it with tiles (now in reverse order)
 		for (String artifactName : tileDiscoveryOrder) {
 			ArtifactModel artifactModel = processedTiles.get(artifactName)
 
-			modelMerger.mergeModelBase_Properties(propertyCollectionModel, artifactModel.model, true, null)
+			modelMerger.mergeModelBase_Properties(propertyCollectionModel, artifactModel.tileModel.model, true, null)
 		}
 
 		// finally override it with out own properties from our pure model (no inheritance or
 		// packaging interference)
-		modelMerger.mergeModelBase_Properties(pureModel, propertyCollectionModel, false, null)
+		modelMerger.mergeModelBase_Properties(pureModel.model, propertyCollectionModel, false, null)
 
 		// this should now replace all properties in our model with the correct properties
-		modelMerger.mergeModelBase_Properties(projectModel, pureModel, true, null)
+		modelMerger.mergeModelBase_Properties(projectModel, pureModel.model, true, null)
 
 		if (logger.isDebugEnabled()) {
 			logPropertyNames(projectModel)
@@ -317,7 +316,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			Artifact resolvedTile = resolveTile(unprocessedTiles.remove(unresolvedTile))
 
-			Model tileModel = loadModel(resolvedTile)
+			TileModel tileModel = loadModel(resolvedTile)
 
 			// ensure we have resolved the tile (it could come from a non-tile model)
 			if (tileModel) {
@@ -357,6 +356,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 	}
 
+	/**
+	 * Normally used inside the current project's pom file when declaring the tile plugin. People may prefer this
+	 * to use to include tiles however in a tile.xml
+	 */
 	protected void collectTiles(Model model, File pomFile) {
 		Xpp3Dom configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
@@ -368,6 +371,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				collectConfigurationTile(model, tile.value, pomFile)
 			}
 		}
+	}
+
+	/**
+	 * Used for when we have a TileModel (we have read directly) so we support the extra syntax.
+	 */
+	protected void collectTiles(TileModel model, File pomFile) {
+		model.tiles.each { String tileGav ->
+			collectConfigurationTile(model.model, tileGav, pomFile)
+		}
+
+		collectTiles(model.model, pomFile)
 	}
 
 	protected void collectConfigurationTile(Model model, String tileDependencyName, File pomFile) {

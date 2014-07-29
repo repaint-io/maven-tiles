@@ -2,7 +2,6 @@ package com.bluetrainsoftware.maven.tiles
 
 import groovy.transform.CompileStatic
 import org.apache.maven.model.Model
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.codehaus.plexus.logging.Logger
 
 /**
@@ -12,32 +11,23 @@ import org.codehaus.plexus.logging.Logger
 @CompileStatic
 class TileValidator {
 	public Model loadModel(Logger log, File tilePom) {
-		Model model = null
+		TileModel modelLoader = new TileModel()
 
 		if (!tilePom) {
 			log.error("No tile exists")
 		} else if (!tilePom.exists()) {
 			log.error("Unable to file tile ${tilePom.absolutePath}")
 		} else {
-			MavenXpp3Reader pomReader = new MavenXpp3Reader()
+			modelLoader.loadTile(tilePom)
 
-			tilePom.withReader { Reader reader ->
-				try {
-					model = pomReader.read(reader)
-
-					model = validateModel(model, log)
-
-					if (model) {
-						log.info("Tile passes basic validation.")
-					}
-				} catch (Exception ex) {
-					log.error("Unable to load model", ex)
-				}
+			if (validateModel(modelLoader.model, log) != null) {
+				log.info("Tile passes basic validation.")
+			} else {
+				log.error("Unable to load model")
 			}
 		}
 
-
-		return model
+		return modelLoader.model
 	}
 
 	/**

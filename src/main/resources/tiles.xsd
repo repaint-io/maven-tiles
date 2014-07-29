@@ -1,0 +1,13 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://tiles.bluetrainsoftware.com/maven/tiles/1.0.0" elementFormDefault="qualified" targetNamespace="http://tiles.bluetrainsoftware.com/maven/tiles/1.0.0">
+	<xs:element name="tiles">
+		<xs:annotation>
+			<xs:documentation source="version">1.0.0+</xs:documentation>
+			<xs:documentation source="description">This element describes all of the tiles this project depends on</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="tile" minOccurs="0" maxOccurs="unbounded" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

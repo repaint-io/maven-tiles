@@ -51,8 +51,6 @@ public class TilesMavenLifecycleParticipantTest {
 	ModelInterpolator modelInterpolator
 
 	public final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
-	private final static String TILE_TEST_POM_PATH = "src/test/resources/licenses-tile-pom.xml"
-	private final static String TILE_TEST_PROPERTY_NAME = "tile.test"
 
 	@Before
 	public void setupParticipant() {
@@ -90,8 +88,8 @@ public class TilesMavenLifecycleParticipantTest {
 	public void testNoTiles() throws MavenExecutionException {
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
-			protected Model loadModel(Artifact artifact) throws MavenExecutionException {
-				return new Model()
+			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
+				return new TileModel(model:new Model())
 			}
 		}
 		participant.logger = logger
@@ -127,9 +125,18 @@ public class TilesMavenLifecycleParticipantTest {
 
 
 	@Test
-	public void testMerge() throws MavenExecutionException {
+	public void testPluginBasedMerge() throws MavenExecutionException {
+		runMergeTest(TILE_TEST_COORDINATES)
+	}
+
+	@Test
+	public void testExtendedSyntaxMerge() throws MavenExecutionException {
+		runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
+	}
+
+	public void runMergeTest(String gav) {
 		Model model = createBasicModel()
-		addTileAndPlugin(model, TILE_TEST_COORDINATES)
+		addTileAndPlugin(model, gav)
 
 		Model pureModel = model.clone()
 
@@ -137,9 +144,9 @@ public class TilesMavenLifecycleParticipantTest {
 
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
-			protected Model loadModel(Artifact artifact) throws MavenExecutionException {
+			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 				if (artifact.file == null) {
-					return pureModel
+					return new TileModel(model:pureModel)
 				} else {
 					return super.loadModel(artifact)
 				}

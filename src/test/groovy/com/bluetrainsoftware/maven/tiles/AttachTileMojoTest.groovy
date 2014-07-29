@@ -5,8 +5,6 @@ import org.apache.maven.project.MavenProjectHelper
 import org.codehaus.plexus.logging.Logger
 import org.junit.Test
 
-import static org.mockito.Mockito.mock
-
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
@@ -34,7 +32,14 @@ class AttachTileMojoTest {
 			}
 		] as MavenProjectHelper
 
-		attach.logger = mock(Logger)
+		attach.logger = [
+			info: { String msg -> println msg },
+			error: { String msg, Throwable t = null ->
+				println msg
+				if (t) { t.printStackTrace() }
+			},
+			warn: { String msg -> println msg }
+		] as Logger
 
 		attach.execute()
 

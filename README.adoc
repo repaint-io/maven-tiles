@@ -78,7 +78,30 @@ attach it as an artifact.
 </project>
 ----
 
-A tile can define the tiles plugin if it wishes to cascade tile inclusion.
+A tile can define the tiles plugin if it wishes to cascade tile inclusion, or it can use the extended tile.xml syntax:
+
+[source.xml,indent=0]
+.tile.xml
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <tiles>
+    <tile>com.bluetrainsoftware.com:ratpack-tile:[1,2)</tile>
+  </tiles>
+
+</project>
+----
+
+Although this will appear to not validate when editing in an IDE, the tile plugin will strip off the tiles
+section when processing and use it directly.
 
 == Composing Build functionality
 

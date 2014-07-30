@@ -17,7 +17,7 @@
 		<component>
 			<role>org.apache.maven.AbstractMavenLifecycleParticipant</role>
 			<role-hint>TilesMavenLifecycleParticipant</role-hint>
-			<implementation>com.bluetrainsoftware.maven.tiles.TilesMavenLifecycleParticipant</implementation>
+			<implementation>io.repaint.maven.tiles.TilesMavenLifecycleParticipant</implementation>
 			<isolated-realm>false</isolated-realm>
 			<requirements>
 				<requirement>
@@ -51,7 +51,7 @@
 						<id>default</id>
 						<phases>
 							<package>
-								com.bluetrainsoftware.maven:tiles-maven-plugin:attach-tile
+								io.repaint.maven:tiles-maven-plugin:attach-tile
 							</package>
 							<install>
 								org.apache.maven.plugins:maven-install-plugin:install

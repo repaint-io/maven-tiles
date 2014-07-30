@@ -14,9 +14,11 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
+import io.repaint.maven.tiles.TileModel
+import io.repaint.maven.tiles.TilesMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.repository.ArtifactRepository

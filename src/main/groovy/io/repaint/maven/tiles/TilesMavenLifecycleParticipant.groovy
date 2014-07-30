@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
 import org.apache.maven.AbstractMavenLifecycleParticipant
@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 	protected static final String TILE_EXTENSION = 'pom'
-	public static final TILEPLUGIN_GROUP = 'com.bluetrainsoftware.maven'
+	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 	public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement"
 	public static final String SMELL_DEPENDENCIES = "dependencies"

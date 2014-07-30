@@ -1,4 +1,4 @@
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
 import org.apache.maven.model.Model

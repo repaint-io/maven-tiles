@@ -19,7 +19,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.bluetrainsoftware.maven</groupId>
+				<groupId>io.repaint.maven</groupId>
 				<artifactId>tiles-maven-plugin</artifactId>
 				<configuration>
 					<buildSmells>pluginmanagement,dependencymanagement,dependencies,repositories,pluginrepositories</buildSmells>

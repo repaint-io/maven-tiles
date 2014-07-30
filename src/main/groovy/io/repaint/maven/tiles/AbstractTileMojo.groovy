@@ -1,4 +1,4 @@
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Component

@@ -1,5 +1,6 @@
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
+import io.repaint.maven.tiles.AttachTileMojo
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.MavenProjectHelper
 import org.codehaus.plexus.logging.Logger

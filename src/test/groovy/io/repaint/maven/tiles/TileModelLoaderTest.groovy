@@ -1,5 +1,6 @@
-package com.bluetrainsoftware.maven.tiles
+package io.repaint.maven.tiles
 
+import io.repaint.maven.tiles.TileModel
 import org.junit.Test
 
 /**

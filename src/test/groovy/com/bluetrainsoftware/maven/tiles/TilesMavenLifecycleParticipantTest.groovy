@@ -28,7 +28,9 @@ import org.apache.maven.model.interpolation.ModelInterpolator
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
+import org.junit.AfterClass
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
@@ -52,6 +54,23 @@ public class TilesMavenLifecycleParticipantTest {
 
 	public final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
 
+	public final static String PERFORM_RELEASE = "performRelease"
+	static String performRelease
+
+	@BeforeClass
+	public static void storePerformRelease() {
+		performRelease = System.getProperty(PERFORM_RELEASE)
+	}
+
+	@AfterClass
+	public static void resetPerformRelease() {
+		if (!performRelease) {
+			System.clearProperty(PERFORM_RELEASE)
+		} else {
+			System.setProperty(PERFORM_RELEASE, performRelease)
+		}
+	}
+
 	@Before
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
@@ -65,6 +84,8 @@ public class TilesMavenLifecycleParticipantTest {
 		modelInterpolator = mock(ModelInterpolator.class)
 
 		participant.resolver = mockResolver
+
+		System.clearProperty(PERFORM_RELEASE)
 	}
 
 	public Artifact getTileTestCoordinates() {
@@ -166,6 +187,14 @@ public class TilesMavenLifecycleParticipantTest {
 		assert !model.dependencyManagement
 		assert !model.build.pluginManagement
 
+	}
+
+	@Test
+	public void testSnapshotsTilesDuringRelease() {
+		System.setProperty(PERFORM_RELEASE, "true")
+		shouldFail(MavenExecutionException) {
+			runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
+		}
 	}
 
 	public Model runMergeTest(String gav) {

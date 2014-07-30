@@ -131,6 +131,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		try {
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
 
+			if (System.getProperty("performRelease")?.asBoolean()) {
+				if (tileArtifact.version.endsWith("-SNAPSHOT")) {
+					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} is a SNAPSHOT and we are releasing.",
+						tileArtifact.getFile())
+				}
+			}
+
 		} catch (ArtifactResolutionException e) {
 			throw new MavenExecutionException(e.getMessage(), e)
 		} catch (ArtifactNotFoundException e) {

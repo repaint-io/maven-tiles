@@ -62,12 +62,20 @@ class TileValidator {
 			log.warn("Tile follows bad practice and has repositories section. Please use settings.xml.")
 		}
 
+		if (model.pluginRepositories) {
+			log.warn("Tile follows bad practice and has pluginRepositories section. Please use settings.xml.")
+		}
+
 		if (model.dependencyManagement) {
 			log.warn("Tile follows bad practice and has dependencyManagement. Please use composites.")
 		}
 
 		if (model.build?.pluginManagement) {
 			log.warn("Rethink your tiles if you feel you need pluginManagement.")
+		}
+
+		if (model.dependencies) {
+			log.warn("Tile includes dependencies - this will prevent consumers from adding exclusions, use composites instead.")
 		}
 
 		return validModel

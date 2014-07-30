@@ -65,6 +65,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected static final String TILE_EXTENSION = 'pom'
 	public static final TILEPLUGIN_GROUP = 'com.bluetrainsoftware.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
+	public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement"
+	public static final String SMELL_DEPENDENCIES = "dependencies"
+	public static final String SMELL_PLUGINMANAGEMENT = "pluginmanagement"
+	public static final String SMELL_REPOSITORIES = "repositories"
+	public static final String SMELL_PLUGINREPOSITORIES = "pluginrepositories"
+
+	public static final List<String> SMELLS = [SMELL_DEPENDENCIES, SMELL_DEPENDENCYMANAGEMENT, SMELL_PLUGINMANAGEMENT,
+	  SMELL_PLUGINREPOSITORIES, SMELL_REPOSITORIES]
 
 	@Requirement
 	Logger logger
@@ -98,6 +106,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	Map<String, ArtifactModel> processedTiles = [:]
 	List<String> tileDiscoveryOrder = []
 	Map<String, Artifact> unprocessedTiles = [:]
+	Set<String> collectedBuildSmells = []
 
 	/**
 	 * reactor builds can/will have their own tile structures
@@ -106,6 +115,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		processedTiles = [:]
 		tileDiscoveryOrder = []
 		unprocessedTiles = [:]
+		collectedBuildSmells = []
 	}
 
 	/**
@@ -201,7 +211,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Model propertyCollectionModel = project.getModel().clone()
 
 		// collect the first set of tiles
-		collectTiles(propertyCollectionModel, project.getFile())
+		parseConfiguration(propertyCollectionModel, project.getFile())
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
 		resolveTiles()
@@ -228,6 +238,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// Warnings otherwise.
 
 		mergeModel(project.model, ourPureModel)
+
+
 	}
 
 	class OurModelProblemCollector implements ModelProblemCollector {
@@ -261,14 +273,50 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
+	/**
+	 * In the context of
+	 * @param model
+	 */
+	protected void cleanModel(Model model) {
+		// should be using composities
+		if (!collectedBuildSmells.contains(SMELL_DEPENDENCYMANAGEMENT)) {
+			model.dependencyManagement = null
+		}
+
+		// can't use exclusions if this is used, so should use composites
+		if (!collectedBuildSmells.contains(SMELL_DEPENDENCIES)) {
+			model.dependencies = null
+		}
+
+		// no longer necessary
+		if (!collectedBuildSmells.contains(SMELL_PLUGINMANAGEMENT)) {
+			model.build?.pluginManagement = null
+		}
+
+		// does this even need explanation? http://blog.sonatype.com/2009/02/why-putting-repositories-in-your-poms-is-a-bad-idea/
+		if (!collectedBuildSmells.contains(SMELL_REPOSITORIES)) {
+			model.repositories = null
+		}
+
+		if (!collectedBuildSmells.contains(SMELL_PLUGINREPOSITORIES)) {
+			model.pluginRepositories = null
+		}
+	}
+
 	protected void mergeModel(Model confusedModel, TileModel pureModel) {
 		TilesModelMerger modelMerger = new TilesModelMerger()
+
+		if (collectedBuildSmells) {
+			logger.info(("Build is smelly, remaining dirty: ${collectedBuildSmells}"))
+		}
 
 		// start with this project and override it with tiles (now in reverse order)
 		for (String artifactName : tileDiscoveryOrder) {
 			ArtifactModel artifactModel = processedTiles.get(artifactName)
 
 			logger.info("Merging ${artifactGav(artifactModel.artifact)}")
+
+			cleanModel(artifactModel.tileModel.model)
 
 			modelMerger.merge(confusedModel, artifactModel.tileModel.model, true, null)
 		}
@@ -322,7 +370,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			if (tileModel) {
 				processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
 
-				collectTiles(tileModel, resolvedTile.getFile())
+				parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 			}
 		}
 
@@ -360,7 +408,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * Normally used inside the current project's pom file when declaring the tile plugin. People may prefer this
 	 * to use to include tiles however in a tile.xml
 	 */
-	protected void collectTiles(Model model, File pomFile) {
+	protected void parseConfiguration(Model model, File pomFile) {
 		Xpp3Dom configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP &&
@@ -368,7 +416,24 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
-				collectConfigurationTile(model, tile.value, pomFile)
+				processConfigurationTile(model, tile.value, pomFile)
+			}
+
+			String buildStink = configuration.getChild("buildSmells")?.value
+
+			if (buildStink) {
+				Collection<String> smells = buildStink.tokenize(',')*.trim().findAll({String tok -> return tok.size()>0})
+
+				// this is Mark's fault.
+				Collection<String> okSmells = smells.collect({it.toLowerCase()}).intersect(SMELLS)
+
+				Collection<String> stinkySmells = new ArrayList(smells).minus(okSmells)
+
+				if (stinkySmells) {
+					throw new MavenExecutionException("Discovered bad smell configuration ${stinkySmells} from <buildStink>${buildStink}</buildStink> in ${pomFile.absolutePath}", pomFile)
+				}
+
+				collectedBuildSmells.addAll(okSmells)
 			}
 		}
 	}
@@ -376,15 +441,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	/**
 	 * Used for when we have a TileModel (we have read directly) so we support the extra syntax.
 	 */
-	protected void collectTiles(TileModel model, File pomFile) {
+	protected void parseForExtendedSyntax(TileModel model, File pomFile) {
 		model.tiles.each { String tileGav ->
-			collectConfigurationTile(model.model, tileGav, pomFile)
+			processConfigurationTile(model.model, tileGav, pomFile)
 		}
 
-		collectTiles(model.model, pomFile)
+		parseConfiguration(model.model, pomFile)
 	}
 
-	protected void collectConfigurationTile(Model model, String tileDependencyName, File pomFile) {
+	protected void processConfigurationTile(Model model, String tileDependencyName, File pomFile) {
 		Artifact unprocessedTile = turnPropertyIntoUnprocessedTile(tileDependencyName, pomFile)
 
 		String depName = artifactName(unprocessedTile)

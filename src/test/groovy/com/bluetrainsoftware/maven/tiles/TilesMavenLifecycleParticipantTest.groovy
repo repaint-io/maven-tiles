@@ -125,16 +125,50 @@ public class TilesMavenLifecycleParticipantTest {
 
 
 	@Test
+	public void allowSmellyBuildsToOccur() {
+		Model model = runMergeTest("com.bluetrainsoftware.maven.tiles:smelly-tile:1.1-SNAPSHOT")
+
+		assert model.repositories
+		assert model.pluginRepositories
+		assert model.dependencies
+		assert model.dependencyManagement
+		assert model.build.pluginManagement
+	}
+
+	@Test
 	public void testPluginBasedMerge() throws MavenExecutionException {
-		runMergeTest(TILE_TEST_COORDINATES)
+		Model model = runMergeTest(TILE_TEST_COORDINATES)
+		assertBuildSmellsRemoved(model)
 	}
 
 	@Test
 	public void testExtendedSyntaxMerge() throws MavenExecutionException {
-		runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
+		Model model = runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
+		assertBuildSmellsRemoved(model)
 	}
 
-	public void runMergeTest(String gav) {
+	@Test
+	public void testBadSmellySyntaxMerge() throws MavenExecutionException {
+		Throwable t = shouldFail() {
+			runMergeTest("com.bluetrainsoftware.maven.tiles:bad-smelly-tile:1.1-SNAPSHOT")
+		}
+
+		assert t.message.startsWith("Discovered bad smell configuration [unknown] from <buildStink>pluginmanagement,dependencymanagement,dependencies,repositories,unknown</buildStink> in")
+
+		println t.message
+	}
+
+	public void assertBuildSmellsRemoved(Model model) {
+
+		assert !model.repositories
+		assert !model.pluginRepositories
+		assert !model.dependencies
+		assert !model.dependencyManagement
+		assert !model.build.pluginManagement
+
+	}
+
+	public Model runMergeTest(String gav) {
 		Model model = createBasicModel()
 		addTileAndPlugin(model, gav)
 
@@ -184,6 +218,8 @@ public class TilesMavenLifecycleParticipantTest {
 			assert executions.size() == 2
 			assert executions*.id.intersect(["print-antrun1", "print-antrun2"])
 		}
+
+		return model
 	}
 
 	protected Model createBasicModel() {

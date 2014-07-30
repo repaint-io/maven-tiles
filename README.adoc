@@ -168,6 +168,12 @@ and Source plugins
 This allows me to open source all my tiles except for the nexus tile, and then decide in the final artifact where I will
 release it.
 
+== Mojos
+
+There are two mojos in the plugin, attach-tile and validate. attach-tile is only used by the deploy/install
+process and attaches the tile.xml. validate is for your use to ensure your tile is valid before releasing it - this
+ensures it can be read and any errors or warnings about content will appear.
+
 == Additional Notes
 
 Some interesting notes:
@@ -184,8 +190,6 @@ together (closest wins), and then reloads the poms and interpolates them. This m
 dependencies works as expected.
 - Plugin execution is merged - if you have the same plugin in two different tiles define two different executions, they will
 merge.
-- The tiles-maven-plugin is _not a plugin the traditional sense_. It does not implement any Mojos and has no Goals. It
-  only executes as a Lifecycle Participant, and as such it has no sensible executions, so they are not supported.
 - The plugin works fine with alternative packaging. It has been tested with war, grails-plugin and grails-app.
 
 

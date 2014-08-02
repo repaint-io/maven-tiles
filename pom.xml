@@ -43,15 +43,6 @@
 			<email>richard@bluetrainsoftware.com</email>
 			<name>Richard Vowles</name>
 		</developer>
-		<!-- from original fork -->
-		<developer>
-			<id>maoo</id>
-			<email>maurizio@session.it</email>
-		</developer>
-		<developer>
-			<id>tony.franca</id>
-			<email>tonylampada@gmail.com</email>
-		</developer>
 	</developers>
 
 	<prerequisites>
@@ -60,14 +51,34 @@
 
 	<properties>
 		<mavenVersion>3.2.2</mavenVersion>
-		<asciidoclet.version>0.1.4</asciidoclet.version>
+		<repaint.release>dev</repaint.release>
 	</properties>
+
+	<scm>
+		<connection>scm:git:git@github.com:repaint-io/maven-tiles</connection>
+		<developerConnection>scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
+		<url>http://github.com/repaint-io/maven-tiles</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-staging</id>
+			<name>oss.sonatype.org Staging Repository</name>
+			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype-snapshots</id>
+			<name>oss.sonatype.org Snapshot Repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>[2.3.4, 2.3.99)</version>
+			<version>[2.3.6, 2.3.99)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -92,8 +103,87 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<!-- adtivate the sonatype profile when a release is being done -->
+			<id>sonaytpe</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<version>1.9</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.2</version>
+				<!-- Invocation is defined by the release plugin goal set hence no executions -->
+				<configuration>
+					<rules>
+						<requireMavenVersion>
+							<version>[3.2.2,)</version>
+						</requireMavenVersion>
+						<requireReleaseDeps>
+							<!--  Don't allow releases with snapshop deps or parents -->
+							<message>No Snapshots Allowed!</message>
+							<failWhenParentIsSnapshot>true</failWhenParentIsSnapshot>
+							<searchTransitive>true</searchTransitive>
+						</requireReleaseDeps>
+						<bannedDependencies>
+							<excludes>
+								<exclude>commons-logging</exclude>
+								<exclude>commons-logging-api</exclude>
+							</excludes>
+						</bannedDependencies>
+					</rules>
+					<fail>true</fail>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<mavenExecutorId>forked-path</mavenExecutorId>
+					<arguments>-Drepaint.release=release</arguments>
+					<preparationGoals>clean enforcer:enforce verify</preparationGoals>
+					<goals>enforcer:enforce deploy</goals>
+					<tagBase>release/${project.groupId}/</tagBase>
+					<pushChanges>false</pushChanges>
+					<localCheckout>true</localCheckout>
+				</configuration>
+			</plugin>
+
 			<!-- allow us to be used by Java 6, even though really, I mean -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -104,6 +194,7 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-component-metadata</artifactId>

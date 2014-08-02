@@ -20,6 +20,7 @@ package io.repaint.maven.tiles
 import groovy.transform.CompileStatic
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
+import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
@@ -37,26 +38,21 @@ import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.building.ModelProblemCollectorRequest
 import org.apache.maven.model.interpolation.ModelInterpolator
 import org.apache.maven.model.merge.ModelMerger
-import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
+import org.eclipse.aether.RepositorySystemSession
+import org.eclipse.aether.impl.VersionRangeResolver
+import org.eclipse.aether.resolution.VersionRangeRequest
+import org.eclipse.aether.resolution.VersionRangeResult
 
 /**
- * Fetches all dependencies defined in the POM `&lt;properties&gt;` as follows:
+ * Fetches all dependencies defined in the POM `configuration`.
  *
- * <pre>
- *   &lt;properties&gt;
- *     &lt;tiles.1&gt;com.bluetrainsoftware.maven.tiles:maven-compile-tiles:0.8-SNAPSHOT&lt;/tiles.1&gt;
- *     &lt;tiles.2&gt;com.bluetrainsoftware.maven.tiles:maven-eclipse-tiles:0.8-SNAPSHOT&lt;/tiles.2&gt;
- *     &lt;tiles.3&gt;com.bluetrainsoftware.maven.tiles:maven-jetty-tiles:0.8-SNAPSHOT&lt;/tiles.3&gt;
- *   &lt;/properties&gt;
- * </pre>
- *
- * Merging operation is delegated to {@link ModelMerger}
+ * Merging operation is delegated to {@link TilesModelMerger} and (@link PropertyModelMerger}
  */
 @CompileStatic
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
@@ -82,10 +78,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@Requirement
 	ModelInterpolator modelInterpolator
 
-	@Parameter(property = "project.remoteArtifactRepositories", readonly = true, required = true)
-	List<ArtifactRepository> remoteRepositories
+	RepositorySystemSession repositorySystemSession
 
-	@Parameter(property = "localRepository")
+	@Requirement
+	VersionRangeResolver versionRangeResolver
+
+	List<ArtifactRepository> remoteRepositories
 	ArtifactRepository localRepository
 
 	class ArtifactModel {
@@ -126,8 +124,22 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			"tile", "tile-pom", new DefaultArtifactHandler("pom"))
 	}
 
+	protected void discoverVersionRange(Artifact tileArtifact) {
+		VersionRangeRequest versionRangeRequest = new VersionRangeRequest(
+			RepositoryUtils.toArtifact(tileArtifact),
+			RepositoryUtils.toRepos(remoteRepositories), null)
+
+		VersionRangeResult versionRangeResult = versionRangeResolver.resolveVersionRange(repositorySystemSession, versionRangeRequest)
+
+		if (versionRangeResult.versions) {
+			tileArtifact.version = versionRangeResult.highestVersion
+		}
+	}
+
 	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
 		try {
+			discoverVersionRange(tileArtifact)
+
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
 
 			if (System.getProperty("performRelease")?.asBoolean()) {
@@ -186,6 +198,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	public void afterProjectsRead(MavenSession mavenSession)
 		throws MavenExecutionException {
+
+		this.remoteRepositories = mavenSession.request.remoteRepositories
+		this.localRepository = mavenSession.request.localRepository
+		this.repositorySystemSession = mavenSession.repositorySession
 
 		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
 		List<String> subModules = topLevelProject.getModules()
@@ -398,7 +414,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected String artifactGav(Artifact artifact) {
-		return String.format("%s:%s:%s", artifact.groupId, artifact.artifactId, artifact.versionRange.toString())
+		return String.format("%s:%s:%s", artifact.groupId, artifact.artifactId, artifact.versionRange ?: artifact.version)
 	}
 
 	protected String modelGav(Model model) {

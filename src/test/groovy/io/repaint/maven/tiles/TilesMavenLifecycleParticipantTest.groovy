@@ -114,6 +114,10 @@ public class TilesMavenLifecycleParticipantTest {
 			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 				return new TileModel(model:new Model())
 			}
+
+			@Override
+			protected void discoverVersionRange(Artifact tileArtifact) {
+			}
 		}
 		participant.logger = logger
 		participant.modelInterpolator = modelInterpolator
@@ -215,6 +219,11 @@ public class TilesMavenLifecycleParticipantTest {
 					return super.loadModel(artifact)
 				}
 			}
+
+			@Override
+			protected void discoverVersionRange(Artifact tileArtifact) {
+			}
+
 		}
 
 		participant.resolver = [

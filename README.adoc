@@ -111,11 +111,6 @@ smells. The following is an explanation of what is stripped and why those smells
 putting together a short book with tutorials for a better approach to building using Maven, but this is the short
 explanation. Note, these are only cleaned from the tile.xml, not from your pom.xml.
 
-- *pluginmanagement* - plugin management is used in parents to define all of the necessary options for a plugin but
-not have that plugin actually run during the release of the parent artifact, and also give the child the option of
-running it. The reason this is bad is that it is no longer necessary. You should split your plugins up into tiles
-so that they be pulled into a build as a standalone set of functionality that will always run and be properly configured.
-Since they will reside in the tile.xml file, they will not be run when the tile is released.
 - *dependencymanagement* - this was always a poor substitute for composite poms. Composite poms - aka a pom only release
 artifact that stores all related dependencies together. This allows your project to pull in only those dependencies
  that it actually requires for release, and allow them to be directly overridden. Dependency management is only
@@ -125,6 +120,15 @@ artifact that stores all related dependencies together. This allows your project
 been a bad idea. Get rid of it as soon as possible.
 - *dependencies* - putting them in a parent or tile prevents your user from exclusion, again composites are a much, much
 better idea here. Just don't use this section anywhere other than your actual artifact or composite poms.
+
+Almost made a build smell:
+- pluginmanagement - plugin management is used in parents to define all of the necessary options for a plugin but
+not have that plugin actually run during the release of the parent artifact, and also give the child the option of
+running it. The reason this is bad is that it is mostly not necessary. You should split your plugins up into tiles
+so that they be pulled into a build as a standalone set of functionality that will always run and be properly configured.
+Since they will reside in the tile.xml file, they will not be run when the tile is released. However, some plugins are
+never run automatically - release and enforcer are two examples. These make sense to stay in pluginManagement.
+
 
 If you need to use them, add them to your configuration section:
 
@@ -137,7 +141,7 @@ If you need to use them, add them to your configuration section:
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
       <configuration>
-        <buildSmells>pluginmanagement, dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
+        <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>
            <tile>groupid:antrun1-tile:1.1-SNAPSHOT</tile>
            <tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>

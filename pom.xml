@@ -21,6 +21,9 @@
 	<version>1.1-SNAPSHOT</version>
 	<name>Tiles Maven Plugin</name>
 
+  <description>Provides composition support for Maven composition support for Maven</description>
+	<url>http://repaint.io</url>
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -57,7 +60,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:repaint-io/maven-tiles</connection>
 		<developerConnection>scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
-		<url>http://github.com/repaint-io/maven-tiles</url>
+		<url>https://github.com/repaint-io/maven-tiles</url>
 		<tag>HEAD</tag>
 	</scm>
 

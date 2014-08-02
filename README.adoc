@@ -35,7 +35,7 @@ you specify a configuration.
 .pom.xml
 ----
 <project>
-  <groupId>com.bluetrainsoftware.tiles</groupId>
+  <groupId>io.repaint.maven</groupId>
   <artifactId>license-tile</artifactId>
   <version>1.1-SNAPSHOT</version>
   <packaging>tile</packaging>
@@ -44,13 +44,13 @@ you specify a configuration.
   <build>
     <plugins>
       <plugin>
-        <groupId>com.bluetrainsoftware.maven</groupId>
+        <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
         <version>1.1</version>
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.bluetraisoftware.tiles:github-release-tile:[1.1, 2)</tile>
+            <tile>io.repaint.tiles:github-release-tile:[1.1, 2)</tile>
           </tiles>
         </configuration>
       </plugin>
@@ -94,7 +94,7 @@ A tile can define the tiles plugin if it wishes to cascade tile inclusion, or it
   </licenses>
 
   <tiles>
-    <tile>com.bluetrainsoftware.com:ratpack-tile:[1,2)</tile>
+    <tile>io.repaint.tiles:ratpack-tile:[1,2)</tile>
   </tiles>
 
 </project>
@@ -134,7 +134,7 @@ If you need to use them, add them to your configuration section:
 <build>
   <plugins>
     <plugin>
-      <groupId>com.bluetrainsoftware.maven</groupId>
+      <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
       <configuration>
         <buildSmells>pluginmanagement, dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>

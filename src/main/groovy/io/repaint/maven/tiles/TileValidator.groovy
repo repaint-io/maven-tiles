@@ -71,7 +71,7 @@ class TileValidator {
 		}
 
 		if (model.build?.pluginManagement) {
-			log.warn("Rethink your tiles if you feel you need pluginManagement.")
+			log.warn("Plugin management is usually not required, if you want a plugin to always run, use plugins instead.")
 		}
 
 		if (model.dependencies) {

@@ -67,11 +67,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 	public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement"
 	public static final String SMELL_DEPENDENCIES = "dependencies"
-	public static final String SMELL_PLUGINMANAGEMENT = "pluginmanagement"
 	public static final String SMELL_REPOSITORIES = "repositories"
 	public static final String SMELL_PLUGINREPOSITORIES = "pluginrepositories"
 
-	public static final List<String> SMELLS = [SMELL_DEPENDENCIES, SMELL_DEPENDENCYMANAGEMENT, SMELL_PLUGINMANAGEMENT,
+	public static final List<String> SMELLS = [SMELL_DEPENDENCIES, SMELL_DEPENDENCYMANAGEMENT,
 	  SMELL_PLUGINREPOSITORIES, SMELL_REPOSITORIES]
 
 	@Requirement
@@ -281,7 +280,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	/**
-	 * In the context of
+	 * Cleans the model of untagged bad build smells.
 	 * @param model
 	 */
 	protected void cleanModel(Model model) {
@@ -293,11 +292,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// can't use exclusions if this is used, so should use composites
 		if (!collectedBuildSmells.contains(SMELL_DEPENDENCIES)) {
 			model.dependencies = null
-		}
-
-		// no longer necessary
-		if (!collectedBuildSmells.contains(SMELL_PLUGINMANAGEMENT)) {
-			model.build?.pluginManagement = null
 		}
 
 		// does this even need explanation? http://blog.sonatype.com/2009/02/why-putting-repositories-in-your-poms-is-a-bad-idea/

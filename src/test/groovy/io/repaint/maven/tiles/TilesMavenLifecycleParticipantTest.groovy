@@ -176,7 +176,7 @@ public class TilesMavenLifecycleParticipantTest {
 			runMergeTest("com.bluetrainsoftware.maven.tiles:bad-smelly-tile:1.1-SNAPSHOT")
 		}
 
-		assert t.message.startsWith("Discovered bad smell configuration [unknown] from <buildStink>pluginmanagement,dependencymanagement,dependencies,repositories,unknown</buildStink> in")
+		assert t.message.startsWith("Discovered bad smell configuration [unknown] from <buildStink>dependencymanagement,dependencies,repositories,unknown</buildStink> in")
 
 		println t.message
 	}
@@ -187,7 +187,6 @@ public class TilesMavenLifecycleParticipantTest {
 		assert !model.pluginRepositories
 		assert !model.dependencies
 		assert !model.dependencyManagement
-		assert !model.build.pluginManagement
 
 	}
 

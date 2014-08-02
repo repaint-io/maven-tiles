@@ -22,7 +22,7 @@
 				<groupId>io.repaint.maven</groupId>
 				<artifactId>tiles-maven-plugin</artifactId>
 				<configuration>
-					<buildSmells>pluginmanagement,dependencymanagement,dependencies,repositories,pluginrepositories</buildSmells>
+					<buildSmells>dependencymanagement,dependencies,repositories,pluginrepositories</buildSmells>
 					<tiles>
 						<tile>groupid:antrun1-tile:1.1-SNAPSHOT</tile>
 						<tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>

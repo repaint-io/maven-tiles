@@ -31,12 +31,14 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
+import org.apache.maven.model.ModelBase
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.DefaultModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.building.ModelProblemCollectorRequest
 import org.apache.maven.model.interpolation.ModelInterpolator
+import org.apache.maven.model.management.DependencyManagementInjector
 import org.apache.maven.model.merge.ModelMerger
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
@@ -77,6 +79,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	ModelInterpolator modelInterpolator
+
+	@Requirement
+	DependencyManagementInjector dependencyManagementInjector
 
 	RepositorySystemSession repositorySystemSession
 
@@ -261,7 +266,20 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		mergeModel(project.model, ourPureModel)
 
+		// now make sure our dependencies have versions if we have dependency management
+		injectDependencyManagement(project.model)
+	}
 
+	void injectDependencyManagement(Model model) {
+		if (model.dependencyManagement) {
+			ModelProblemCollector problemCollector = new OurModelProblemCollector()
+			DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
+
+			modelBuildingRequest.setSystemProperties(System.getProperties())
+			modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
+
+			dependencyManagementInjector.injectManagement(model, modelBuildingRequest, problemCollector)
+		}
 	}
 
 	class OurModelProblemCollector implements ModelProblemCollector {
@@ -293,6 +311,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			modelInterpolator.interpolateModel(artifactModel.tileModel.model, project.getBasedir(),
 				modelBuildingRequest, problemCollector)
 		}
+
 	}
 
 	/**

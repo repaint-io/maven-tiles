@@ -26,7 +26,10 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.building.ModelBuildingRequest
+import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.interpolation.ModelInterpolator
+import org.apache.maven.model.management.DependencyManagementInjector
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
@@ -232,8 +235,16 @@ public class TilesMavenLifecycleParticipantTest {
 		  }
 		] as ArtifactResolver
 
+		DependencyManagementInjector dependencyManagementInjector = new DependencyManagementInjector() {
+			@Override
+			void injectManagement(Model model1, ModelBuildingRequest request, ModelProblemCollector problems) {
+			}
+		}
+
 		participant.logger = logger
 		participant.modelInterpolator = modelInterpolator
+		participant.dependencyManagementInjector = dependencyManagementInjector
+
 		participant.orchestrateMerge(project)
 
 		assert participant.unprocessedTiles.size() == 0
@@ -271,6 +282,6 @@ public class TilesMavenLifecycleParticipantTest {
 		Properties model1Properties = new Properties()
 		model1Properties.setProperty("property1", "property1")
 		model.setProperties(model1Properties)
-		model
+		return model
 	}
 }

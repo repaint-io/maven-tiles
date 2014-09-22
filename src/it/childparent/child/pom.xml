@@ -1,32 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	<groupId>io.repaint.tiles.examples</groupId>
-	<artifactId>parent</artifactId>
-	<version>1.1</version>
-  </parent>
+		<groupId>io.repaint.tiles.examples</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.1</version>
+	</parent>
 	<artifactId>child</artifactId>
 	<version>1.1</version>
 	<name>Simple Parent</name>
 	<description>
 		Ensure we have a plugin defined in the parent
-  </description>
+	</description>
 	<url>http://repaint.io</url>
 
-<build>
-                <plugins>
-                        <plugin>
-                                <groupId>io.repaint.maven</groupId>
-                                <artifactId>tiles-maven-plugin</artifactId>
-                                <version>1.1</version>
-                                <extensions>true</extensions>
-<configuration>
-  <tiles>
-   <tile>io.repaint.tiles:karma-tile:1.1</tile>
-  </tiles>
-</configuration>
-                        </plugin>
-                </plugins>
-        </build>
+	<dependencies>
+		<dependency>
+			<groupId>com.bluetrainsoftware.composite</groupId>
+			<artifactId>composite-unit-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>io.repaint.maven</groupId>
+				<artifactId>tiles-maven-plugin</artifactId>
+				<version>1.2-SNAPSHOT</version>
+				<extensions>true</extensions>
+				<configuration>
+					<buildSmells>dependencymanagement</buildSmells>
+					<tiles>
+						<tile>io.repaint.tiles:karma-tile:1.1</tile>
+					</tiles>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+
 </project>

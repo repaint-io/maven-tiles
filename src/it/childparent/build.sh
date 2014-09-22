@@ -1,3 +1,4 @@
+#!/bin/sh
 cd parent
 mvn install
 cd ../tile

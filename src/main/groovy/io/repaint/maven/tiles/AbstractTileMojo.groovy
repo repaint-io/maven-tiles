@@ -4,7 +4,6 @@ import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
-import org.apache.maven.project.MavenProjectHelper
 import org.codehaus.plexus.logging.Logger
 
 /**
@@ -16,6 +15,12 @@ abstract class AbstractTileMojo extends AbstractMojo {
 
 	@Parameter(property = "project", readonly = true, required = true)
 	MavenProject project
+
+	@Parameter(property = "tiles", readonly = false, required = false)
+	List<String> tiles
+
+	@Parameter(property = "buildSmells", readonly = false, required = false)
+	String buildSmells
 
 	@Component
 	Logger logger

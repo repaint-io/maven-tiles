@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_f976b305",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AetherIsolator.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-23T10:29:53Z",
+      "side": 1,
+      "message": "I really don\u0027t like the naming of \u0027discover\u0027, that sounds like method should return something, the function doesn\u0027t reveal anything but rather modifies tileArtifact.\n\nMaybe something more like \u0027resolveVersionRange\u0027?",
+      "range": {
+        "startLine": 39,
+        "startChar": 13,
+        "endLine": 39,
+        "endChar": 33
+      },
+      "revId": "207140f0b35437caf86267c02c256cf0fc3163fd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d973f713",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-23T10:29:53Z",
+      "side": 1,
+      "message": "Still not a fan of \u0027void\u0027 mutating methods.  discoverMavenVersion should probably return the Isolator, and be assigned here.  Personal preference...  ignore me maybe?",
+      "revId": "207140f0b35437caf86267c02c256cf0fc3163fd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

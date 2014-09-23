@@ -18,9 +18,11 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
+import io.repaint.maven.tiles.isolators.AetherIsolator
+import io.repaint.maven.tiles.isolators.Maven30Isolator
+import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
-import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
@@ -31,7 +33,6 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
-import org.apache.maven.model.ModelBase
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.DefaultModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingRequest
@@ -39,17 +40,12 @@ import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.building.ModelProblemCollectorRequest
 import org.apache.maven.model.interpolation.ModelInterpolator
 import org.apache.maven.model.management.DependencyManagementInjector
-import org.apache.maven.model.merge.ModelMerger
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
-import org.eclipse.aether.RepositorySystemSession
-import org.eclipse.aether.impl.VersionRangeResolver
-import org.eclipse.aether.resolution.VersionRangeRequest
-import org.eclipse.aether.resolution.VersionRangeResult
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
@@ -83,10 +79,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@Requirement
 	DependencyManagementInjector dependencyManagementInjector
 
-	RepositorySystemSession repositorySystemSession
-
-	@Requirement
-	VersionRangeResolver versionRangeResolver
+	protected MavenVersionIsolator mavenVersionIsolate
 
 	List<ArtifactRepository> remoteRepositories
 	ArtifactRepository localRepository
@@ -129,21 +122,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			"tile", "tile-pom", new DefaultArtifactHandler("pom"))
 	}
 
-	protected void discoverVersionRange(Artifact tileArtifact) {
-		VersionRangeRequest versionRangeRequest = new VersionRangeRequest(
-			RepositoryUtils.toArtifact(tileArtifact),
-			RepositoryUtils.toRepos(remoteRepositories), null)
 
-		VersionRangeResult versionRangeResult = versionRangeResolver.resolveVersionRange(repositorySystemSession, versionRangeRequest)
-
-		if (versionRangeResult.versions) {
-			tileArtifact.version = versionRangeResult.highestVersion
-		}
-	}
 
 	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
 		try {
-			discoverVersionRange(tileArtifact)
+			mavenVersionIsolate.discoverVersionRange(tileArtifact)
 
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
 
@@ -195,6 +178,18 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
+	protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
+		MavenVersionIsolator isolator = null
+
+		try {
+			isolator = new AetherIsolator(mavenSession)
+		} catch (MavenExecutionException mee) {
+			isolator = new Maven30Isolator(mavenSession)
+		}
+
+		return isolator
+	}
+
 	/**
 	 * Invoked after all MavenProject instances have been created.
 	 *
@@ -206,7 +201,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.remoteRepositories = mavenSession.request.remoteRepositories
 		this.localRepository = mavenSession.request.localRepository
-		this.repositorySystemSession = mavenSession.repositorySession
+
+		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
 
 		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
 		List<String> subModules = topLevelProject.getModules()
@@ -272,7 +268,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	void injectDependencyManagement(Model model) {
 		if (model.dependencyManagement) {
-			ModelProblemCollector problemCollector = new OurModelProblemCollector()
+			ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
 			DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
 
 			modelBuildingRequest.setSystemProperties(System.getProperties())
@@ -282,17 +278,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	class OurModelProblemCollector implements ModelProblemCollector {
-		public List<ModelProblemCollectorRequest> problems = new ArrayList<ModelProblemCollectorRequest>()
 
-		@Override
-		public void add(ModelProblemCollectorRequest req) {
-			problems.add(req)
-		}
-	}
 
 	protected void interpolateModels(TileModel pureModel, MavenProject project) {
-		ModelProblemCollector problemCollector = new OurModelProblemCollector()
+		ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
 		DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
 
 		modelBuildingRequest.setSystemProperties(System.getProperties())

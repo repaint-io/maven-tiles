@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 1.2
+= Tiles Maven Plugin - Version 1.3
 
 == Overview
 
@@ -46,7 +46,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
         <extensions>true</extensions>
         <configuration>
           <tiles>
@@ -140,7 +140,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>1.2</version>
+      <version>1.3</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>

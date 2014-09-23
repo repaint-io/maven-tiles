@@ -1,0 +1,24 @@
+= Change Log
+
+All notable changes to this project will be documented in this file.
+
+== 1.3 - 2014-09-24
+
+=== Added
+- Apache Maven configuration parameter defintions for IDE support.
+  This prevents IDEs such as IntelliJ IDEA from reporting `<tiles>`
+  as being unexpected content.
+
+=== Changed
+- Added fallback support for Apache Maven 3.0.x. Primarilly to support
+  working within IntelliJ IDEA which embeds 3.0.x. This means that tiles
+  based projects resolve correctly in the IDE correctly, once again letting you
+  _develop with pleasure_.
+
+
+== 1.2 - 2014-09-23
+
+=== Changed
+- Fixed faulty merging of `<dependencyManagement>` sections from parent POMs
+  when the tiles plugin was included in your project POM.
+

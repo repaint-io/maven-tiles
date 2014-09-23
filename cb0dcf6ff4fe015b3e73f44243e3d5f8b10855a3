@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_99505f60",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-23T11:21:47Z",
+      "side": 1,
+      "message": "Now that this works with 3.0.x and IntelliJ - we could drop the \"start of\" from the commit message.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 5
+      },
+      "revId": "cb0dcf6ff4fe015b3e73f44243e3d5f8b10855a3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

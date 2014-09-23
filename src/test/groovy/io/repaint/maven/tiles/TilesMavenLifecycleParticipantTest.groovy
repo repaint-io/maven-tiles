@@ -23,6 +23,7 @@ import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
@@ -79,6 +80,11 @@ public class TilesMavenLifecycleParticipantTest {
 	@Before
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
+		participant.mavenVersionIsolate = new MavenVersionIsolator() {
+			@Override
+			void discoverVersionRange(Artifact tileArtifact) {
+			}
+		}
 		mockResolver = mock(ArtifactResolver.class)
 		logger = [
 		  warn: { String msg -> println msg },
@@ -119,7 +125,7 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected void discoverVersionRange(Artifact tileArtifact) {
+			protected void discoverMavenVersion(MavenSession mavenSession) {
 			}
 		}
 		participant.logger = logger
@@ -224,9 +230,15 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected void discoverVersionRange(Artifact tileArtifact) {
+			protected void discoverMavenVersion(MavenSession mavenSession) {
 			}
 
+		}
+
+		participant.mavenVersionIsolate = new MavenVersionIsolator() {
+			@Override
+			void discoverVersionRange(Artifact tileArtifact) {
+			}
 		}
 
 		participant.resolver = [

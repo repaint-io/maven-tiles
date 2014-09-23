@@ -17,12 +17,13 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
-import io.repaint.maven.tiles.TileModel
-import io.repaint.maven.tiles.TilesMavenLifecycleParticipant
+import groovy.transform.TypeCheckingMode
+import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
@@ -79,6 +80,9 @@ public class TilesMavenLifecycleParticipantTest {
 	@Before
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
+
+		createFakeIsolate()
+
 		mockResolver = mock(ArtifactResolver.class)
 		logger = [
 		  warn: { String msg -> println msg },
@@ -91,6 +95,23 @@ public class TilesMavenLifecycleParticipantTest {
 		participant.resolver = mockResolver
 
 		System.clearProperty(PERFORM_RELEASE)
+	}
+
+	protected MavenVersionIsolator createFakeIsolate() {
+		return new MavenVersionIsolator() {
+			@Override
+			void resolveVersionRange(Artifact tileArtifact) {
+			}
+
+			@Override
+			ModelProblemCollector createModelProblemCollector() {
+				return [
+					add: { req ->
+
+					}
+				] as ModelProblemCollector
+			}
+		}
 	}
 
 	public Artifact getTileTestCoordinates() {
@@ -119,9 +140,11 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected void discoverVersionRange(Artifact tileArtifact) {
+			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
+				return createFakeIsolate()
 			}
 		}
+		createFakeIsolate()
 		participant.logger = logger
 		participant.modelInterpolator = modelInterpolator
 		participant.orchestrateMerge(new MavenProject())
@@ -213,6 +236,8 @@ public class TilesMavenLifecycleParticipantTest {
 
 		MavenProject project = new MavenProject(model)
 
+		TilesMavenLifecycleParticipant oldParticipant = participant
+
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
@@ -224,11 +249,13 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected void discoverVersionRange(Artifact tileArtifact) {
+			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
+				return createFakeIsolate()
 			}
 
 		}
 
+		createFakeIsolate()
 		participant.resolver = [
 		  resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
 			  artifact.setFile(new File("src/test/resources/${artifact.artifactId}.xml"))

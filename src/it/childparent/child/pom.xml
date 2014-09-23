@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>child</artifactId>
 	<version>1.1</version>
-	<name>Simple Parent</name>
+	<name>Simple Child</name>
 	<description>
 		Ensure we have a plugin defined in the parent
 	</description>

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_79e8e37c",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-23T11:59:12Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "adf8e6b5a6ac161ffcde87e59fe03a7aca2a87d1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

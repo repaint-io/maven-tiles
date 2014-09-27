@@ -1,10 +1,18 @@
 package io.repaint.maven.tiles.isolators
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.InputLocation
+import org.apache.maven.model.Model
+import org.apache.maven.model.Repository
 import org.apache.maven.model.building.ModelProblem
 import org.apache.maven.model.building.ModelProblemCollector
+import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.resolution.InvalidRepositoryException
+import org.apache.maven.model.resolution.ModelResolver
+import org.apache.maven.model.resolution.UnresolvableModelException
 
 /**
  *
@@ -34,5 +42,11 @@ class Maven30Isolator extends BaseMavenIsolator {
 				collected.add([severity: severity, message: message, location: location, cause: cause])
 			}
 		] as ModelProblemCollector
+	}
+
+	@Override
+	@CompileStatic(TypeCheckingMode.SKIP)
+	def createModelData(Model model, File pomFile) {
+		return org.apache.maven.model.building.ModelData.newInstance(model)
 	}
 }

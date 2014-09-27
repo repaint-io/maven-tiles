@@ -17,20 +17,19 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.repository.ArtifactRepository
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException
+import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.execution.MavenSession
-import org.apache.maven.model.Build
-import org.apache.maven.model.Model
-import org.apache.maven.model.Plugin
+import org.apache.maven.model.*
 import org.apache.maven.model.building.ModelBuildingRequest
+import org.apache.maven.model.building.ModelData
 import org.apache.maven.model.building.ModelProblemCollector
-import org.apache.maven.model.interpolation.ModelInterpolator
-import org.apache.maven.model.management.DependencyManagementInjector
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
@@ -41,8 +40,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
 
-import static org.mockito.Mockito.mock
 import static groovy.test.GroovyAssert.shouldFail
+import static org.mockito.Mockito.mock
 
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
@@ -56,9 +55,6 @@ public class TilesMavenLifecycleParticipantTest {
 	TilesMavenLifecycleParticipant participant
 	ArtifactResolver mockResolver
 	Logger logger
-	ModelInterpolator modelInterpolator
-
-	public final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
 
 	public final static String PERFORM_RELEASE = "performRelease"
 	static String performRelease
@@ -88,11 +84,17 @@ public class TilesMavenLifecycleParticipantTest {
 			debug: { String msg -> println msg },
 			isDebugEnabled: { return true }
 		] as Logger
-		modelInterpolator = mock(ModelInterpolator.class)
 
-		participant.resolver = mockResolver
+		stuffParticipant()
 
 		System.clearProperty(PERFORM_RELEASE)
+	}
+
+	void stuffParticipant() {
+		participant.logger = logger
+		participant.resolver = mockResolver
+		participant.mavenVersionIsolate = createFakeIsolate()
+
 	}
 
 	protected MavenVersionIsolator createFakeIsolate() {
@@ -109,11 +111,50 @@ public class TilesMavenLifecycleParticipantTest {
 					}
 				] as ModelProblemCollector
 			}
+
+			@Override
+			ModelData createModelData(Model model, File pomFile) {
+				return null
+			}
 		}
 	}
 
 	public Artifact getTileTestCoordinates() {
 		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "0.8-SNAPSHOT")
+	}
+
+
+	@Test
+	public void ensureSnapshotFailsOnRelease() {
+		Artifact snapshot = getTileTestCoordinates()
+		System.setProperty(PERFORM_RELEASE, "true")
+		shouldFail(MavenExecutionException) {
+			participant.resolveTile(snapshot)
+		}
+	}
+
+	@Test
+	public void ensureBadArtifactsFail() {
+		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad")
+
+		participant.resolver = [
+			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
+				throw new ArtifactResolutionException("failed", badbadbad)
+			}
+		] as ArtifactResolver
+
+		shouldFail(MavenExecutionException) {
+			participant.resolveTile(badbadbad)
+		}
+		participant.resolver = [
+			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
+				throw new ArtifactNotFoundException("failed", badbadbad)
+			}
+		] as ArtifactResolver
+
+		shouldFail(MavenExecutionException) {
+			participant.resolveTile(badbadbad)
+		}
 	}
 
 	@Test
@@ -130,21 +171,150 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	@Test
+	public void testGavFromString() {
+		Artifact dummy = participant.turnPropertyIntoUnprocessedTile("my:long:feet", null)
+
+		assert dummy.version == 'feet'
+		assert dummy.artifactId == 'long'
+		assert dummy.groupId == 'my'
+		assert dummy.classifier == 'tile-pom'
+		assert dummy.type == 'tile'
+
+		// too short
+		shouldFail(MavenExecutionException) {
+			participant.turnPropertyIntoUnprocessedTile("my:long", null)
+		}
+
+		// too long
+		shouldFail(MavenExecutionException) {
+			participant.turnPropertyIntoUnprocessedTile("my:long:feet:and:shoes", null)
+		}
+	}
+
+	@Test
+	public void canLoadExtendedTiles() {
+		Artifact artifact = participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:extended-syntax:1.1", null)
+		artifact.file = new File("src/test/resources/extended-syntax-tile.xml")
+		assert participant.loadModel(artifact)
+		artifact.file = new File("src/test/resources/session-license-tile.xml")
+		assert participant.loadModel(artifact)
+		artifact.file = new File("src/test/resources/bad-smelly-tile.xml")
+		assert participant.loadModel(artifact)
+
+		shouldFail(MavenExecutionException) {
+			artifact.file = new File("src/test/resources/extended-syntax-tile1.xml")
+			participant.loadModel(artifact)
+		}
+
+		shouldFail(MavenExecutionException) {
+			artifact.file = new File("src/test/resources/invalid-tile.xml")
+			participant.loadModel(artifact)
+		}
+
+		shouldFail(MavenExecutionException) {
+			artifact.file = new File("src/test/resources/not-a-file-file.xml")
+			participant.loadModel(artifact)
+		}
+	}
+
+	@Test
+	public void canUseModelResolver() {
+		File licensePom = new File('src/test/resources/session-license-pom.xml')
+
+		participant.mavenVersionIsolate = [
+			resolveVersionRange: { Artifact artifact ->
+				artifact.file = licensePom
+			}
+		] as MavenVersionIsolator
+
+		def resolver = participant.createModelResolver()
+		def model = resolver.resolveModel('my', 'left', 'foot')
+
+		assert model.inputStream.text == licensePom.text
+		assert model.location == licensePom.absolutePath
+
+		model.inputStream.close()
+	}
+
+	protected Model readModel(File pomFile) {
+		MavenXpp3Reader modelReader = new MavenXpp3Reader()
+		Model pomModel
+
+		pomFile.withReader { Reader r ->
+			pomModel = modelReader.read(r)
+		}
+
+		return pomModel
+	}
+
+	@Test
+	public void injectModelLayerTiles() {
+		TileModel sessionLicenseTile = new TileModel(new File('src/test/resources/session-license-tile.xml'),
+			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:session-license:1', null))
+
+		TileModel extendedSyntaxTile = new TileModel(new File('src/test/resources/extended-syntax-tile.xml'),
+			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:extended-syntax:1', null))
+
+		TileModel antrunTile = new TileModel(new File('src/test/resources/antrun1-tile.xml'),
+			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:antrun1:1', null))
+
+		List<TileModel> tiles = [
+			sessionLicenseTile,
+			extendedSyntaxTile,
+			antrunTile,
+		]
+
+		File pomFile = new File('src/test/resources/empty-pom.xml')
+		Model pomModel = readModel(pomFile)
+
+		participant = new TilesMavenLifecycleParticipant() {
+			@Override
+			protected void putModelInCache(Model model, ModelBuildingRequest request, File pFile) {
+			}
+		}
+
+		stuffParticipant()
+
+		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+
+		assert pomModel.parent.artifactId == 'session-license'
+		assert sessionLicenseTile.model.parent.artifactId == 'extended-syntax'
+		assert extendedSyntaxTile.model.parent.artifactId == 'antrun1'
+		assert antrunTile.model.parent == null
+
+		pomModel.parent = new Parent(groupId: 'io.repaint.tiles', artifactId: 'fake-parent', version: '1')
+
+		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+		assert antrunTile.model.parent.artifactId == 'fake-parent'
+	}
+
+	@Test
+	public void cleanModel() {
+		Model model = new Model()
+		model.dependencies = [new Dependency()]
+		model.pluginRepositories = [new Repository()]
+		model.repositories = [new Repository()]
+		model.dependencyManagement = new DependencyManagement()
+
+		participant.cleanModel(model)
+
+		assert model.dependencies.size() == 0
+		assert model.pluginRepositories.size() == 0
+		assert model.repositories.size() == 0
+		assert model.dependencyManagement == null
+	}
+
+	@Test
 	public void testNoTiles() throws MavenExecutionException {
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 				return new TileModel(model:new Model())
 			}
-
-			@Override
-			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-				return createFakeIsolate()
-			}
 		}
-		participant.mavenVersionIsolate = createFakeIsolate()
-		participant.logger = logger
-		participant.modelInterpolator = modelInterpolator
+
+		stuffParticipant()
+
 		participant.orchestrateMerge(new MavenProject())
 	}
 
@@ -152,7 +322,10 @@ public class TilesMavenLifecycleParticipantTest {
 	public void testBadGav() {
 		Model model = createBasicModel()
 		addTileAndPlugin(model, "groupid:artifactid")
+
 		participant = new TilesMavenLifecycleParticipant()
+		stuffParticipant()
+
 		MavenProject project = new MavenProject(model)
 
 		Throwable failure = shouldFail {
@@ -174,127 +347,63 @@ public class TilesMavenLifecycleParticipantTest {
 		}
 	}
 
-
-	@Test
-	public void allowSmellyBuildsToOccur() {
-		Model model = runMergeTest("com.bluetrainsoftware.maven.tiles:smelly-tile:1.1-SNAPSHOT")
-
-		assert model.repositories
-		assert model.pluginRepositories
-		assert model.dependencies
-		assert model.dependencyManagement
-		assert model.build.pluginManagement
-	}
-
-	@Test
-	public void testPluginBasedMerge() throws MavenExecutionException {
-		Model model = runMergeTest(TILE_TEST_COORDINATES)
-		assertBuildSmellsRemoved(model)
-	}
-
-	@Test
-	public void testExtendedSyntaxMerge() throws MavenExecutionException {
-		Model model = runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
-		assertBuildSmellsRemoved(model)
-	}
-
-	@Test
-	public void testBadSmellySyntaxMerge() throws MavenExecutionException {
-		Throwable t = shouldFail() {
-			runMergeTest("com.bluetrainsoftware.maven.tiles:bad-smelly-tile:1.1-SNAPSHOT")
-		}
-
-		assert t.message.startsWith("Discovered bad smell configuration [unknown] from <buildStink>dependencymanagement,dependencies,repositories,unknown</buildStink> in")
-
-		println t.message
-	}
-
-	public void assertBuildSmellsRemoved(Model model) {
-
-		assert !model.repositories
-		assert !model.pluginRepositories
-		assert !model.dependencies
-		assert !model.dependencyManagement
-
-	}
-
-	@Test
-	public void testSnapshotsTilesDuringRelease() {
-		System.setProperty(PERFORM_RELEASE, "true")
-		shouldFail(MavenExecutionException) {
-			runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
-		}
-	}
-
-	public Model runMergeTest(String gav) {
-		Model model = createBasicModel()
-		addTileAndPlugin(model, gav)
-
-		Model pureModel = model.clone()
-
-		MavenProject project = new MavenProject(model)
-
-		TilesMavenLifecycleParticipant oldParticipant = participant
-
+	protected resetParticipantToLoadTilesFromDisk() {
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
-			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
-				if (artifact.file == null) {
-					return new TileModel(model:pureModel)
-				} else {
-					return super.loadModel(artifact)
-				}
+			protected void thunkModelBuilder(MavenProject project1) {
 			}
 
 			@Override
-			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-				return createFakeIsolate()
-			}
+			protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
+				tileArtifact.file = new File("src/test/resources/${tileArtifact.artifactId}.xml")
 
-		}
-		participant.mavenVersionIsolate = createFakeIsolate()
-
-		participant.resolver = [
-		  resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
-			  artifact.setFile(new File("src/test/resources/${artifact.artifactId}.xml"))
-		  }
-		] as ArtifactResolver
-
-		DependencyManagementInjector dependencyManagementInjector = new DependencyManagementInjector() {
-			@Override
-			void injectManagement(Model model1, ModelBuildingRequest request, ModelProblemCollector problems) {
+				return tileArtifact
 			}
 		}
 
-		participant.logger = logger
-		participant.modelInterpolator = modelInterpolator
-		participant.dependencyManagementInjector = dependencyManagementInjector
+		stuffParticipant()
+	}
+
+	protected MavenProject fakeProjectFromFile(String pom) {
+		File pomFile = new File("src/test/resources/${pom}.xml")
+
+		return [
+			getModel: { return readModel(pomFile)},
+			getPomFile: { return pomFile }
+		] as MavenProject
+	}
+
+	@Test
+	public void testTileResolve() {
+		MavenProject project = fakeProjectFromFile("full-tile-load-pom")
+
+		resetParticipantToLoadTilesFromDisk()
 
 		participant.orchestrateMerge(project)
 
-		assert participant.unprocessedTiles.size() == 0
-		assert participant.processedTiles.size() == 3
-		assert participant.tileDiscoveryOrder
+		assert participant.processedTiles.size() == 4
+	}
 
-		assert model.properties.size() == 3
-		assert model.properties["one"] == "1"
-		assert model.properties["two"] == "2"
-		assert model.properties["property1"] == "property1"
+	@Test
+	public void testCascadeIgnore() {
+		MavenProject project = fakeProjectFromFile("cascade-check-pom")
 
-		assert model.build.plugins.size() == 2 // tiles and ant-run
+		resetParticipantToLoadTilesFromDisk()
 
-		Plugin antRun = model.build.plugins.find { Plugin plugin -> return plugin.artifactId == "maven-antrun-plugin"}
+		participant.orchestrateMerge(project)
 
-		assert antRun
+		assert participant.processedTiles.size() == 4
+		assert participant.processedTiles['io.repaint.tiles:release-tile'] == null
+	}
 
-		antRun.with {
-			assert artifactId == 'maven-antrun-plugin'
-			assert version == "1.7"
-			assert executions.size() == 2
-			assert executions*.id.intersect(["print-antrun1", "print-antrun2"])
-		}
+	@Test
+	public void testDuplicateTilesIgnored() {
+		MavenProject project = fakeProjectFromFile("duplicate-tile-pom")
 
-		return model
+		resetParticipantToLoadTilesFromDisk()
+
+		participant.orchestrateMerge(project)
+		assert participant.processedTiles.size() == 4
 	}
 
 	protected Model createBasicModel() {

@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_7f3ba3eb",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-27T12:04:32Z",
+      "side": 1,
+      "message": "I asssume this is commented out due to being rewritten/reworked in the `thunkModelBuilder` code?  If so, delete :)",
+      "revId": "1f00d9cb6658713f6987cd21b36032cc36df9a5e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5f406756",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-27T12:04:32Z",
+      "side": 1,
+      "message": "Remove commented code",
+      "range": {
+        "startLine": 399,
+        "startChar": 13,
+        "endLine": 399,
+        "endChar": 14
+      },
+      "revId": "1f00d9cb6658713f6987cd21b36032cc36df9a5e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_bf241bc7",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-27T12:04:32Z",
+      "side": 1,
+      "message": "Commented methods?",
+      "revId": "1f00d9cb6658713f6987cd21b36032cc36df9a5e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9f215fb7",
+        "filename": "src/test/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipantTest.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-27T12:04:32Z",
+      "side": 1,
+      "message": "commented setup code?",
+      "revId": "1f00d9cb6658713f6987cd21b36032cc36df9a5e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

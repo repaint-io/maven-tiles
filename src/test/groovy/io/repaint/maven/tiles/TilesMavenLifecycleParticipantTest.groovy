@@ -28,9 +28,11 @@ import org.apache.maven.model.Build
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelBuildingRequest
+import org.apache.maven.model.building.ModelData
 import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.interpolation.ModelInterpolator
 import org.apache.maven.model.management.DependencyManagementInjector
+import org.apache.maven.model.management.PluginManagementInjector
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
@@ -57,6 +59,8 @@ public class TilesMavenLifecycleParticipantTest {
 	ArtifactResolver mockResolver
 	Logger logger
 	ModelInterpolator modelInterpolator
+	DependencyManagementInjector dependencyManagementInjector
+	PluginManagementInjector pluginManagementInjector
 
 	public final static String TILE_TEST_COORDINATES = "com.bluetrainsoftware.maven.tiles:session-license-tile:1.1-SNAPSHOT"
 
@@ -81,6 +85,18 @@ public class TilesMavenLifecycleParticipantTest {
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
 
+		pluginManagementInjector = new PluginManagementInjector() {
+			@Override
+			void injectManagement(Model model, ModelBuildingRequest request, ModelProblemCollector problems) {
+			}
+		}
+
+		dependencyManagementInjector = new DependencyManagementInjector() {
+			@Override
+			void injectManagement(Model model, ModelBuildingRequest request, ModelProblemCollector problems) {
+			}
+		}
+
 		mockResolver = mock(ArtifactResolver.class)
 		logger = [
 		  warn: { String msg -> println msg },
@@ -90,9 +106,19 @@ public class TilesMavenLifecycleParticipantTest {
 		] as Logger
 		modelInterpolator = mock(ModelInterpolator.class)
 
-		participant.resolver = mockResolver
+		stuffParticipant()
 
 		System.clearProperty(PERFORM_RELEASE)
+	}
+
+	void stuffParticipant() {
+		participant.logger = logger
+//		participant.modelInterpolator = modelInterpolator
+		participant.resolver = mockResolver
+//		participant.pluginManagementInjector = pluginManagementInjector
+//		participant.dependencyManagementInjector = dependencyManagementInjector
+		participant.mavenVersionIsolate = createFakeIsolate()
+
 	}
 
 	protected MavenVersionIsolator createFakeIsolate() {
@@ -108,6 +134,11 @@ public class TilesMavenLifecycleParticipantTest {
 
 					}
 				] as ModelProblemCollector
+			}
+
+			@Override
+			ModelData createModelData(Model model, File pomFile) {
+				return null
 			}
 		}
 	}
@@ -136,15 +167,10 @@ public class TilesMavenLifecycleParticipantTest {
 			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 				return new TileModel(model:new Model())
 			}
-
-			@Override
-			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-				return createFakeIsolate()
-			}
 		}
-		participant.mavenVersionIsolate = createFakeIsolate()
-		participant.logger = logger
-		participant.modelInterpolator = modelInterpolator
+
+		stuffParticipant()
+
 		participant.orchestrateMerge(new MavenProject())
 	}
 
@@ -152,7 +178,10 @@ public class TilesMavenLifecycleParticipantTest {
 	public void testBadGav() {
 		Model model = createBasicModel()
 		addTileAndPlugin(model, "groupid:artifactid")
+
 		participant = new TilesMavenLifecycleParticipant()
+		stuffParticipant()
+
 		MavenProject project = new MavenProject(model)
 
 		Throwable failure = shouldFail {
@@ -173,7 +202,6 @@ public class TilesMavenLifecycleParticipantTest {
 			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${gav}</tile></tiles></configuration>"))
 		}
 	}
-
 
 	@Test
 	public void allowSmellyBuildsToOccur() {
@@ -220,8 +248,9 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testSnapshotsTilesDuringRelease() {
-		System.setProperty(PERFORM_RELEASE, "true")
+
 		shouldFail(MavenExecutionException) {
+			System.setProperty(PERFORM_RELEASE, "true")
 			runMergeTest("com.bluetrainsoftware.maven.tiles:extended-syntax-tile:1.1-SNAPSHOT")
 		}
 	}
@@ -250,9 +279,8 @@ public class TilesMavenLifecycleParticipantTest {
 			protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
 				return createFakeIsolate()
 			}
-
 		}
-		participant.mavenVersionIsolate = createFakeIsolate()
+		stuffParticipant()
 
 		participant.resolver = [
 		  resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
@@ -260,15 +288,6 @@ public class TilesMavenLifecycleParticipantTest {
 		  }
 		] as ArtifactResolver
 
-		DependencyManagementInjector dependencyManagementInjector = new DependencyManagementInjector() {
-			@Override
-			void injectManagement(Model model1, ModelBuildingRequest request, ModelProblemCollector problems) {
-			}
-		}
-
-		participant.logger = logger
-		participant.modelInterpolator = modelInterpolator
-		participant.dependencyManagementInjector = dependencyManagementInjector
 
 		participant.orchestrateMerge(project)
 

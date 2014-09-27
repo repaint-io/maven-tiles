@@ -3,6 +3,7 @@ package io.repaint.maven.tiles
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
+import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 
@@ -53,7 +54,15 @@ class TileModel {
 	}
 
 	public TileModel() {}
-	public TileModel(File tilePom) {
+	public TileModel(File tilePom, Artifact artifact) {
 		loadTile(tilePom)
+
+		// this is in the artifact but isn't actually in the file, we need it
+		// so we can pass it through the parent structure in the TilesModelResolverImpl
+
+		model.version = artifact.version
+		model.groupId = artifact.groupId
+		model.artifactId = artifact.artifactId
+		model.packaging = "pom"
 	}
 }

@@ -17,9 +17,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.repaint.tiles</groupId>
-	<artifactId>session-license-tile</artifactId>
+	<artifactId>simple-project</artifactId>
 	<version>1.1-SNAPSHOT</version>
-	<packaging>tile</packaging>
+	<packaging>jar</packaging>
 	<name>Maven Tile - Lilcense</name>
 
 	<licenses>
@@ -35,11 +35,12 @@
 			<plugin>
 				<groupId>io.repaint.maven</groupId>
 				<artifactId>tiles-maven-plugin</artifactId>
-				<version>1.1-SNAPSHOT</version>
+				<version>1.4-SNAPSHOT</version>
 				<extensions>true</extensions>
 				<configuration>
 					<tiles>
-						<tile>i:dont:exist</tile>  <!-- should not be requested -->
+						<tile>io.repaint.tiles:smelly-tile:1.1</tile>
+						<tile cascade="false">io.repaint.tiles:release-tile:1.1</tile>
 					</tiles>
 				</configuration>
 			</plugin>

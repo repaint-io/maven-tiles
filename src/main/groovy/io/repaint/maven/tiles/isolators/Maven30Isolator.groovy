@@ -3,8 +3,13 @@ package io.repaint.maven.tiles.isolators
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.InputLocation
+import org.apache.maven.model.Repository
 import org.apache.maven.model.building.ModelProblem
 import org.apache.maven.model.building.ModelProblemCollector
+import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.resolution.InvalidRepositoryException
+import org.apache.maven.model.resolution.ModelResolver
+import org.apache.maven.model.resolution.UnresolvableModelException
 
 /**
  *

@@ -18,6 +18,7 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.AetherIsolator
 import io.repaint.maven.tiles.isolators.Maven30Isolator
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
@@ -33,12 +34,21 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
+import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.Repository
+import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.FileModelSource
+import org.apache.maven.model.building.ModelBuilder
 import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelProblemCollector
-import org.apache.maven.model.interpolation.ModelInterpolator
-import org.apache.maven.model.management.DependencyManagementInjector
+import org.apache.maven.model.building.ModelBuildingResult
+import org.apache.maven.model.building.ModelProcessor
+import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.io.ModelParseException
+import org.apache.maven.model.resolution.InvalidRepositoryException
+import org.apache.maven.model.resolution.ModelResolver
+import org.apache.maven.model.resolution.UnresolvableModelException
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
@@ -73,15 +83,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	ArtifactResolver resolver
 
 	@Requirement
-	ModelInterpolator modelInterpolator
+	ModelBuilder modelBuilder
 
 	@Requirement
-	DependencyManagementInjector dependencyManagementInjector
+	ModelProcessor modelProcessor
 
 	protected MavenVersionIsolator mavenVersionIsolate
 
 	List<ArtifactRepository> remoteRepositories
 	ArtifactRepository localRepository
+
+	NotDefaultModelCache modelCache
+
+	MavenSession mavenSession
 
 	class ArtifactModel {
 		public Artifact artifact
@@ -163,7 +177,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 		try {
-			TileModel modelLoader = new TileModel(artifact.getFile())
+			TileModel modelLoader = new TileModel(artifact.getFile(), artifact)
 
 			logger.debug(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
 
@@ -198,10 +212,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	public void afterProjectsRead(MavenSession mavenSession)
 		throws MavenExecutionException {
 
+		this.mavenSession = mavenSession
+
 		this.remoteRepositories = mavenSession.request.remoteRepositories
 		this.localRepository = mavenSession.request.localRepository
 
 		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
+
+		this.modelCache = new NotDefaultModelCache(mavenSession)
 
 		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
 		List<String> subModules = topLevelProject.getModules()
@@ -236,22 +254,27 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		parseConfiguration(propertyCollectionModel, project.getFile())
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		resolveTiles()
+		loadAllDiscoveredTiles()
 
-		// last discovered tile should be first to be overridden
-		Collections.reverse(tileDiscoveryOrder)
+		// don't do anything if there are no tiles
+		if (processedTiles) {
+			thunkModelBuilder(project)
+		}
+
+		// last discovered tile should be first to be overridden, i.e. create new parent chain
+//		Collections.reverse(tileDiscoveryOrder)
 
 		// get our own model in pure, naked form - this will cause property usage to be unresolved when
 		// we try and process it
 		// we need to
-		Artifact artifact = getArtifactFromCoordinates(project.groupId, project.artifactId, project.version)
-		artifact.setFile(project.getFile())
+//		Artifact artifact = getArtifactFromCoordinates(project.groupId, project.artifactId, project.version)
+//		artifact.setFile(project.getFile())
+//
+//		TileModel ourPureModel = loadModel(artifact)
+//
+//		mergePropertyModels(ourPureModel, propertyCollectionModel, project.getModel())
 
-		TileModel ourPureModel = loadModel(artifact)
-
-		mergePropertyModels(ourPureModel, propertyCollectionModel, project.getModel())
-
-		interpolateModels(ourPureModel, project)
+//		interpolateModels(ourPureModel, project)
 
 		// now we are at a point where we know what all of our tiles are, we have them in the least
 		// important to most important sequence and we have collected all of the properties across all
@@ -259,26 +282,188 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// We are ignoring mismatching version ranges or clashing versions of tiles. First in, First Served.
 		// Warnings otherwise.
 
-		mergeModel(project.model, ourPureModel)
+//		mergeModel(project.model, ourPureModel)
 
-		// now make sure our dependencies have versions if we have dependency management
-		injectDependencyManagement(project.model)
+		// now make sure our dependencies have versions if we have dependency management, same if plugin mgmt
+//		injectManagementSections(project.model)
 	}
 
-	void injectDependencyManagement(Model model) {
-		if (model.dependencyManagement) {
-			ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
-			DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected void thunkModelBuilder(MavenProject project) {
+		List<TileModel> tiles = processedTiles.values().collect({it.tileModel})
 
-			modelBuildingRequest.setSystemProperties(System.getProperties())
-			modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
+		if (!tiles) return
+
+		// this allows us to know when the ModelProcessor is called that we should inject the tiles into the
+		// parent structure
+		ModelSource mainArtifactModelSource = createModelSource(project.file)
+		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
+			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
+		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
+		  activeProfileIds: mavenSession.request.activeProfiles, inactiveProfileIds: mavenSession.request.inactiveProfiles)
+
+		boolean injected = false
+
+		ModelProcessor fakeModelProcessor = new ModelProcessor() {
+			@Override
+			File locatePom(File projectDirectory) {
+				return modelProcessor.locatePom(projectDirectory)
+			}
+
+			@Override
+			Model read(File input, Map<String, ?> options) throws IOException, ModelParseException {
+				return modelProcessor.read(input, options)
+			}
+
+			@Override
+			Model read(Reader input, Map<String, ?> options) throws IOException, ModelParseException {
+				return modelProcessor.read(input, options)
+			}
+
+			@Override
+			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
+				Model model = modelProcessor.read(input, options)
+
+				if (!injected && input == mainArtifactModelSource.inputStream) {
+					injected = true
+
+					injectTilesIntoParentStructure(tiles, model, request)
+				}
+
+				return model
+			}
+		}
+
+		((DefaultModelBuilder)modelBuilder).setModelProcessor(fakeModelProcessor)
+
+		ModelBuildingResult build = modelBuilder.build(
+			request)
+
+		((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
+
+		copyModel(project.model, build.effectiveModel)
+	}
+
+	ModelSource createModelSource(File pomFile) {
+		return new ModelSource() {
+			InputStream stream = pomFile.newInputStream()
+
+			@Override
+			InputStream getInputStream() throws IOException {
+				return stream
+			}
+
+			@Override
+			String getLocation() {
+				return pomFile.absolutePath
+			}
+		}
+	}
+
+	ModelResolver createModelResolver() {
+		// this is for resolving parents, so always poms
+
+		return new ModelResolver() {
+			@Override
+			ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
+				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
+					"pom", null, new DefaultArtifactHandler("pom"))
+
+				mavenVersionIsolate.resolveVersionRange(artifact)
+				resolver.resolve(artifact, remoteRepositories, localRepository)
+
+				return createModelSource(artifact.file)
+			}
+
+			@Override
+			void addRepository(Repository repository) throws InvalidRepositoryException {
+
+			}
+
+			@Override
+			ModelResolver newCopy() {
+				return null
+			}
+		}
+
+	}
+
+
+
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected void putModelInCache(Model model, ModelBuildingRequest request) {
+		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
+		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, model.version,
+			org.apache.maven.model.building.ModelCacheTag.RAW,
+			new org.apache.maven.model.building.ModelData(model));
+//				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
+	}
+
+	public void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel,
+	                                            ModelBuildingRequest request) {
+		Parent originalParent = pomModel.parent
+		Model lastPom = pomModel
+
+		tiles.each { TileModel tileModel ->
+			Model model = tileModel.model
+
+			Parent modelParent = new Parent(groupId: model.groupId, version: model.version, artifactId: model.artifactId)
+			lastPom.parent = modelParent
+
+			if (pomModel != lastPom) {
+				println "LastPom Model is ${modelGav(lastPom)} new parent is ${parentGav(modelParent)}"
+				putModelInCache(lastPom, request)
+			}
+
+			lastPom = model
+		}
+
+		lastPom.parent = originalParent
+
+		if (pomModel != lastPom) {
+			println "LastPom Model is ${modelGav(lastPom)} new parent is ${parentGav(originalParent)}"
+			putModelInCache(lastPom, request)
+		}
+	}
+
+	protected void copyModel(Model projectModel, Model newModel) {
+		projectModel.build = newModel.build
+		projectModel.dependencyManagement = newModel.dependencyManagement
+		projectModel.dependencies = newModel.dependencies
+		projectModel.pluginRepositories = newModel.pluginRepositories
+		projectModel.licenses = newModel.licenses
+		projectModel.scm = newModel.scm
+		projectModel.developers = newModel.developers
+		projectModel.contributors = newModel.contributors
+		projectModel.organization = newModel.organization
+		projectModel.mailingLists = newModel.mailingLists
+		projectModel.issueManagement = newModel.issueManagement
+		projectModel.ciManagement = newModel.ciManagement
+		projectModel.profiles = newModel.profiles
+		projectModel.prerequisites = newModel.prerequisites
+		projectModel.properties = newModel.properties
+	}
+
+	/*
+	void injectManagementSections(Model model) {
+		ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
+		DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
+
+		modelBuildingRequest.setSystemProperties(System.getProperties())
+		modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
+
+		if (model.build?.pluginManagement) {
+			pluginManagementInjector.injectManagement(model, modelBuildingRequest, problemCollector)
+		}
+
+		if (model.dependencyManagement) {
 
 			dependencyManagementInjector.injectManagement(model, modelBuildingRequest, problemCollector)
 		}
 	}
+	*/
 
-
-
+	/*
 	protected void interpolateModels(TileModel pureModel, MavenProject project) {
 		ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
 		DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
@@ -301,6 +486,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 	}
+	*/
 
 	/**
 	 * Cleans the model of untagged bad build smells.
@@ -382,7 +568,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		logger.debug("Tiles properties:\n " + sb.toString())
 	}
 
-	protected void resolveTiles() throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
@@ -425,6 +611,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected String modelGav(Model model) {
+		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
+	}
+
+	protected String parentGav(Parent model) {
 		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 	}
 

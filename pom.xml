@@ -52,7 +52,7 @@
 	</prerequisites>
 
 	<properties>
-		<mavenVersion>3.2.2</mavenVersion>
+		<mavenVersion>3.0.4</mavenVersion>
 		<repaint.release>dev</repaint.release>
 	</properties>
 

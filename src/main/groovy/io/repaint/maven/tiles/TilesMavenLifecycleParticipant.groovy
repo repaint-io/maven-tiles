@@ -18,6 +18,7 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.AetherIsolator
 import io.repaint.maven.tiles.isolators.Maven30Isolator
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
@@ -33,23 +34,33 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
+import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.Repository
+import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.FileModelSource
+import org.apache.maven.model.building.ModelBuilder
 import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelProblemCollector
-import org.apache.maven.model.interpolation.ModelInterpolator
-import org.apache.maven.model.management.DependencyManagementInjector
+import org.apache.maven.model.building.ModelBuildingResult
+import org.apache.maven.model.building.ModelProcessor
+import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.io.ModelParseException
+import org.apache.maven.model.resolution.InvalidRepositoryException
+import org.apache.maven.model.resolution.ModelResolver
+import org.apache.maven.model.resolution.UnresolvableModelException
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
+import org.xml.sax.SAXParseException
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
  *
- * Merging operation is delegated to {@link TilesModelMerger} and (@link PropertyModelMerger}
+ * Merging operation is delegated to {@link DefaultModelBuilder}
  */
 @CompileStatic
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
@@ -73,15 +84,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	ArtifactResolver resolver
 
 	@Requirement
-	ModelInterpolator modelInterpolator
+	ModelBuilder modelBuilder
 
 	@Requirement
-	DependencyManagementInjector dependencyManagementInjector
+	ModelProcessor modelProcessor
 
 	protected MavenVersionIsolator mavenVersionIsolate
 
 	List<ArtifactRepository> remoteRepositories
 	ArtifactRepository localRepository
+
+	NotDefaultModelCache modelCache
+
+	MavenSession mavenSession
 
 	class ArtifactModel {
 		public Artifact artifact
@@ -163,7 +178,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 		try {
-			TileModel modelLoader = new TileModel(artifact.getFile())
+			TileModel modelLoader = new TileModel(artifact.getFile(), artifact)
 
 			logger.debug(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
 
@@ -172,13 +187,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			throw new MavenExecutionException(String.format("Error loading %s", artifactGav(artifact)), e)
 		} catch (XmlPullParserException e) {
 			throw new MavenExecutionException(String.format("Error building %s", artifactGav(artifact)), e)
+		} catch (SAXParseException sax) {
+			throw new MavenExecutionException(String.format("Error building %s", artifactGav(artifact)), sax)
 		} catch (IOException e) {
 			throw new MavenExecutionException(String.format("Error parsing %s", artifactGav(artifact)), e)
 		}
 	}
 
 	protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-		MavenVersionIsolator isolator = null
+		MavenVersionIsolator isolator
 
 		try {
 			isolator = new AetherIsolator(mavenSession)
@@ -198,10 +215,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	public void afterProjectsRead(MavenSession mavenSession)
 		throws MavenExecutionException {
 
+		this.mavenSession = mavenSession
+
 		this.remoteRepositories = mavenSession.request.remoteRepositories
 		this.localRepository = mavenSession.request.localRepository
 
 		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
+
+		this.modelCache = new NotDefaultModelCache(mavenSession)
 
 		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
 		List<String> subModules = topLevelProject.getModules()
@@ -228,78 +249,205 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @throws MavenExecutionException
 	 */
 	protected void orchestrateMerge(MavenProject project) throws MavenExecutionException {
-
-		// take a copy so we can mutate it and collect the properties across all the tiles
-		Model propertyCollectionModel = project.getModel().clone()
-
 		// collect the first set of tiles
-		parseConfiguration(propertyCollectionModel, project.getFile())
+		parseConfiguration(project.model, project.getFile(), true)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		resolveTiles()
+		loadAllDiscoveredTiles()
 
-		// last discovered tile should be first to be overridden
-		Collections.reverse(tileDiscoveryOrder)
-
-		// get our own model in pure, naked form - this will cause property usage to be unresolved when
-		// we try and process it
-		// we need to
-		Artifact artifact = getArtifactFromCoordinates(project.groupId, project.artifactId, project.version)
-		artifact.setFile(project.getFile())
-
-		TileModel ourPureModel = loadModel(artifact)
-
-		mergePropertyModels(ourPureModel, propertyCollectionModel, project.getModel())
-
-		interpolateModels(ourPureModel, project)
-
-		// now we are at a point where we know what all of our tiles are, we have them in the least
-		// important to most important sequence and we have collected all of the properties across all
-		// of the tiles.
-		// We are ignoring mismatching version ranges or clashing versions of tiles. First in, First Served.
-		// Warnings otherwise.
-
-		mergeModel(project.model, ourPureModel)
-
-		// now make sure our dependencies have versions if we have dependency management
-		injectDependencyManagement(project.model)
-	}
-
-	void injectDependencyManagement(Model model) {
-		if (model.dependencyManagement) {
-			ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
-			DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
-
-			modelBuildingRequest.setSystemProperties(System.getProperties())
-			modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
-
-			dependencyManagementInjector.injectManagement(model, modelBuildingRequest, problemCollector)
+		// don't do anything if there are no tiles
+		if (processedTiles) {
+			thunkModelBuilder(project)
 		}
 	}
 
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected void thunkModelBuilder(MavenProject project) {
+		List<TileModel> tiles = processedTiles.values().collect({it.tileModel})
 
+		if (!tiles) return
 
-	protected void interpolateModels(TileModel pureModel, MavenProject project) {
-		ModelProblemCollector problemCollector = mavenVersionIsolate.createModelProblemCollector()
-		DefaultModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest()
+		// this allows us to know when the ModelProcessor is called that we should inject the tiles into the
+		// parent structure
+		ModelSource mainArtifactModelSource = createModelSource(project.file)
+		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
+			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
+		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
+		  activeProfileIds: mavenSession.request.activeProfiles, inactiveProfileIds: mavenSession.request.inactiveProfiles)
 
-		modelBuildingRequest.setSystemProperties(System.getProperties())
-		modelBuildingRequest.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_1)
+		boolean injected = false
 
-		modelInterpolator.interpolateModel(pureModel.model, project.getBasedir(), modelBuildingRequest, problemCollector)
+		ModelProcessor delegateModelProcessor = new ModelProcessor() {
+			@Override
+			File locatePom(File projectDirectory) {
+				return modelProcessor.locatePom(projectDirectory)
+			}
 
-		for (String artifactName : tileDiscoveryOrder) {
-			ArtifactModel artifactModel = processedTiles.get(artifactName)
+			@Override
+			Model read(File input, Map<String, ?> options) throws IOException, ModelParseException {
+				return modelProcessor.read(input, options)
+			}
 
-			// all tile properties have been merged into our project now, so lets push them into the tile
-			// we have to do this otherwise we get duplicates appearing - particularly in dependencies
-			artifactModel.tileModel.model.setProperties(project.getProperties())
+			@Override
+			Model read(Reader input, Map<String, ?> options) throws IOException, ModelParseException {
+				return modelProcessor.read(input, options)
+			}
 
-			// now we do our string substitution
-			modelInterpolator.interpolateModel(artifactModel.tileModel.model, project.getBasedir(),
-				modelBuildingRequest, problemCollector)
+			@Override
+			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
+				Model model = modelProcessor.read(input, options)
+
+				if (!injected && input == mainArtifactModelSource.inputStream) {
+					injected = true
+
+					injectTilesIntoParentStructure(tiles, model, request)
+				}
+
+				return model
+			}
 		}
 
+		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
+
+		ModelBuildingResult build = modelBuilder.build(
+			request)
+
+		((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
+
+		copyModel(project.model, build.effectiveModel)
+
+		cleanModel(project.model)
+	}
+
+	ModelSource createModelSource(File pomFile) {
+		return new ModelSource() {
+			InputStream stream = pomFile.newInputStream()
+
+			@Override
+			InputStream getInputStream() throws IOException {
+				return stream
+			}
+
+			@Override
+			String getLocation() {
+				return pomFile.absolutePath
+			}
+		}
+	}
+
+	protected ModelResolver createModelResolver() {
+		// this is for resolving parents, so always poms
+
+		return new ModelResolver() {
+			@Override
+			ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
+				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
+					"pom", null, new DefaultArtifactHandler("pom"))
+
+				mavenVersionIsolate.resolveVersionRange(artifact)
+				resolver.resolve(artifact, remoteRepositories, localRepository)
+
+				return createModelSource(artifact.file)
+			}
+
+			@Override
+			ModelSource resolveModel(Parent parent) throws UnresolvableModelException {
+				return resolveModel(parent.groupId, parent.artifactId, parent.version)
+			}
+
+			@Override
+			void addRepository(Repository repository) throws InvalidRepositoryException {
+
+			}
+
+			@Override
+			void resetRepositories() {
+
+			}
+
+			@Override
+			ModelResolver newCopy() {
+				return null
+			}
+		}
+
+	}
+
+	/**
+	 * This is out of static type checking because the method is private and the class ModelCacheTag
+	 * is package-private.
+	 *
+	 * @param model - the model we are inserting into the cache
+	 * @param request - the building request, it holds the cache reference
+	 * @param pomFile - the pomFile is required for model data for Maven 3.2.x not for 3.0.x
+	 */
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected void putModelInCache(Model model, ModelBuildingRequest request, File pomFile) {
+		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
+		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, model.version,
+			org.apache.maven.model.building.ModelCacheTag.RAW,
+			mavenVersionIsolate.createModelData(model, pomFile));
+//				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
+	}
+
+	/**
+	 * Creates a chain of tile parents based on how we discovered them and inserts them into the parent
+	 * chain, above this project and before this project's parent (if any)
+	 *
+	 * @param tiles - tiles that should make up part of the collection
+	 * @param pomModel - the current project
+	 * @param request - the request to build the current project
+	 */
+	public void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel,
+	                                            ModelBuildingRequest request) {
+		Parent originalParent = pomModel.parent
+		Model lastPom = pomModel
+		File lastPomFile = request.pomFile
+
+		StringBuilder sb = new StringBuilder()
+
+		tiles.each { TileModel tileModel ->
+			Model model = tileModel.model
+
+			Parent modelParent = new Parent(groupId: model.groupId, version: model.version, artifactId: model.artifactId)
+			lastPom.parent = modelParent
+
+			sb.append("model: ${modelGav(lastPom)} has new parent: ${parentGav(modelParent)}\n")
+
+			if (pomModel != lastPom) {
+				putModelInCache(lastPom, request, lastPomFile)
+			}
+
+			lastPom = model
+			lastPomFile = tileModel.tilePom
+		}
+
+		lastPom.parent = originalParent
+		sb.append("model: ${modelGav(lastPom)} has new parent: ${parentGav(originalParent)}")
+
+		if (pomModel != lastPom) {
+			putModelInCache(lastPom, request, lastPomFile)
+		}
+
+		logger.info(sb.toString())
+	}
+
+	protected void copyModel(Model projectModel, Model newModel) {
+		projectModel.build = newModel.build
+		projectModel.dependencyManagement = newModel.dependencyManagement
+		projectModel.dependencies = newModel.dependencies
+		projectModel.pluginRepositories = newModel.pluginRepositories
+		projectModel.licenses = newModel.licenses
+		projectModel.scm = newModel.scm
+		projectModel.developers = newModel.developers
+		projectModel.contributors = newModel.contributors
+		projectModel.organization = newModel.organization
+		projectModel.mailingLists = newModel.mailingLists
+		projectModel.issueManagement = newModel.issueManagement
+		projectModel.ciManagement = newModel.ciManagement
+		projectModel.profiles = newModel.profiles
+		projectModel.prerequisites = newModel.prerequisites
+		projectModel.properties = newModel.properties
 	}
 
 	/**
@@ -327,62 +475,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected void mergeModel(Model confusedModel, TileModel pureModel) {
-		TilesModelMerger modelMerger = new TilesModelMerger()
 
-		if (collectedBuildSmells) {
-			logger.info(("Build is smelly, remaining dirty: ${collectedBuildSmells}"))
-		}
-
-		// start with this project and override it with tiles (now in reverse order)
-		for (String artifactName : tileDiscoveryOrder) {
-			ArtifactModel artifactModel = processedTiles.get(artifactName)
-
-			logger.info("Merging ${artifactGav(artifactModel.artifact)}")
-
-			cleanModel(artifactModel.tileModel.model)
-
-			modelMerger.merge(confusedModel, artifactModel.tileModel.model, true, null)
-		}
-
-		// finally override it with out own properties
-		modelMerger.merge(confusedModel, pureModel.model, true, null)
-	}
-
-
-	protected void mergePropertyModels(TileModel pureModel, Model propertyCollectionModel, Model projectModel) {
-		PropertyModelMerger modelMerger = new PropertyModelMerger()
-
-		// start with this project and override it with tiles (now in reverse order)
-		for (String artifactName : tileDiscoveryOrder) {
-			ArtifactModel artifactModel = processedTiles.get(artifactName)
-
-			modelMerger.mergeModelBase_Properties(propertyCollectionModel, artifactModel.tileModel.model, true, null)
-		}
-
-		// finally override it with out own properties from our pure model (no inheritance or
-		// packaging interference)
-		modelMerger.mergeModelBase_Properties(pureModel.model, propertyCollectionModel, false, null)
-
-		// this should now replace all properties in our model with the correct properties
-		modelMerger.mergeModelBase_Properties(projectModel, pureModel.model, true, null)
-
-		if (logger.isDebugEnabled()) {
-			logPropertyNames(projectModel)
-		}
-	}
-
-	protected void logPropertyNames(Model model) {
-		StringBuilder sb = new StringBuilder()
-
-		model.properties.each { Object key, Object value ->
-			sb.append("\t<" + key.toString() + ">" + value.toString() + "</" + key.toString() + ">\n")
-		}
-
-		logger.debug("Tiles properties:\n " + sb.toString())
-	}
-
-	protected void resolveTiles() throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
@@ -428,11 +522,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 	}
 
+	protected String parentGav(Parent model) {
+		if (!model) {
+			return "(no parent)"
+		} else {
+			return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
+		}
+	}
+
 	/**
 	 * Normally used inside the current project's pom file when declaring the tile plugin. People may prefer this
 	 * to use to include tiles however in a tile.xml
 	 */
-	protected void parseConfiguration(Model model, File pomFile) {
+	protected void parseConfiguration(Model model, File pomFile, boolean projectModel) {
 		Xpp3Dom configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP &&
@@ -440,7 +542,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
-				processConfigurationTile(model, tile.value, pomFile)
+
+				// if this configuration is not the main project & specifies the cascade is false, ignore it
+				if (tile.getAttribute("cascade") != "false" || projectModel) {
+					processConfigurationTile(model, tile.value, pomFile)
+				}
 			}
 
 			String buildStink = configuration.getChild("buildSmells")?.value
@@ -470,7 +576,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			processConfigurationTile(model.model, tileGav, pomFile)
 		}
 
-		parseConfiguration(model.model, pomFile)
+		parseConfiguration(model.model, pomFile, false)
 	}
 
 	protected void processConfigurationTile(Model model, String tileDependencyName, File pomFile) {

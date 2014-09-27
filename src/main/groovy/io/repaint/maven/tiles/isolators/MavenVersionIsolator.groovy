@@ -1,6 +1,7 @@
 package io.repaint.maven.tiles.isolators
 
 import org.apache.maven.artifact.Artifact
+import org.apache.maven.model.Model
 import org.apache.maven.model.building.ModelProblemCollector
 
 /**
@@ -10,4 +11,5 @@ import org.apache.maven.model.building.ModelProblemCollector
 interface MavenVersionIsolator {
 	public void resolveVersionRange(Artifact tileArtifact)
 	public ModelProblemCollector createModelProblemCollector()
+	public def createModelData(Model model, File pomFile)
 }

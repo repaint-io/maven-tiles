@@ -1,7 +1,11 @@
 package io.repaint.maven.tiles.isolators
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.execution.MavenSession
+import org.apache.maven.model.Model
+import org.apache.maven.model.building.FileModelSource
 import org.apache.maven.model.building.ModelProblemCollector
 
 /**
@@ -20,6 +24,12 @@ class AetherIsolator extends BaseMavenIsolator {
 			  collected.add(req)
 		  }
 		] as ModelProblemCollector
+	}
+
+	@Override
+	@CompileStatic(TypeCheckingMode.SKIP)
+	def createModelData(Model model, File pomFile) {
+		return org.apache.maven.model.building.ModelData.newInstance(new FileModelSource(pomFile), model)
 	}
 
 	AetherIsolator(MavenSession mavenSession) throws MavenExecutionException {

@@ -16,6 +16,10 @@
 		</license>
 	</licenses>
 
+	<tiles>
+		<tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>
+	</tiles>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -25,7 +29,6 @@
 					<buildSmells>dependencymanagement,dependencies,repositories,pluginrepositories</buildSmells>
 					<tiles>
 						<tile>groupid:antrun1-tile:1.1-SNAPSHOT</tile>
-						<tile>groupid:antrun2-tile:1.1-SNAPSHOT</tile>
 					</tiles>
 				</configuration>
 			</plugin>

@@ -108,8 +108,8 @@
 
 	<profiles>
 		<profile>
-			<!-- adtivate the sonatype profile when a release is being done -->
-			<id>sonaytpe</id>
+			<!-- activate the sonatype profile when a release is being done -->
+			<id>sonatype</id>
 			<activation>
 				<property>
 					<name>performRelease</name>

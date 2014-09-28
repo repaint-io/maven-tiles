@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_8a20fb9c",
+        "filename": "src/it/childparent/child/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-28T07:14:14Z",
+      "side": 1,
+      "message": "we are not using the invoker plugin. Would you like to contribute it? It would be very useful.",
+      "parentUuid": "7a6b29fe_2a044714",
+      "range": {
+        "startLine": 32,
+        "startChar": 13,
+        "endLine": 32,
+        "endChar": 16
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_8a091b2f",
         "filename": "src/it/childparent/tile/pom.xml",
         "patchSetId": 5
@@ -82,6 +106,30 @@
       "writtenOn": "2014-09-28T06:38:49Z",
       "side": 1,
       "message": "strange newlining here?",
+      "range": {
+        "startLine": 312,
+        "startChar": 48,
+        "endLine": 312,
+        "endChar": 49
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6a259faa",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-28T07:14:14Z",
+      "side": 1,
+      "message": "introduced variable.",
+      "parentUuid": "7a6b29fe_6a0e3f36",
       "range": {
         "startLine": 312,
         "startChar": 48,
@@ -162,6 +210,24 @@
       "writtenOn": "2014-09-28T06:38:49Z",
       "side": 1,
       "message": "Can we have an associated README.adoc update explaining the what, and why?\n\nShould it be an error condition if the top level project happens to specify cascade\u003d\u0027false\u0027? ( or ANY cascade attribute value for that matter )?",
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ca3953da",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-28T07:14:14Z",
+      "side": 1,
+      "message": "top level project?",
+      "parentUuid": "7a6b29fe_ea19af7a",
       "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false

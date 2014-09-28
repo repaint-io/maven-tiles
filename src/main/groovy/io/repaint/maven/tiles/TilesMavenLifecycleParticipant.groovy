@@ -537,11 +537,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
-
-				// if this configuration is not the main project & specifies the cascade is false, ignore it
-				if (tile.getAttribute("cascade") != "false" || projectModel) {
-					processConfigurationTile(model, tile.value, pomFile)
-				}
+				processConfigurationTile(model, tile.value, pomFile)
 			}
 
 			String buildStink = configuration.getChild("buildSmells")?.value

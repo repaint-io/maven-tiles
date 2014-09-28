@@ -47,6 +47,6 @@ class Maven30Isolator extends BaseMavenIsolator {
 	@Override
 	@CompileStatic(TypeCheckingMode.SKIP)
 	def createModelData(Model model, File pomFile) {
-		return org.apache.maven.model.building.ModelData.newInstance(model)
+		return org.apache.maven.model.building.ModelData.newInstance(model, model.getGroupId(), model.getArtifactId(), model.getVersion())
 	}
 }

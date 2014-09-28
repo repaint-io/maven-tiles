@@ -339,7 +339,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// this is for resolving parents, so always poms
 
 		return new ModelResolver() {
-			@Override
 			ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
 				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
@@ -350,22 +349,22 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				return createModelSource(artifact.file)
 			}
 
-			@Override
 			ModelSource resolveModel(Parent parent) throws UnresolvableModelException {
 				return resolveModel(parent.groupId, parent.artifactId, parent.version)
 			}
 
-			@Override
 			void addRepository(Repository repository) throws InvalidRepositoryException {
 
 			}
 
-			@Override
+			void addRepository(Repository repository, boolean wat) throws InvalidRepositoryException {
+
+			}
+
 			void resetRepositories() {
 
 			}
 
-			@Override
 			ModelResolver newCopy() {
 				return null
 			}

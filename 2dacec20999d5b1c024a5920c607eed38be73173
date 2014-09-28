@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_ea308fea",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/isolators/Maven30Isolator.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T08:16:53Z",
+      "side": 1,
+      "message": "That should be model.version....",
+      "revId": "2dacec20999d5b1c024a5920c607eed38be73173",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

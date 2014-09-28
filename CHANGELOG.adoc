@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+== 1.4 - 2014-09-28
+
+=== Added
+- The Maven Tiles Plugin now supports `<pluginManagement>` and `<profiles>`
+  declared inside of a tile.
+- A `<tile>` configuration element can be annotated with the `cascade` attribute
+  to control whether or not the tile should be included as part of a transitive tile,
+  i.e. a tile that's included inside another tile via plugin configuration, and not a
+  top level `<tiles>` element.
+
+=== Changed
+- Major internal reworking of how tiles are applied. Each tile is now
+  injected into your POM's Model as a parent artifact, with your `pom.xml`'s
+  original parent being used as the top level parent of the root tile.
+
+
 == 1.3 - 2014-09-24
 
 === Added

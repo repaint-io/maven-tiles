@@ -1,0 +1,187 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_4aff0302",
+        "filename": "pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "activate",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 111,
+        "endChar": 16
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2a044714",
+        "filename": "src/it/childparent/child/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "If you use @project.version@ then it will be interpolated with the current projects version. So it\u0027ll actually run the tests against our CURRENT version of the plugin, not the released one.",
+      "range": {
+        "startLine": 32,
+        "startChar": 13,
+        "endLine": 32,
+        "endChar": 16
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8a091b2f",
+        "filename": "src/it/childparent/tile/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "Ditto @project.version@",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 16
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6a0e3f36",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "strange newlining here?",
+      "range": {
+        "startLine": 312,
+        "startChar": 48,
+        "endLine": 312,
+        "endChar": 49
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ca12f357",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "This anonymous class breaks under Maven 3.0.5, this my submitted patch on top of this review for changes which should be squashed into this - naming removing the @Override annotations which prevent compiling against earlier versions ( useful for debugging, but not required if we compile against the latest ).",
+      "range": {
+        "startLine": 358,
+        "startChar": 4,
+        "endLine": 358,
+        "endChar": 12
+      },
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_aa0fb72d",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "Should the logging/messages here be worded more to make it clear that we\u0027re \"Injecting tile xx as the parent POM for yy\", something less debug like, and more informative.",
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0a1d0b67",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "Similarly, should be be more clearer that the last pom / tile is now using the original parent.",
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ea19af7a",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "Can we have an associated README.adoc update explaining the what, and why?\n\nShould it be an error condition if the top level project happens to specify cascade\u003d\u0027false\u0027? ( or ANY cascade attribute value for that matter )?",
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4a26e3bb",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/isolators/Maven30Isolator.groovy",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-09-28T06:38:49Z",
+      "side": 1,
+      "message": "See my followup/related patch which adds the GAV arguments here needed by Maven 3.0.5 - looks like the constructor only taking the model doesn\u0027t actually set them.",
+      "revId": "43ebec20ee6d93d22014f7711967cfeca9455ace",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

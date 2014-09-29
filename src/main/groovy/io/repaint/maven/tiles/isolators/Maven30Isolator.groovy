@@ -17,6 +17,7 @@ import org.apache.maven.model.resolution.UnresolvableModelException
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 class Maven30Isolator extends BaseMavenIsolator {
 	Maven30Isolator(MavenSession mavenSession) throws MavenExecutionException {

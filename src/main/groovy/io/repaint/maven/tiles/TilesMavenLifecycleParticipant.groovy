@@ -60,6 +60,10 @@ import org.xml.sax.SAXParseException
  * Fetches all dependencies defined in the POM `configuration`.
  *
  * Merging operation is delegated to {@link DefaultModelBuilder}
+ *
+ * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
+ *
  */
 @CompileStatic
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")

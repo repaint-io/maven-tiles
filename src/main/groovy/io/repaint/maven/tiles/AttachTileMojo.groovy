@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProjectHelper
  * We are attaching the tile.pom file, and we don't care what the dependency resolution is.
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 @CompileStatic
 @Mojo(name = "attach-tile", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE, defaultPhase = LifecyclePhase.PACKAGE)

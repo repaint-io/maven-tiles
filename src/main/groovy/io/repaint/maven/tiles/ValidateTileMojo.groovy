@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 @CompileStatic
 @Mojo(name = "validate", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE)

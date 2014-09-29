@@ -10,6 +10,7 @@ import org.codehaus.plexus.logging.Logger
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 @CompileStatic
 abstract class AbstractTileMojo extends AbstractMojo {

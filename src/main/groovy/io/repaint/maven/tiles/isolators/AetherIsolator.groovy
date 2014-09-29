@@ -11,6 +11,7 @@ import org.apache.maven.model.building.ModelProblemCollector
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
+ * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 class AetherIsolator extends BaseMavenIsolator {
 

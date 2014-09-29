@@ -1,6 +1,7 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
+import org.apache.maven.MavenExecutionException
 import org.apache.maven.model.Model
 import org.codehaus.plexus.logging.Logger
 
@@ -10,8 +11,37 @@ import org.codehaus.plexus.logging.Logger
  */
 @CompileStatic
 class TileValidator {
-	public Model loadModel(Logger log, File tilePom) {
+
+	public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement"
+	public static final String SMELL_DEPENDENCIES = "dependencies"
+	public static final String SMELL_REPOSITORIES = "repositories"
+	public static final String SMELL_PLUGINREPOSITORIES = "pluginrepositories"
+	public static final String SMELL_PLUGINMANAGEMENT = "pluginmanagement"
+
+	public static final List<String> SMELLS = [SMELL_DEPENDENCIES, SMELL_DEPENDENCYMANAGEMENT,
+	                                           SMELL_PLUGINREPOSITORIES, SMELL_PLUGINMANAGEMENT,
+	                                           SMELL_REPOSITORIES]
+
+	public Model loadModel(Logger log, File tilePom, String buildSmells) {
 		TileModel modelLoader = new TileModel()
+		Model validatedModel = null
+
+		Set<String> collectedBuildSmells = []
+		if (buildSmells) {
+			Collection<String> smells = buildSmells.tokenize(',')*.trim().findAll({ String tok -> return tok.size() > 0 })
+
+			// this is Mark's fault.
+			Collection<String> okSmells = smells.collect({ it.toLowerCase() }).intersect(TileValidator.SMELLS)
+
+			Collection<String> stinkySmells = new ArrayList(smells).minus(okSmells)
+
+			if (stinkySmells) {
+				throw new MavenExecutionException("Discovered bad smell configuration ${stinkySmells} from <buildSmells>${buildSmells}</buildSmells>.", tilePom)
+			}
+
+			collectedBuildSmells.addAll(okSmells)
+		}
+
 
 		if (!tilePom) {
 			log.error("No tile exists")
@@ -19,15 +49,13 @@ class TileValidator {
 			log.error("Unable to file tile ${tilePom.absolutePath}")
 		} else {
 			modelLoader.loadTile(tilePom)
-
-			if (validateModel(modelLoader.model, log) != null) {
+			validatedModel = validateModel(modelLoader.model, log, collectedBuildSmells)
+			if (validatedModel) {
 				log.info("Tile passes basic validation.")
-			} else {
-				log.error("Unable to load model")
 			}
 		}
 
-		return modelLoader.model
+		return validatedModel
 	}
 
 	/**
@@ -35,7 +63,7 @@ class TileValidator {
 	 *
 	 * Should we allow name? description? modelVersion?
 	 */
-	protected Model validateModel(Model model, Logger log) {
+	protected Model validateModel(Model model, Logger log, Set<String> buildSmells) {
 		Model validModel = model
 
 		if (model.groupId) {
@@ -58,24 +86,29 @@ class TileValidator {
 			validModel = null
 		}
 
-		if (model.repositories) {
-			log.warn("Tile follows bad practice and has repositories section. Please use settings.xml.")
+		if (model.repositories && !buildSmells.contains(SMELL_REPOSITORIES)) {
+			log.error("Tile follows bad practice and has repositories section. Please use settings.xml.")
+			validModel = null
 		}
 
-		if (model.pluginRepositories) {
-			log.warn("Tile follows bad practice and has pluginRepositories section. Please use settings.xml.")
+		if (model.pluginRepositories && !buildSmells.contains(SMELL_PLUGINREPOSITORIES)) {
+			log.error("Tile follows bad practice and has pluginRepositories section. Please use settings.xml.")
+			validModel = null
 		}
 
-		if (model.dependencyManagement) {
-			log.warn("Tile follows bad practice and has dependencyManagement. Please use composites.")
+		if (model.dependencyManagement && !buildSmells.contains(SMELL_DEPENDENCYMANAGEMENT)) {
+			log.error("Tile follows bad practice and has dependencyManagement. Please use composites.")
+			validModel = null
 		}
 
-		if (model.build?.pluginManagement) {
-			log.warn("Plugin management is usually not required, if you want a plugin to always run, use plugins instead.")
+		if (model.build?.pluginManagement && !buildSmells.contains(SMELL_PLUGINMANAGEMENT)) {
+			log.error("Plugin management is usually not required, if you want a plugin to always run, use plugins instead.")
+			validModel = null
 		}
 
-		if (model.dependencies) {
-			log.warn("Tile includes dependencies - this will prevent consumers from adding exclusions, use composites instead.")
+		if (model.dependencies && !buildSmells.contains(SMELL_DEPENDENCIES)) {
+			log.error("Tile includes dependencies - this will prevent consumers from adding exclusions, use composites instead.")
+			validModel = null
 		}
 
 		return validModel

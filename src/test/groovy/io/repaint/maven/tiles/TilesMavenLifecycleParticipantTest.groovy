@@ -385,18 +385,6 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	@Test
-	public void testCascadeIgnore() {
-		MavenProject project = fakeProjectFromFile("cascade-check-pom")
-
-		resetParticipantToLoadTilesFromDisk()
-
-		participant.orchestrateMerge(project)
-
-		assert participant.processedTiles.size() == 4
-		assert participant.processedTiles['io.repaint.tiles:release-tile'] == null
-	}
-
-	@Test
 	public void testDuplicateTilesIgnored() {
 		MavenProject project = fakeProjectFromFile("duplicate-tile-pom")
 

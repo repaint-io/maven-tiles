@@ -39,7 +39,6 @@ import org.apache.maven.model.Plugin
 import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
-import org.apache.maven.model.building.FileModelSource
 import org.apache.maven.model.building.ModelBuilder
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingResult
@@ -275,8 +274,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
 		  activeProfileIds: mavenSession.request.activeProfiles, inactiveProfileIds: mavenSession.request.inactiveProfiles)
 
-		boolean injected = false
-
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {
 			@Override
 			File locatePom(File projectDirectory) {
@@ -297,9 +294,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
 
-				if (!injected && input == mainArtifactModelSource.inputStream) {
-					injected = true
-
+				if (model.artifactId == project.artifactId && model.groupId == project.groupId
+						&& model.version == project.version && model.packaging == project.packaging) {
 					injectTilesIntoParentStructure(tiles, model, request)
 				}
 
@@ -314,8 +310,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
 
 		copyModel(project.model, build.effectiveModel)
-
-		cleanModel(project.model)
 	}
 
 	ModelSource createModelSource(File pomFile) {
@@ -428,6 +422,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected void copyModel(Model projectModel, Model newModel) {
+		projectModel.parent = newModel.parent
 		projectModel.build = newModel.build
 		projectModel.dependencyManagement = newModel.dependencyManagement
 		projectModel.dependencies = newModel.dependencies
@@ -444,32 +439,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.prerequisites = newModel.prerequisites
 		projectModel.properties = newModel.properties
 	}
-
-	/**
-	 * Cleans the model of untagged bad build smells.
-	 * @param model
-	 */
-	protected void cleanModel(Model model) {
-		// should be using composities
-		if (!collectedBuildSmells.contains(SMELL_DEPENDENCYMANAGEMENT)) {
-			model.dependencyManagement = null
-		}
-
-		// can't use exclusions if this is used, so should use composites
-		if (!collectedBuildSmells.contains(SMELL_DEPENDENCIES)) {
-			model.dependencies = null
-		}
-
-		// does this even need explanation? http://blog.sonatype.com/2009/02/why-putting-repositories-in-your-poms-is-a-bad-idea/
-		if (!collectedBuildSmells.contains(SMELL_REPOSITORIES)) {
-			model.repositories = null
-		}
-
-		if (!collectedBuildSmells.contains(SMELL_PLUGINREPOSITORIES)) {
-			model.pluginRepositories = null
-		}
-	}
-
 
 	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {

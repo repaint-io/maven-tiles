@@ -289,22 +289,6 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	@Test
-	public void cleanModel() {
-		Model model = new Model()
-		model.dependencies = [new Dependency()]
-		model.pluginRepositories = [new Repository()]
-		model.repositories = [new Repository()]
-		model.dependencyManagement = new DependencyManagement()
-
-		participant.cleanModel(model)
-
-		assert model.dependencies.size() == 0
-		assert model.pluginRepositories.size() == 0
-		assert model.repositories.size() == 0
-		assert model.dependencyManagement == null
-	}
-
-	@Test
 	public void testNoTiles() throws MavenExecutionException {
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override

@@ -1,5 +1,6 @@
 package io.repaint.maven.tiles
 
+import groovy.transform.CompileStatic
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
@@ -11,6 +12,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
+@CompileStatic
 @Mojo(name = "validate", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE)
 class ValidateTileMojo extends AbstractTileMojo {
 	@Component
@@ -21,7 +23,7 @@ class ValidateTileMojo extends AbstractTileMojo {
 		if (project.modules) {
 			logger.info("Ignoring reactor for tile check.")
 		} else {
-			new TileValidator().loadModel(logger, getTile())
+			new TileValidator().loadModel(logger, getTile(), buildSmells)
 		}
 	}
 }

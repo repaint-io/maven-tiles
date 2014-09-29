@@ -68,13 +68,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected static final String TILE_EXTENSION = 'pom'
 	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
-	public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement"
-	public static final String SMELL_DEPENDENCIES = "dependencies"
-	public static final String SMELL_REPOSITORIES = "repositories"
-	public static final String SMELL_PLUGINREPOSITORIES = "pluginrepositories"
-
-	public static final List<String> SMELLS = [SMELL_DEPENDENCIES, SMELL_DEPENDENCYMANAGEMENT,
-	  SMELL_PLUGINREPOSITORIES, SMELL_REPOSITORIES]
 
 	@Requirement
 	Logger logger
@@ -114,7 +107,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	Map<String, ArtifactModel> processedTiles = [:]
 	List<String> tileDiscoveryOrder = []
 	Map<String, Artifact> unprocessedTiles = [:]
-	Set<String> collectedBuildSmells = []
 
 	/**
 	 * reactor builds can/will have their own tile structures
@@ -123,7 +115,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		processedTiles = [:]
 		tileDiscoveryOrder = []
 		unprocessedTiles = [:]
-		collectedBuildSmells = []
 	}
 
 	/**
@@ -507,23 +498,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
 				processConfigurationTile(model, tile.value, pomFile)
-			}
-
-			String buildStink = configuration.getChild("buildSmells")?.value
-
-			if (buildStink) {
-				Collection<String> smells = buildStink.tokenize(',')*.trim().findAll({String tok -> return tok.size()>0})
-
-				// this is Mark's fault.
-				Collection<String> okSmells = smells.collect({it.toLowerCase()}).intersect(SMELLS)
-
-				Collection<String> stinkySmells = new ArrayList(smells).minus(okSmells)
-
-				if (stinkySmells) {
-					throw new MavenExecutionException("Discovered bad smell configuration ${stinkySmells} from <buildStink>${buildStink}</buildStink> in ${pomFile.absolutePath}", pomFile)
-				}
-
-				collectedBuildSmells.addAll(okSmells)
 			}
 		}
 	}

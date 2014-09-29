@@ -1,5 +1,6 @@
 package io.repaint.maven.tiles
 
+import groovy.transform.CompileStatic
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Component
@@ -13,8 +14,10 @@ import org.apache.maven.project.MavenProjectHelper
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
+@CompileStatic
 @Mojo(name = "attach-tile", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE, defaultPhase = LifecyclePhase.PACKAGE)
 class AttachTileMojo extends AbstractTileMojo {
+
 	@Component
 	MavenProjectHelper projectHelper
 
@@ -26,12 +29,12 @@ class AttachTileMojo extends AbstractTileMojo {
 
 		File tile = getTile()
 
-		if (new TileValidator().loadModel(logger, tile)) {
+		if (new TileValidator().loadModel(logger, tile, buildSmells)) {
 			projectHelper.attachArtifact(project, "pom", "tile-pom", tile)
 
 			logger.info("Tile: attaching tile ${tile.path}")
 		} else {
-			throw new MojoFailureException("There is no tile called ${tile.path}!")
+			throw new MojoFailureException("Unable to validate tile ${tile.path}!")
 		}
 
 	}

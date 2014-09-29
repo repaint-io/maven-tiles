@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_6a875f10",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AttachTileMojo.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-29T09:05:04Z",
+      "side": 1,
+      "message": "unused exception?",
+      "revId": "444ad4734c2ce1001bdb4aa8e44e496e5230db87",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8a82bbfe",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AttachTileMojo.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-09-29T09:05:04Z",
+      "side": 1,
+      "message": "you don\u0027t need to compare against null",
+      "revId": "444ad4734c2ce1001bdb4aa8e44e496e5230db87",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

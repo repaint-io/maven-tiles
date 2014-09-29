@@ -29,15 +29,15 @@ class TileValidatorTest {
 
 	@Test
 	public void testValidation() {
-		new TileValidator().loadModel(logger, new File("src/test/resources/bad-tile.xml"))
+		new TileValidator().loadModel(logger, new File("src/test/resources/bad-tile.xml"), "")
 
-		assert errors.size() == 5
-		assert warnings.size() == 4
+		assert errors.size() == 8
+		assert warnings.size() == 0
 		assert infos.size() == 0
 	}
 
 	@Test void testNoFile() {
-		new TileValidator().loadModel(logger, null)
+		new TileValidator().loadModel(logger, null, "")
 
 		assert errors.size() == 1
 		assert warnings.size() == 0
@@ -45,7 +45,7 @@ class TileValidatorTest {
 	}
 
 	@Test void noSuchFileExists() {
-		new TileValidator().loadModel(logger, new File("skink.txt"))
+		new TileValidator().loadModel(logger, new File("skink.txt"), "")
 
 		assert errors.size() == 1
 		assert warnings.size() == 0
@@ -53,7 +53,7 @@ class TileValidatorTest {
 	}
 
 	@Test void okFile() {
-		new TileValidator().loadModel(logger, new File("src/test/resources/session-license-tile.xml"))
+		new TileValidator().loadModel(logger, new File("src/test/resources/session-license-tile.xml"), "")
 		assert errors.size() == 0
 		assert warnings.size() == 0
 		assert infos.size() == 1

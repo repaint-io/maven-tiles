@@ -21,7 +21,7 @@ class ValidateTileMojo extends AbstractTileMojo {
 		if (project.modules) {
 			logger.info("Ignoring reactor for tile check.")
 		} else {
-			new TileValidator().loadModel(logger, getTile())
+			new TileValidator().loadModel(logger, getTile(), buildSmells)
 		}
 	}
 }

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+== 1.5 - 2014-10-01
+
+=== Changed
+- When 1.4 switched to the new 'parental guidance' model of applying
+  tiles, we unfortunately missed a critical step of applying activated
+  and deactivate profiles, as well as the superpom. This meant that
+  all unconfigured plugins simply..... vanished.
+- As part of the above change, a problem dating back to 1.3 where
+  `<configuration>` blocks that were not inside a plugins `<execution>`
+  block were not correctly being applied to the plugin.
+
 == 1.4 - 2014-09-29
 
 === Added

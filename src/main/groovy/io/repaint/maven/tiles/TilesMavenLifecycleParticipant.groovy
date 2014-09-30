@@ -49,6 +49,7 @@ import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
 import org.apache.maven.model.resolution.UnresolvableModelException
 import org.apache.maven.project.MavenProject
+import org.apache.maven.project.ProjectBuildingHelper
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
@@ -84,6 +85,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	ModelProcessor modelProcessor
+
+	@Requirement
+	ProjectBuildingHelper projectBuildingHelper
 
 	protected MavenVersionIsolator mavenVersionIsolate
 
@@ -267,7 +271,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
 			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
 		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
-		  activeProfileIds: mavenSession.request.activeProfiles, inactiveProfileIds: mavenSession.request.inactiveProfiles)
+			profiles: mavenSession.request.projectBuildingRequest.profiles,
+		  activeProfileIds: mavenSession.request.projectBuildingRequest.activeProfileIds,
+			inactiveProfileIds: mavenSession.request.projectBuildingRequest.inactiveProfileIds,
+		  modelBuildingListener: new org.apache.maven.project.DefaultModelBuildingListener( project,
+			  projectBuildingHelper, mavenSession.request.projectBuildingRequest ),
+			locationTracking: true, twoPhaseBuilding: true, processPlugins: true)
 
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {
 			@Override
@@ -300,11 +309,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
 
-		ModelBuildingResult build = modelBuilder.build(request)
+		ModelBuildingResult interimBuild = modelBuilder.build(request)
 
-		((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
-
-		copyModel(project.model, build.effectiveModel)
+		ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
+		copyModel(project.model, finalModel.effectiveModel)
 	}
 
 	ModelSource createModelSource(File pomFile) {

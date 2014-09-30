@@ -309,6 +309,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
 
+		modelBuilder.inheritanceAssembler.merger = new ThunkedInheritanceAssembler.FixedInheritanceAssembler()
+
 		ModelBuildingResult interimBuild = modelBuilder.build(request)
 
 		ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)

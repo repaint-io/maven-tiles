@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_60881b23",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 3
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-02T20:54:08Z",
+      "side": 1,
+      "message": "if (tiles) - please don\u0027t use Java verbose nastyness",
+      "revId": "e7802eff077fe1c61db2c8c3446259ffc16c55d6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

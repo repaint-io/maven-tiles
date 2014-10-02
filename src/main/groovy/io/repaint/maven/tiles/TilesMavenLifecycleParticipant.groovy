@@ -396,7 +396,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Model lastPom = pomModel
 		File lastPomFile = request.pomFile
 
-		StringBuilder sb = new StringBuilder()
+		if (!tiles.isEmpty()) {
+			logger.info("--- tiles-maven-plugin: Injecting tiles as intermediary parent artifact's...")
+			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as it's new parent.")
+		}
 
 		tiles.each { TileModel tileModel ->
 			Model model = tileModel.model
@@ -404,10 +407,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			Parent modelParent = new Parent(groupId: model.groupId, version: model.version, artifactId: model.artifactId)
 			lastPom.parent = modelParent
 
-			sb.append("model: '${modelGav(lastPom)}' has tile '${parentGav(modelParent)}' as new parent.\n")
-
 			if (pomModel != lastPom) {
 				putModelInCache(lastPom, request, lastPomFile)
+				logger.info("Mixed '${modelGav(lastPom)}' with tile '${parentGav(modelParent)}' as it's new parent.")
 			}
 
 			lastPom = model
@@ -415,13 +417,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		lastPom.parent = originalParent
-		sb.append("model: '${modelGav(lastPom)}' has original pom '${parentGav(originalParent)}' as new parent.")
+		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as it's  new top level parent.")
+		logger.info("")
 
 		if (pomModel != lastPom) {
 			putModelInCache(lastPom, request, lastPomFile)
 		}
 
-		logger.info(sb.toString())
 	}
 
 	protected void copyModel(Model projectModel, Model newModel) {

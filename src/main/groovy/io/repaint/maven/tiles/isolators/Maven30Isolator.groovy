@@ -4,15 +4,10 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.execution.MavenSession
-import org.apache.maven.model.InputLocation
-import org.apache.maven.model.Model
-import org.apache.maven.model.Repository
+import org.apache.maven.model.*
 import org.apache.maven.model.building.ModelProblem
 import org.apache.maven.model.building.ModelProblemCollector
-import org.apache.maven.model.building.ModelSource
-import org.apache.maven.model.resolution.InvalidRepositoryException
-import org.apache.maven.model.resolution.ModelResolver
-import org.apache.maven.model.resolution.UnresolvableModelException
+import org.apache.maven.model.merge.MavenModelMerger
 
 /**
  *
@@ -50,4 +45,11 @@ class Maven30Isolator extends BaseMavenIsolator {
 	def createModelData(Model model, File pomFile) {
 		return org.apache.maven.model.building.ModelData.newInstance(model, model.groupId, model.artifactId, model.version)
 	}
+
+	@Override
+	MavenModelMerger createInheritanceModelMerger() {
+		// Maven 3.0.5 doesn't do the strange appendPath() so we don't need to replace the model merger.
+		return null
+	}
+
 }

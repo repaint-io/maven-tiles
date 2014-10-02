@@ -10,6 +10,5 @@ import org.apache.maven.model.merge.MavenModelMerger
 interface MavenVersionIsolator {
 	public void resolveVersionRange(Artifact tileArtifact)
 	public ModelProblemCollector createModelProblemCollector()
-	public MavenModelMerger createInheritanceModelMerger()
 	public def createModelData(Model model, File pomFile)
 }

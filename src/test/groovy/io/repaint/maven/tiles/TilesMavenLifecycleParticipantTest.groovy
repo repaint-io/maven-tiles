@@ -120,11 +120,6 @@ public class TilesMavenLifecycleParticipantTest {
 				return null
 			}
 
-			@Override
-			MavenModelMerger createInheritanceModelMerger() {
-				return null
-			}
-
 		}
 	}
 

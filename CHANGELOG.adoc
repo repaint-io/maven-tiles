@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+== 1.6-SNAPSHOT - 2014-10-02
+
+=== Changed
+- We broke Maven 3.0.x ( and thus, IntelliJ ) support again with the changes
+  to the thunked inheritance merger. Since that change was only needed for 3.2.x
+  support, under 3.0.x we simply don't reassign it.
+
 == 1.5 - 2014-10-01
 
 === Changed

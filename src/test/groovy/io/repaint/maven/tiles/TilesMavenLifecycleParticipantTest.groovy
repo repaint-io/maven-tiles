@@ -24,12 +24,15 @@ import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolver
-import org.apache.maven.execution.MavenSession
-import org.apache.maven.model.*
+import org.apache.maven.model.Build
+import org.apache.maven.model.Model
+import org.apache.maven.model.Parent
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelData
 import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.apache.maven.model.merge.MavenModelMerger
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
@@ -116,6 +119,12 @@ public class TilesMavenLifecycleParticipantTest {
 			ModelData createModelData(Model model, File pomFile) {
 				return null
 			}
+
+			@Override
+			MavenModelMerger createInheritanceModelMerger() {
+				return null
+			}
+
 		}
 	}
 

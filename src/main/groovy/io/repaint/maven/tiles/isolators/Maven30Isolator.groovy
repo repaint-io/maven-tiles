@@ -46,10 +46,4 @@ class Maven30Isolator extends BaseMavenIsolator {
 		return org.apache.maven.model.building.ModelData.newInstance(model, model.groupId, model.artifactId, model.version)
 	}
 
-	@Override
-	MavenModelMerger createInheritanceModelMerger() {
-		// Maven 3.0.5 doesn't do the strange appendPath() so we don't need to replace the model merger.
-		return null
-	}
-
 }

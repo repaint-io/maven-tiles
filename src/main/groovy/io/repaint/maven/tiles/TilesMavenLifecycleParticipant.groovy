@@ -37,14 +37,9 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.Repository
-import org.apache.maven.model.building.DefaultModelBuilder
-import org.apache.maven.model.building.DefaultModelBuildingRequest
-import org.apache.maven.model.building.ModelBuilder
-import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelBuildingResult
-import org.apache.maven.model.building.ModelProcessor
-import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.building.*
 import org.apache.maven.model.io.ModelParseException
+import org.apache.maven.model.merge.MavenModelMerger
 import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
 import org.apache.maven.model.resolution.UnresolvableModelException
@@ -308,8 +303,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
-
-		modelBuilder.inheritanceAssembler.merger = new ThunkedInheritanceAssembler.FixedInheritanceAssembler()
 
 		ModelBuildingResult interimBuild = modelBuilder.build(request)
 

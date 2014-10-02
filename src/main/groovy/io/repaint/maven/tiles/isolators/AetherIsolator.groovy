@@ -5,8 +5,11 @@ import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Model
+import org.apache.maven.model.Scm
 import org.apache.maven.model.building.FileModelSource
 import org.apache.maven.model.building.ModelProblemCollector
+import org.apache.maven.model.inheritance.DefaultInheritanceAssembler
+import org.apache.maven.model.merge.MavenModelMerger
 
 /**
  *

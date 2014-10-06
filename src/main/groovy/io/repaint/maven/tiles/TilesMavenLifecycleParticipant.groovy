@@ -422,7 +422,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected void copyModel(Model projectModel, Model newModel) {
-		projectModel.parent = newModel.parent
+
 		projectModel.build = newModel.build
 		projectModel.dependencyManagement = newModel.dependencyManagement
 		projectModel.dependencies = newModel.dependencies

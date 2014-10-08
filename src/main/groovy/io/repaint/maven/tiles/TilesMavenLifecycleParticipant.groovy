@@ -22,6 +22,7 @@ import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.AetherIsolator
 import io.repaint.maven.tiles.isolators.Maven30Isolator
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
+import static io.repaint.maven.tiles.GavUtil.*
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
@@ -451,7 +452,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// ensure we have resolved the tile (it could come from a non-tile model)
 			if (tileModel) {
-				processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
+				processedTiles.put(GavUtil.artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
 
 				parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 			}
@@ -473,26 +474,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		tileDiscoveryOrder.removeAll(missingTiles)
-	}
-
-	protected String artifactName(Artifact artifact) {
-		return String.format("%s:%s", artifact.groupId, artifact.artifactId)
-	}
-
-	protected String artifactGav(Artifact artifact) {
-		return String.format("%s:%s:%s", artifact.groupId, artifact.artifactId, artifact.versionRange ?: artifact.version)
-	}
-
-	protected String modelGav(Model model) {
-		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
-	}
-
-	protected String parentGav(Parent model) {
-		if (!model) {
-			return "(no parent)"
-		} else {
-			return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
-		}
 	}
 
 	/**

@@ -1,13 +1,10 @@
 package io.repaint.maven.tiles
-
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException
-
 /**
  * This will parse a tile.xml file with the intent of removing extra syntax, holding onto it and then
  * pushing the rest into a standard model. We could have used a Delegate or a Mixin here potentially, but
@@ -65,5 +62,19 @@ class TileModel {
 		model.groupId = artifact.groupId
 		model.artifactId = artifact.artifactId
 		model.packaging = "pom"
+
+		// Update each tile'd plugin's execution id with the tile GAV for easier debugging/tracing
+		if (model.build) {
+			if (model.build.plugins) {
+				model.build.plugins.each { plugin ->
+					if (plugin.executions) {
+						plugin.executions.each { execution ->
+							execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+						}
+					}
+				}
+			}
+		}
+
 	}
 }

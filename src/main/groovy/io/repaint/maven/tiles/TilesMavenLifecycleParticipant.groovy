@@ -429,6 +429,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.pluginRepositories = newModel.pluginRepositories
 		projectModel.licenses = newModel.licenses
 		projectModel.scm = newModel.scm
+		projectModel.distributionManagement = newModel.distributionManagement
 		projectModel.developers = newModel.developers
 		projectModel.contributors = newModel.contributors
 		projectModel.organization = newModel.organization

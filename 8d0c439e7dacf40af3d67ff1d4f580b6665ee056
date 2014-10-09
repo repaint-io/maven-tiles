@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_e2a26b99",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TileModel.groovy",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-09T22:54:08Z",
+      "side": 1,
+      "message": "why are you storing this here and never using it outside of this class?",
+      "revId": "8d0c439e7dacf40af3d67ff1d4f580b6665ee056",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

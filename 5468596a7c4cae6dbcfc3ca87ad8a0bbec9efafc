@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_8287370f",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TileModel.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-09T22:28:27Z",
+      "side": 1,
+      "message": "why do this here, mucking with the XML? and you have to store the artifact at the class level to do this, instead of just passing it?",
+      "revId": "5468596a7c4cae6dbcfc3ca87ad8a0bbec9efafc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e27b8b27",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TileModel.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-09T22:28:27Z",
+      "side": 1,
+      "message": "isn\u0027t it easier to do it here, after the model has been read in? Then you know exactly what you are dealing with.",
+      "revId": "5468596a7c4cae6dbcfc3ca87ad8a0bbec9efafc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

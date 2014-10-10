@@ -2,7 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
-== 1.6-SNAPSHOT - 2014-10-02
+== 1.7 - 2014-10-10
+
+=== Added
+- When a tile is merged into the build, any plugin execution id's defined
+  now get prepended with the tile's GAV reference. This allows for
+  better understanding of what's happening in your build when looking
+  at a build log file. Very useful for debugging/diagnosing oddities
+  with your build process.
+
+=== Changed
+- The logging around what tiles are being injected into your project as
+  parents has been cleaned up and improved.
+- We've removed the copying/updating of the `<parent>` in the effective
+  POM Model - this was causing issues with IntelliJ projects that
+  contained both the tile, and an artifact _using_ that tile. Due to the
+  maven server being reused over all IntelliJ Modules, and that IntelliJ
+  assumes a parents artifact type is always `pom` and not `tile`,
+  a circular reference was being reported to the IDE. As the effective
+  model has already been resolved, this change does not actually effect
+  the build process at all.
+- `<distributionManagement>` wasn't being merged from tile models at all.
+  This was preventing the implementation of a standard 'release' style
+  tile.
+
+== 1.6 - 2014-10-02
 
 === Changed
 - We broke Maven 3.0.x ( and thus, IntelliJ ) support again with the changes

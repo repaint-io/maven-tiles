@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_fe25e30a",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-19T21:32:25Z",
+      "side": 1,
+      "message": "[1.2]",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_de22a700",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-19T21:32:25Z",
+      "side": 1,
+      "message": "use single quotes so you don\u0027t need to escape the $\n\nI\u0027m also not sure if this is the right directory for this. generated-sources is normally for... generated sources. The tile.xml is not source and it is not a resource.",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3e20fbf6",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-19T21:32:25Z",
+      "side": 1,
+      "message": "req.setDelimiters([\u0027@\u0027] as Set) would also do.",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1e1d3fbe",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AttachTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2014-10-19T21:32:25Z",
+      "side": 1,
+      "message": "you do not appear to need these imports?",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

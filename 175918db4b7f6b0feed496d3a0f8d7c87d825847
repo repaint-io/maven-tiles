@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_be836bcb",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-10-19T23:35:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_de22a700",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_3e20fbf6",
         "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
         "patchSetId": 2
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_9e882fe9",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-10-19T23:35:04Z",
+      "side": 1,
+      "message": "Unfortunately setDelimiters takes a LinkedHashSet. Using \"as LinkedHashSet\" works tho - not sure it really adds much tho.",
+      "parentUuid": "7a6b29fe_3e20fbf6",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_1e1d3fbe",
         "filename": "src/main/groovy/io/repaint/maven/tiles/AttachTileMojo.groovy",
         "patchSetId": 2
@@ -64,6 +100,24 @@
       "writtenOn": "2014-10-19T21:32:25Z",
       "side": 1,
       "message": "you do not appear to need these imports?",
+      "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_fe6cc338",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AttachTileMojo.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2014-10-19T23:35:04Z",
+      "side": 1,
+      "message": "Doh - bad refactoring.  They -were- temporarily used here, until things pushed down only into the base.",
+      "parentUuid": "7a6b29fe_1e1d3fbe",
       "revId": "175918db4b7f6b0feed496d3a0f8d7c87d825847",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false

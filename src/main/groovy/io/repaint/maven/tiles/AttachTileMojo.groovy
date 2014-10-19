@@ -24,9 +24,6 @@ class AttachTileMojo extends AbstractTileMojo {
 
 	@Override
 	void execute() throws MojoExecutionException, MojoFailureException {
-		if (project.packaging != "tile") {
-			throw new MojoFailureException("Package is not a tile.")
-		}
 
 		File tile = getTile()
 

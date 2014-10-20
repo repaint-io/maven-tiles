@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 1.7
+= Tiles Maven Plugin - Version 1.8
 
 == Overview
 
@@ -46,9 +46,10 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>1.7</version>
+        <version>1.8</version>
         <extensions>true</extensions>
         <configuration>
+          <filtering>false</filtering>
           <tiles>
             <tile>io.repaint.tiles:github-release-tile:[1.1, 2)</tile>
           </tiles>
@@ -61,6 +62,9 @@ you specify a configuration.
 
 With the packaging _tile_, the plugin will look for the attached tile.xml, do some basic validation on it and
 attach it as an artifact.
+
+When the `<filtering>` configuration item is specified as `true` - then standard Maven resource filtering
+for `@project.version@` style references is applied to the `tile.xml` file prior to install/deploy.
 
 [source,xml,indent=0]
 .tile.xml

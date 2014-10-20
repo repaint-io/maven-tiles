@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+== 1.8 - PENDING RELEASE
+
+=== Added
+- The `attach-tile` goal now understands a new `filtering` configuration
+  property which will enable standard Maven resource processing for your tile.
+  This enables refering to such things as `@project.version@` which will be
+  resolved at install/deploy time. This is primarily useful for use in
+  conjunction with including the tiles plugin in an existing project.
+
+=== Changed
+- The `attach-tile` goal no longer enforces the use of the `tile` packaging.
+  This means you can easily add an `<execution>` definition and include
+  the `tiles-maven-plugin` directly in existing projects to attach tiles,
+  rather than using the `build-helper-maven-plugin`.
+
 == 1.7 - 2014-10-10
 
 === Added

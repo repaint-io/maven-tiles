@@ -295,9 +295,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			@Override
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
+				String version = getModelVersion(model);
+				String groupId = getModelGroupId(model);
 
-				if (model.artifactId == project.artifactId && model.groupId == project.groupId
-						&& model.version == project.version && model.packaging == project.packaging) {
+				if (model.artifactId == project.artifactId 
+					&& groupId == project.groupId
+					&& version == project.version
+					&& model.packaging == project.packaging) {
 					injectTilesIntoParentStructure(tiles, model, request)
 				}
 
@@ -311,6 +315,30 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
 		copyModel(project.model, finalModel.effectiveModel)
+	}
+
+	private String getModelGroupId(Model model) {
+		String groupId = model.getGroupId();
+		if (groupId != null) {
+			return groupId;
+		}
+		Parent p = model.getParent()
+		if (p != null) {
+			return p.getGroupId()
+		}
+		return null;
+	}
+
+	private String getModelVersion(Model model) {
+		String version = model.getVersion();
+		if (version != null) {
+			return version;
+		}
+		Parent p = model.getParent()
+		if (p != null) {
+			return p.getVersion()
+		}
+		return null;
 	}
 
 	ModelSource createModelSource(File pomFile) {

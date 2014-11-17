@@ -296,9 +296,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
 
-				if (model.artifactId == project.artifactId && model.groupId == project.groupId
-						&& model.version == project.version && model.packaging == project.packaging) {
-					injectTilesIntoParentStructure(tiles, model, request)
+				use(GavUtil) {
+					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
+						&& model.realVersion == project.version && model.packaging == project.packaging) {
+						injectTilesIntoParentStructure(tiles, model, request)
+					}
 				}
 
 				return model

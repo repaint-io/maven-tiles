@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - GAV tile references can now specify the artifact type to use ( for
   legacy tiles, or those deployed via other means ) in the form of
   `groupId:artifact:type:versionrange`.
+- Added support for inherited version/groupId
 
 === Changed
 

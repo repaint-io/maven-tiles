@@ -6,7 +6,7 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 
 @CompileStatic
-final class GavUtil {
+class GavUtil {
 
 	public static String artifactName(Artifact artifact) {
 		return String.format("%s:%s", artifact.groupId, artifact.artifactId)
@@ -28,4 +28,11 @@ final class GavUtil {
 		}
 	}
 
+	public static String getRealGroupId(Model model) {
+		return model.groupId ?: model.parent?.groupId
+	}
+
+	public static String getRealVersion(Model model) {
+		return model.version ?: model.parent?.version
+	}
 }

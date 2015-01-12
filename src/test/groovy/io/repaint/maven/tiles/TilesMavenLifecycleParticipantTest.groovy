@@ -124,7 +124,7 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	public Artifact getTileTestCoordinates() {
-		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "0.8-SNAPSHOT")
+		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "tile", "0.8-SNAPSHOT")
 	}
 
 
@@ -139,7 +139,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void ensureBadArtifactsFail() {
-		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad")
+		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad")
 
 		participant.resolver = [
 			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
@@ -163,13 +163,14 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testGetArtifactFromCoordinates() {
-		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "1")
+		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "tile", "1")
 
 		assert artifact != null
 
 		artifact.with {
 			assert groupId == "dummy"
 			assert artifactId == "dummy"
+			assert type == "tile"
 			assert version == "1"
 		}
 	}
@@ -184,6 +185,14 @@ public class TilesMavenLifecycleParticipantTest {
 		assert dummy.classifier == 'tile-pom'
 		assert dummy.type == 'tile'
 
+		Artifact dummy2 = participant.turnPropertyIntoUnprocessedTile("my:long:sore:feet", null)
+
+		assert dummy2.version == 'feet'
+		assert dummy2.artifactId == 'long'
+		assert dummy2.groupId == 'my'
+		assert dummy2.classifier == 'tile-pom'
+		assert dummy2.type == 'sore'
+
 		// too short
 		shouldFail(MavenExecutionException) {
 			participant.turnPropertyIntoUnprocessedTile("my:long", null)
@@ -191,7 +200,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		// too long
 		shouldFail(MavenExecutionException) {
-			participant.turnPropertyIntoUnprocessedTile("my:long:feet:and:shoes", null)
+			participant.turnPropertyIntoUnprocessedTile("my:long:feet:and:smelly:shoes", null)
 		}
 	}
 
@@ -320,7 +329,7 @@ public class TilesMavenLifecycleParticipantTest {
 			participant.orchestrateMerge(project)
 		}
 
-		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range"
+		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:type:version-range"
 	}
 
 	public void addTileAndPlugin(Model model, String gav) {

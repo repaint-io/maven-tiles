@@ -2,7 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-== 1.8 - PENDING RELEASE
+== 2.1 - PENDING
+
+=== Added
+
+- GAV tile references can now specify the artifact type to use ( for
+  legacy tiles, or those deployed via other means ) in the form of
+  `groupId:artifact:type:versionrange`.
+
+=== Changed
+
+- The `attach-tile` goal now attaches tiles as the artifact type `tile`. This
+  prevents services like oss.sonatype.org from doing full POM validation
+  checks and dying.
+- `tile` is now the default artifact type for resolution.
+- Updated to use Groovy 2.3.9
+
+== 1.8 - 2014-11-17
 
 === Added
 - The `attach-tile` goal now understands a new `filtering` configuration

@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-== 2.1 - PENDING
+== 2.2 - PENDING
+
+=== Added
+
+- GAV tile references can now specify the artifact type to use ( for
+  legacy tiles, or those deployed via other means ) in the form of
+  `groupId:artifact:type:versionrange`.
+- Added support for inherited version/groupId
+
+=== Changed
+
+- The `attach-tile` goal now _correctly_ attaches the tile as the primary
+  artifact for a `tile` packaged project, and merely as a `tile' artifact
+  with a `.xml` extension for other packaging types.
+- GAV specification now looks for a `.xml` artifact with an empty classifier
+  or one with a specific extension/classifier.
+- Updated to use Groovy 2.4
+
+== 2.1 - 2015-01-13
 
 === Added
 

@@ -127,9 +127,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
 	 * pom itself (because we don't care about that).
 	 */
-	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String version) {
+	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String classifier, String version) {
 		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
-			type, "tile-pom", new DefaultArtifactHandler(type))
+			type, classifier, new DefaultArtifactHandler(type))
 	}
 
 
@@ -161,22 +161,24 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		String[] gav = artifactGav.tokenize(":")
 
-		if (gav.size() != 3 && gav.size() != 4) {
-			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:type:version-range", pomFile)
+		if (gav.size() != 3 && gav.size() != 5) {
+			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range", pomFile)
 		}
 
 		String groupId = gav[0]
 		String artifactId = gav[1]
 		String version
-		String type = "tile"
+		String type = "xml"
+		String classifier = ""
 		if (gav.size() == 3) {
 			version = gav[2]
 		} else {
 			type = gav[2]
-			version = gav[3]
+			classifier = gav[3]
+			version = gav[4]
 		}
 
-		return getArtifactFromCoordinates(groupId, artifactId, type, version)
+		return getArtifactFromCoordinates(groupId, artifactId, type, classifier, version)
 	}
 
 	protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {

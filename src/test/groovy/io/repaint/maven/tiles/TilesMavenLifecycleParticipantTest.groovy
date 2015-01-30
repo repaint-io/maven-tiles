@@ -124,7 +124,7 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	public Artifact getTileTestCoordinates() {
-		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "tile", "0.8-SNAPSHOT")
+		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "xml", "", "0.8-SNAPSHOT")
 	}
 
 
@@ -139,7 +139,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void ensureBadArtifactsFail() {
-		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad")
+		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad", "bad")
 
 		participant.resolver = [
 			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
@@ -163,14 +163,15 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testGetArtifactFromCoordinates() {
-		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "tile", "1")
+		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "xml", "classy", "1")
 
 		assert artifact != null
 
 		artifact.with {
 			assert groupId == "dummy"
 			assert artifactId == "dummy"
-			assert type == "tile"
+			assert type == "xml"
+			assert classifier == "classy"
 			assert version == "1"
 		}
 	}
@@ -182,15 +183,15 @@ public class TilesMavenLifecycleParticipantTest {
 		assert dummy.version == 'feet'
 		assert dummy.artifactId == 'long'
 		assert dummy.groupId == 'my'
-		assert dummy.classifier == 'tile-pom'
-		assert dummy.type == 'tile'
+		assert dummy.classifier == ''
+		assert dummy.type == 'xml'
 
-		Artifact dummy2 = participant.turnPropertyIntoUnprocessedTile("my:long:sore:feet", null)
+		Artifact dummy2 = participant.turnPropertyIntoUnprocessedTile("my:long:sore:smelly:feet", null)
 
 		assert dummy2.version == 'feet'
 		assert dummy2.artifactId == 'long'
 		assert dummy2.groupId == 'my'
-		assert dummy2.classifier == 'tile-pom'
+		assert dummy2.classifier == 'smelly'
 		assert dummy2.type == 'sore'
 
 		// too short
@@ -329,7 +330,7 @@ public class TilesMavenLifecycleParticipantTest {
 			participant.orchestrateMerge(project)
 		}
 
-		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:type:version-range"
+		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range"
 	}
 
 	public void addTileAndPlugin(Model model, String gav) {

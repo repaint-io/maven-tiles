@@ -233,13 +233,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		List<String> subModules = topLevelProject.getModules()
 
 		if (subModules != null && subModules.size() > 0) {
-			//We're in a multi-module build, we need to trigger model merging on all sub-modules
-			for (MavenProject subModule : mavenSession.getProjects()) {
-				if (subModule != topLevelProject) {
-					resetTiles()
-					orchestrateMerge(subModule)
-				}
-			}
+			//We're in a multi-module build, fail the build immediate. This is both an opinionated choice, but also
+			//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
+			//are limited.
+			throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds.", topLevelProject.getFile())
 		} else {
 			orchestrateMerge(topLevelProject)
 		}

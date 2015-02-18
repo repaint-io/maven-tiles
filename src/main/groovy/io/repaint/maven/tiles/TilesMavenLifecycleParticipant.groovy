@@ -229,19 +229,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
-		List<String> subModules = topLevelProject.getModules()
+		final MavenProject currentProject = mavenSession.getCurrentProject()
+		List<String> subModules = currentProject.getModules()
 
 		if (subModules != null && subModules.size() > 0) {
-			//We're in a multi-module build, we need to trigger model merging on all sub-modules
-			for (MavenProject subModule : mavenSession.getProjects()) {
-				if (subModule != topLevelProject) {
-					resetTiles()
-					orchestrateMerge(subModule)
-				}
-			}
+			//We're in project with children, fail the build immediate. This is both an opinionated choice, but also
+			//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
+			//are limited.
+			throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds.", currentProject.getFile())
 		} else {
-			orchestrateMerge(topLevelProject)
+			orchestrateMerge(currentProject)
 		}
 	}
 

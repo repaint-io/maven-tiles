@@ -13,12 +13,16 @@ All notable changes to this project will be documented in this file.
 
 === Changed
 
+- Maven Tiles Lifecycle now prevents execution with submodules, this is
+ to prevent breaking support of -pl, -am, and -amd usage from Apache Maven.
+ This also serves to drive one away from parents, forcing one mix in the tiles
+ at the artifact level.
 - The `attach-tile` goal now _correctly_ attaches the tile as the primary
   artifact for a `tile` packaged project, and merely as a `tile' artifact
   with a `.xml` extension for other packaging types.
 - GAV specification now looks for a `.xml` artifact with an empty classifier
   or one with a specific extension/classifier.
-- Updated to use Groovy 2.4
+- Updated to use Groovy 2.4.1
 
 == 2.1 - 2015-01-13
 

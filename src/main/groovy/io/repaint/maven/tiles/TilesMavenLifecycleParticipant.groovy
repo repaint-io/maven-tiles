@@ -115,15 +115,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	Map<String, Artifact> unprocessedTiles = [:]
 
 	/**
-	 * reactor builds can/will have their own tile structures
-	 */
-	protected void resetTiles() {
-		processedTiles = [:]
-		tileDiscoveryOrder = []
-		unprocessedTiles = [:]
-	}
-
-	/**
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
 	 * pom itself (because we don't care about that).
 	 */
@@ -229,19 +220,21 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-		final MavenProject topLevelProject = mavenSession.getTopLevelProject()
-		List<String> subModules = topLevelProject.getModules()
+		List<MavenProject> allProjects = mavenSession.getAllProjects()
+		for (MavenProject currentProject : allProjects) {
+			List<String> subModules = currentProject.getModules()
+			boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains("io.repaint.maven:tiles-maven-plugin")
 
-		if (subModules != null && subModules.size() > 0) {
-			//We're in a multi-module build, we need to trigger model merging on all sub-modules
-			for (MavenProject subModule : mavenSession.getProjects()) {
-				if (subModule != topLevelProject) {
-					resetTiles()
-					orchestrateMerge(subModule)
+			if (containsTiles) {
+				if (subModules != null && subModules.size() > 0) {
+					//We're in project with children, fail the build immediate. This is both an opinionated choice, but also
+					//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
+					//are limited.
+					throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds.", currentProject.getFile())
+				} else {
+					orchestrateMerge(currentProject)
 				}
 			}
-		} else {
-			orchestrateMerge(topLevelProject)
 		}
 	}
 

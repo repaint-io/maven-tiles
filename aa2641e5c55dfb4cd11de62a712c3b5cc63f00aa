@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a1969be_dd68af23",
+        "filename": "src/test/groovy/io/repaint/maven/tiles/AttachTileMojoTest.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2015-02-19T01:06:44Z",
+      "side": 1,
+      "message": "why is this  test commented out?",
+      "revId": "aa2641e5c55dfb4cd11de62a712c3b5cc63f00aa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

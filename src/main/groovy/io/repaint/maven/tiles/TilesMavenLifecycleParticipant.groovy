@@ -459,7 +459,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			// ensure we have resolved the tile (it could come from a non-tile model)
 			if (tileModel) {
 				processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
-
 				parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 			}
 		}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  <groupId>io.repaint.tiles</groupId>
+	<artifactId>frege-example</artifactId>
+	<version>testing</version>
+	<name>Frege Tile Example</name>
+	<description>Ensure we have a plugin defined in the parent</description>
+	<url>http://repaint.io</url>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>io.repaint.maven</groupId>
+				<artifactId>tiles-maven-plugin</artifactId>
+				<version>@project.version@</version>
+				<extensions>true</extensions>
+				<configuration>
+					<tiles>
+						<tile>com.theoryinpractise.frege:frege-maven-tile:xml:tile-pom:[1.0.0,2.0.0)</tile>
+					</tiles>
+				</configuration>
+			</plugin>
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>io.repaint.tiles.Test</mainClass>
+        </configuration>
+      </plugin>
+		</plugins>
+	</build>
+
+</project>

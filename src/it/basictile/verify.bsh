@@ -1,0 +1,16 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+if (!content.contains("Mixed 'io.repaint.tiles:child:testing' with tile 'io.repaint.tiles:basic-tile:2.2-SNAPSHOT' as it's new parent.") {
+  throw new Exception("Tile not injected")
+}
+
+if (!content.contains("Mixed 'io.repaint.tiles:basic-tile:2.2-SNAPSHOT' with original parent '(no parent)' as it's  new top level parent.") {
+  throw new Exception("Parent tile not injected")
+}

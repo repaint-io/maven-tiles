@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a106d94_5c897dc9",
+        "filename": "src/test/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipantTest.groovy",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-03-30T08:55:01Z",
+      "side": 1,
+      "message": "Review commented code Mark - tsk tsk - self slap.",
+      "range": {
+        "startLine": 100,
+        "startChar": 2,
+        "endLine": 100,
+        "endChar": 4
+      },
+      "revId": "618c946ecd0b22a32f37bf373e747b7b863d43f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

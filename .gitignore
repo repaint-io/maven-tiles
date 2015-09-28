@@ -1,1 +1,11 @@
+# Ignore hidden files
+.*
+**/.*
+
+# Ignore target directory
 target
+
+# Don't ignore git special files
+!.gitignore
+!.gitattributes
+!.gitkeep

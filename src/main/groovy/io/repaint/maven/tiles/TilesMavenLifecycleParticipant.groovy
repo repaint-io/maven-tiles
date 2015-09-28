@@ -221,21 +221,27 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
 		List<MavenProject> allProjects = mavenSession.getAllProjects()
-		for (MavenProject currentProject : allProjects) {
-			List<String> subModules = currentProject.getModules()
-			boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains("io.repaint.maven:tiles-maven-plugin")
+        for (MavenProject currentProject : allProjects) {
+            List<String> subModules = currentProject.getModules()
+            boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains("io.repaint.maven:tiles-maven-plugin")
 
-			if (containsTiles) {
-				if (subModules != null && subModules.size() > 0) {
-					//We're in project with children, fail the build immediate. This is both an opinionated choice, but also
-					//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
-					//are limited.
-					throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds.", currentProject.getFile())
-				} else {
-					orchestrateMerge(currentProject)
-				}
-			}
-		}
+            if (containsTiles) {
+                if (subModules != null && !subModules.isEmpty()) {
+                    Model currentModel = currentProject.getModel();
+                    for (MavenProject otherProject : allProjects) {
+                        Parent otherParent = otherProject.getModel().getParent()
+                        if(otherParent!=null && parentGav(otherParent).equals(modelGav(currentModel))) {
+                            //We're in project with children, fail the build immediate. This is both an opinionated choice, but also
+                            //one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
+                            //are limited.
+                            throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds where reactor is used as parent.", currentProject.getFile())
+                        }
+                    }
+                }
+
+                orchestrateMerge(currentProject)
+            }
+        }
 	}
 
 	/**

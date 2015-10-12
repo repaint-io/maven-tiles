@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baada198_b51ff708",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-10-12T19:51:13Z",
+      "side": 1,
+      "message": "Can you raise this as an issue and add a \"fixes #nn\" reference in the commit, and shorten the primary commit message.\n\nre: http://chris.beams.io/posts/git-commit/\n\nTo resubmit, \"git commit --ammend\" this commit with the needed changes and resubmit like you did originally.\n\nAlso, you\u0027ll need to include \"Change-Id: 249602\" as a footer in your commit message so that Gerrit can update this review with the new revision.\n\nIn order to have this added automatically, you can run:\n\n  curl -Lo .git/hooks/commit-msg http://review.gerrithub.io/tools/hooks/commit-msg\n\nin the root of your git repository, this will copy down the commit-msg hook script which will generate a Change-Id line if missing. See https://review.gerrithub.io/Documentation/user-changeid.html for more information.\n\nI should add this to a CONTRIBUTING.adoc actually.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 89
+      },
+      "revId": "c6ddd4bba920e8503b8af42fde27a40c219b4d0f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

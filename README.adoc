@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 1.8
+= Tiles Maven Plugin - Version 2.3
 
 == Overview
 
@@ -46,7 +46,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>1.8</version>
+        <version>2.3</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>
@@ -144,7 +144,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>1.7</version>
+      <version>2.3</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>
@@ -213,5 +213,3 @@ create your own versions and always lock down versions of third party tiles, jus
 - http://jira.codehaus.org/browse/MNG-5102[Mixin POM fragments]
 - http://stackoverflow.com/questions/11749375/import-maven-plugin-configuration-by-composition-rather-than-inheritance-can-it[Stack Overflow]
 - http://maven.40175.n5.nabble.com/Moving-forward-with-mixins-tc4421069.html[Maven Discussion]
-
-

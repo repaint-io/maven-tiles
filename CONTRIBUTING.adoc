@@ -7,10 +7,10 @@ easy and effective for everyone involved.
 
 === Using the issue tracker
 
-The https://github.com/rvowles/maven-tiles/issues[issue tracker] is
-the preferred channel for reporting all bugs or feature requests for this fork of the
+The https://github.com/repaint-io/maven-tiles/issues[issue tracker] is
+the preferred channel for reporting all bugs or feature requests for the
 plugin. Pull requests are accepted but will be managed via
-https://review.gerrithub.io/#/q/project:rvowles/maven-tiles[GerritHub.io] ( see below )
+https://review.gerrithub.io/#/q/project:repaint-io/maven-tiles[GerritHub.io] ( see below )
 but please respect the following restrictions:
 
 * Please **do not** use the issue tracker for personal support requests.
@@ -27,15 +27,20 @@ Rather than using Github's Pull Request model, the _tiles-maven-plugin_ is using
 https://code.google.com/p/gerrit/[Gerrit] code review tool via the public http://gerrithub.io[GerritHub.io]
 service for pre-merge code review.
 
-Github pull requests will be automatically pulled into GerritHub as reviews, and any
-updated changes will be expected to be pushed/managed via GerritHub.io.
+Github pull requests SHOULD be automatically pulled into GerritHub as reviews, and any
+updated changes will be expected to be pushed/managed via GerritHub.io, however direct review submissions
+via GerritHub.io are preferred.
 
 ==== Submission via GerritHub
 
 Clone the repository::
 [source,shell]
 ----
-git clone https://review.gerrithub.io/rvowles/maven-tiles
+git clone https://review.gerrithub.io/repaint-io/maven-tiles
+----
+Install Gerrit Commit Message Hook
+[source,shell]
+curl -Lo .git/hooks/commit-msg http://review.gerrithub.io/tools/hooks/commit-msg
 ----
 Make changes and submit::
 [source,shell]

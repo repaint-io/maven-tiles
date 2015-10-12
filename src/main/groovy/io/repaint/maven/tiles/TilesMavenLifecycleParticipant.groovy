@@ -238,9 +238,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 								throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds where reactor is used as parent.", currentProject.getFile())
 							}
 						}
-					} else {
-						orchestrateMerge(currentProject)
 					}
+					
+					orchestrateMerge(currentProject)
 				}
 			}
 		}

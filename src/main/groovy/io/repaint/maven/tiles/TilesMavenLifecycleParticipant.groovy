@@ -71,6 +71,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected static final String TILE_EXTENSION = 'pom'
 	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
+	public static final String TILEPLUGIN_KEY = "${TILEPLUGIN_GROUP}:${TILEPLUGIN_ARTIFACT}"
 
 	@Requirement
 	Logger logger
@@ -224,10 +225,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		if (allProjects != null) {
 			for (MavenProject currentProject : allProjects) {
 				List<String> subModules = currentProject.getModules()
-				boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains("io.repaint.maven:tiles-maven-plugin")
+				boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains(TILEPLUGIN_KEY)
 
 				if (containsTiles) {
-					if (subModules != null && subModules.size() > 0) {
+					Plugin plugin = currentProject.getPlugin(TILEPLUGIN_KEY);
+					if (plugin.isInherited() && subModules != null && subModules.size() > 0) {
 						Model currentModel = currentProject.getModel();
 						for (MavenProject otherProject : allProjects) {
 							Parent otherParent = otherProject.getModel().getParent()

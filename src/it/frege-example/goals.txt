@@ -1,1 +1,1 @@
-clean install exec:java
+clean dependency:go-offline install exec:java

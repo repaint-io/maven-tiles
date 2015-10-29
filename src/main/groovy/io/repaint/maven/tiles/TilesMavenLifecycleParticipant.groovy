@@ -47,7 +47,7 @@ import org.apache.maven.model.building.ModelBuildingListener
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingResult
 import org.apache.maven.model.building.ModelProcessor
-import org.apache.maven.model.building.ModelSource
+import org.apache.maven.model.building.ModelSource2
 import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
@@ -279,7 +279,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 							}
 						}
 					}
-					
+
 					orchestrateMerge(currentProject)
 
 					// did we expect but not get a distribution artifact repository?
@@ -358,7 +358,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		//projectBuildingHelper, mavenSession.request.projectBuildingRequest )
 		// this allows us to know when the ModelProcessor is called that we should inject the tiles into the
 		// parent structure
-		ModelSource mainArtifactModelSource = createModelSource(project.file)
+		ModelSource2 mainArtifactModelSource = createModelSource(project.file)
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
 			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
 		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
@@ -417,8 +417,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		copyModel(project.model, finalModel.effectiveModel)
 	}
 
-	ModelSource createModelSource(File pomFile) {
-		return new ModelSource() {
+	ModelSource2 createModelSource(File pomFile) {
+		return new ModelSource2() {
 			InputStream stream = pomFile.newInputStream()
 
 			@Override
@@ -430,6 +430,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			String getLocation() {
 				return pomFile.absolutePath
 			}
+
+			@Override
+			URI getLocationURI() {
+				return pomFile.toURI()
+			}
+
+			@Override
+			ModelSource2 getRelatedSource( String relPath ) {
+				return createModelSource(new File(pomFile, relPath))
+			}
 		}
 	}
 
@@ -437,7 +447,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// this is for resolving parents, so always poms
 
 		return new ModelResolver() {
-			ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
+			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
 				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
@@ -447,7 +457,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				return createModelSource(artifact.file)
 			}
 
-			ModelSource resolveModel(Parent parent) throws UnresolvableModelException {
+			ModelSource2 resolveModel(Parent parent) throws UnresolvableModelException {
 				return resolveModel(parent.groupId, parent.artifactId, parent.version)
 			}
 

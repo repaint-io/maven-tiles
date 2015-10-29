@@ -221,7 +221,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-		List<MavenProject> allProjects = mavenSession.getAllProjects()
+		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
 			for (MavenProject currentProject : allProjects) {
 				List<String> subModules = currentProject.getModules()

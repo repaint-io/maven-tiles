@@ -277,7 +277,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		// this allows us to know when the ModelProcessor is called that we should inject the tiles into the
 		// parent structure
-		ModelSource mainArtifactModelSource = createModelSource(project.file)
+		ModelSource2 mainArtifactModelSource = createModelSource(project.file)
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
 			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
 		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
@@ -327,8 +327,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		copyModel(project.model, finalModel.effectiveModel)
 	}
 
-	ModelSource createModelSource(File pomFile) {
-		return new ModelSource() {
+	ModelSource2 createModelSource(File pomFile) {
+		return new ModelSource2() {
 			InputStream stream = pomFile.newInputStream()
 
 			@Override
@@ -339,6 +339,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			@Override
 			String getLocation() {
 				return pomFile.absolutePath
+			}
+
+			@Override
+			URI getLocationURI() {
+				return pomFile.toURI()
+			}
+
+			@Override
+			ModelSource2 getRelatedSource( String relPath ) {
+				return createModelSource(new File(pomFile, relPath))
 			}
 		}
 	}

@@ -194,6 +194,18 @@ and Source plugins
 This allows me to open source all my tiles except for the nexus tile, and then decide in the final artifact where I will
 release it.
 
+== Using Snapshots of Tiles
+
+`-SNAPSHOT` versions of tiles work when installed into your local `~/.m2/repository`, however - if you wish to use
+a _published_ SNAPSHOT - you will need to declare a `<repository>` in your `pom.xml` that support SNAPSHOTs.
+Review the [introduction to repositories](https://maven.apache.org/guides/introduction/introduction-to-repositories.html)
+section on the Apache Maven website.
+
+If you don't wish to include `<repository>` definitions in your project source, declaring them in an activated
+`<profile>` in your `~/.m2/settings.xml` file is a viable alternative.
+
+NOTE: This introduces an element of inconsistentcy/non-reproducability to your build and should be done with care.
+
 == Mojos
 
 There are two mojos in the plugin, attach-tile and validate. attach-tile is only used by the deploy/install

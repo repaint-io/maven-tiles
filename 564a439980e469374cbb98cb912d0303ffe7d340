@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7ac7a964_d9a1daaa",
+        "filename": "README.adoc",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-11-21T23:11:13Z",
+      "side": 1,
+      "message": "Agreed - not disagreeing with the terminology, only that as far as execution is concerned - you can USE a tile ( if non-inherited ).\n\nYou can\u0027t DEFINE a tile EITHER a reactor or multi-module build.",
+      "parentUuid": "7ac7a964_d9babae0",
+      "range": {
+        "startLine": 30,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 9
+      },
+      "revId": "564a439980e469374cbb98cb912d0303ffe7d340",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7ac7a964_99f122d0",
         "filename": "README.adoc",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Perhaps the comment needs to change to - remove all the non-accepted repaint crap, turn it into a reactor build and if it still occurs we\u0027ll look at it.",
       "parentUuid": "7ac7a964_99f122d0",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 89
+      },
+      "revId": "564a439980e469374cbb98cb912d0303ffe7d340",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac7a964_f9a696c0",
+        "filename": "README.adoc",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-11-21T23:11:13Z",
+      "side": 1,
+      "message": "Agreed.  It\u0027s more just about wording.",
+      "parentUuid": "7ac7a964_f9bf76ce",
       "range": {
         "startLine": 37,
         "startChar": 0,

@@ -22,6 +22,21 @@ This could, for example, allow you to have build aspects consistent across your 
 distribution of internal vs external artifacts kept in a single tile. In the current single parent hierarchy, this
 is all duplicated.
 
+== Where can't I use a Maven Tile?
+
+- *define: reactor build* - pom.xml that contains only modules, no plugins,
+  no dependencies, no dependency management, no plugin management. These are used as shortcuts to get your full project
+  installed or tested.
+- *define: multi-module build* - pom.xml that contains plugins and/or dependencies, dependency management, plugin management
+
+With those defined:
+
+- Your tile cannot be part of a reactor build, it must exist before the reactor build takes place, because that
+  process only ever occurs once and the parent build order is otherwise unknown. If you find issues in your reactor
+  build like this, please let us know on the https://github.com/repaint-io/maven-tiles/issues/[Github issues].
+- We do not support issues raised where you are using a multi-module build. These are the
+  anti-thesis of Repaint.IO's philosophy of composition over inheritance.
+
 == Composing a Maven Tile
 
 A Maven Tile is made up of a pom.xml and a tile.xml. The pom.xml contains the normal release information. When using

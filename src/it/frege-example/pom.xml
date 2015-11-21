@@ -19,25 +19,51 @@
 				<extensions>true</extensions>
 				<configuration>
 					<tiles>
-						<tile>com.theoryinpractise.frege:frege-maven-tile:xml:tile-pom:[1.0.0,2.0.0)</tile>
+						<tile>com.theoryinpractise.frege:frege-maven-tile:[1.0.4,2.0.0)</tile>
 					</tiles>
 				</configuration>
 			</plugin>
 			<plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.4.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>io.repaint.tiles.Test</mainClass>
-        </configuration>
-      </plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+				  </execution>
+				</executions>
+				<configuration>
+					<mainClass>io.repaint.tiles.Test</mainClass>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.0.0-beta-5</version>
+				<configuration>
+					<flattenMode>oss</flattenMode>
+				</configuration>
+				<executions>
+					<!-- enable flattening -->
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<!-- ensure proper cleanup -->
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

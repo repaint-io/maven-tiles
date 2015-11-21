@@ -7,7 +7,7 @@ if ( !file.isFile() ) {
 
 String content = new Scanner(file).useDelimiter("\\Z").next();
 
-if (!content.contains("[INFO] Mixed 'io.repaint.tiles:frege-example:testing' with tile 'com.theoryinpractise.frege:frege-maven-tile:1.0.2' as it's new parent.")) {
+if (!content.contains("[INFO] Mixed 'io.repaint.tiles:frege-example:testing' with tile 'com.theoryinpractise.frege:frege-maven-tile")) {
   throw new Exception("Tile not injected");
 }
 

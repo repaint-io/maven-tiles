@@ -145,18 +145,31 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			type, classifier, new DefaultArtifactHandler(type))
 	}
 
-
+	/**
+	 * Return the given Artifact's .pom artifact
+	 */
+	protected Artifact getPomArtifactForArtifact(Artifact artifact) {
+		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
+	}
 
 	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
 		try {
 			mavenVersionIsolate.resolveVersionRange(tileArtifact)
 
+			// Resolve the .xml file for the tile
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
 
+			// Resolve the .pom file for the tile
+			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
+			resolver.resolve(pomArtifact, remoteRepositories, localRepository)
+
 			if (System.getProperty("performRelease")?.asBoolean()) {
+
 				if (tileArtifact.version.endsWith("-SNAPSHOT")) {
+
 					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} is a SNAPSHOT and we are releasing.",
 						tileArtifact.getFile())
+
 				}
 			}
 

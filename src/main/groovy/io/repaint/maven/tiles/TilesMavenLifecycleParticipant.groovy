@@ -22,26 +22,31 @@ import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.AetherIsolator
 import io.repaint.maven.tiles.isolators.Maven30Isolator
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
-import static io.repaint.maven.tiles.GavUtil.artifactName
-import static io.repaint.maven.tiles.GavUtil.artifactGav
-import static io.repaint.maven.tiles.GavUtil.modelGav
-import static io.repaint.maven.tiles.GavUtil.parentGav
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import org.apache.maven.artifact.repository.ArtifactRepository
+import org.apache.maven.artifact.repository.ArtifactRepositoryFactory
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
+import org.apache.maven.model.DistributionManagement
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.Repository
-import org.apache.maven.model.building.*
+import org.apache.maven.model.building.DefaultModelBuilder
+import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.ModelBuilder
+import org.apache.maven.model.building.ModelBuildingRequest
+import org.apache.maven.model.building.ModelBuildingResult
+import org.apache.maven.model.building.ModelProcessor
+import org.apache.maven.model.building.ModelSource
 import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
@@ -54,6 +59,11 @@ import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 import org.xml.sax.SAXParseException
+
+import static io.repaint.maven.tiles.GavUtil.artifactGav
+import static io.repaint.maven.tiles.GavUtil.artifactName
+import static io.repaint.maven.tiles.GavUtil.modelGav
+import static io.repaint.maven.tiles.GavUtil.parentGav
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
@@ -87,6 +97,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	ProjectBuildingHelper projectBuildingHelper
+
+	/**
+	 * Component used to create a repository.
+	 */
+	ArtifactRepositoryFactory repositoryFactory;
+
+	/**
+	 * Map that contains the layouts.
+	 */
+	@Requirement( role = ArtifactRepositoryLayout.class )
+	private Map<String, ArtifactRepositoryLayout> repositoryLayouts;
 
 	protected MavenVersionIsolator mavenVersionIsolate
 
@@ -221,6 +242,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
+		repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory)
+		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
 			for (MavenProject currentProject : allProjects) {
@@ -243,7 +267,35 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 					}
 					
 					orchestrateMerge(currentProject)
+
+					// did we expect but not get a distribution artifact repository?
+					if (!currentProject.distributionManagementArtifactRepository) {
+						discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(currentProject)
+					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * If we get here, we have a Tiles project that might have a distribution management section but it is playing
+	 * dicky-birds and hasn't set up the distribution management repositories.
+	 *
+	 * @param project
+	 */
+	void discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(MavenProject project) {
+		DistributionManagement distributionManagement = project.model.distributionManagement
+
+		if (distributionManagement) {
+			if (distributionManagement.repository) {
+				project.setReleaseArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
+					distributionManagement.repository.id, distributionManagement.repository.url,
+					repositoryLayouts.get( distributionManagement.repository.layout ?: 'default' ), true ))
+			}
+			if (distributionManagement.snapshotRepository) {
+				project.setSnapshotArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
+					distributionManagement.snapshotRepository.id, distributionManagement.snapshotRepository.url,
+					repositoryLayouts.get( distributionManagement.snapshotRepository.layout ?: 'default' ), true ))
 			}
 		}
 	}
@@ -450,6 +502,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	protected void copyModel(Model projectModel, Model newModel) {
 
+		// no setting parent, we have generated an effective model which is now all copied in
 		projectModel.build = newModel.build
 		projectModel.dependencyManagement = newModel.dependencyManagement
 		projectModel.dependencies = newModel.dependencies

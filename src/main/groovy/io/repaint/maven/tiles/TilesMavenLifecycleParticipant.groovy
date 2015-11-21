@@ -312,6 +312,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
 						&& model.realVersion == project.version && model.packaging == project.packaging) {
 						injectTilesIntoParentStructure(tiles, model, request)
+					} else if (model.packaging == 'tile' || model.packaging == 'pom') {
+						TileModel oneOfUs = tiles.find { TileModel tm ->
+							Model tileModel = tm.model
+							return (model.artifactId == tileModel.artifactId && model.realGroupId == tileModel.realGroupId &&
+							  model.realVersion == tileModel.realVersion)
+						}
+
+						if (oneOfUs) {
+							model = oneOfUs.model
+						}
 					}
 				}
 

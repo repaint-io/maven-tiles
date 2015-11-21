@@ -22,6 +22,25 @@ This could, for example, allow you to have build aspects consistent across your 
 distribution of internal vs external artifacts kept in a single tile. In the current single parent hierarchy, this
 is all duplicated.
 
+== Where can't I use a Maven Tile?
+
+The following are Repaint project definitions:
+
+- *define: reactor build* - pom.xml that contains only modules, no plugins,
+  no dependencies, no dependency management, no plugin management. These are used as shortcuts to get your full project
+  installed or tested.
+- *define: multi-module build* - pom.xml that contains plugins and/or dependencies, dependency management, plugin management
+
+With those defined:
+
+- You can use a tile in a reactor or multi-module build where the tile is a module and (a) only used in the
+  other modules or (b) used in the parent with the inherits config turned off (so it is not inherited by the children).
+  This is a side effect of how Maven works and we cannot work around it.
+- We do not prioritize issues raised where you are using a multi-module build. These are the
+  anti-thesis of Repaint.IO's philosophy of composition over inheritance. If you raise the issue and it seems a
+  reasonable use case we will look at it, but please be aware that it is unlikely to be looked at by us without an
+  explicit reproducible test case.
+
 == Composing a Maven Tile
 
 A Maven Tile is made up of a pom.xml and a tile.xml. The pom.xml contains the normal release information. When using

@@ -1,14 +1,9 @@
-= Tiles Maven Plugin - Version 2.3
+= Tiles Maven Plugin - Version 2.5
 
 == Overview
 
 The _tiles-maven-plugin_ is a Maven Plugin that tries to bringing the *composition* that is available to
 dependencies to the parent structure as well.
-
-https://buildhive.cloudbees.com/job/rvowles/job/maven-tiles/[Build Status]
-
-[[img-sunset]]
-image::https://buildhive.cloudbees.com/job/rvowles/job/maven-tiles/badge/icon[caption="Cloudbees Build Status"]
 
 == How do I make a Maven Tile?
 
@@ -46,7 +41,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.3</version>
+        <version>2.5</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>
@@ -144,7 +139,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.3</version>
+      <version>2.5</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>

@@ -1,0 +1,16 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+if (!content.contains("[INFO] Mixed 'io.repaint.tiles:apache-maven-central-tile'")) {
+  throw new Exception("Tile not injected");
+}
+
+if (!content.contains("Spring boot lives!")) {
+  throw new Exception("Compiled example output not found.");
+}

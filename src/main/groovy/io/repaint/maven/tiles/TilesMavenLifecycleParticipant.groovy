@@ -433,7 +433,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 
 			ModelResolver newCopy() {
-				return null
+				return createModelResolver()
 			}
 		}
 

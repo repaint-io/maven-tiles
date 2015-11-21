@@ -43,6 +43,7 @@ import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
 import org.apache.maven.model.building.ModelBuilder
+import org.apache.maven.model.building.ModelBuildingListener
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingResult
 import org.apache.maven.model.building.ModelProcessor
@@ -334,12 +335,22 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
+
+
 	@CompileStatic(TypeCheckingMode.SKIP)
 	protected void thunkModelBuilder(MavenProject project) {
 		List<TileModel> tiles = processedTiles.values().collect({it.tileModel})
 
 		if (!tiles) return
 
+		// Maven 3.2.5 doesn't let you have access to this (package private), 3.3.x does
+		def modelBuildingListenerConstructor = Class.forName("org.apache.maven.project.DefaultModelBuildingListener").declaredConstructors[0]
+		modelBuildingListenerConstructor.accessible = true
+		ModelBuildingListener modelBuildingListener = modelBuildingListenerConstructor.newInstance(project,
+			projectBuildingHelper, mavenSession.request.projectBuildingRequest)
+
+		// new org.apache.maven.project.PublicDefaultModelBuildingListener( project,
+		//projectBuildingHelper, mavenSession.request.projectBuildingRequest )
 		// this allows us to know when the ModelProcessor is called that we should inject the tiles into the
 		// parent structure
 		ModelSource mainArtifactModelSource = createModelSource(project.file)
@@ -349,8 +360,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			profiles: mavenSession.request.projectBuildingRequest.profiles,
 		  activeProfileIds: mavenSession.request.projectBuildingRequest.activeProfileIds,
 			inactiveProfileIds: mavenSession.request.projectBuildingRequest.inactiveProfileIds,
-		  modelBuildingListener: new org.apache.maven.project.DefaultModelBuildingListener( project,
-			  projectBuildingHelper, mavenSession.request.projectBuildingRequest ),
+		  modelBuildingListener: modelBuildingListener,
 			locationTracking: true, twoPhaseBuilding: true, processPlugins: true)
 
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.5
+
+=== Added
+
+- If something is trying to use the MavenBuilder, because we remain in the lifecycle
+ they were requesting the tile parents and because they were of type "tile" they
+ were not being accepted by plugins that wanted "pom" parents (which is perfectly reasonable). This
+ particularly affected the flatten plugin. There is a change in the smack-talk we introduce
+ to ensure that tile models are returned as pom models.
+- Mixed in tiles were not appearing as distribution management early enough, so now after
+ the resolution of a project's model, we check if there is a distribution management section
+ and insert it into the MavenProject so the Deploy plugin can pick it up. Much like the deploy
+ plugin does for supporting overrides.
+
 == 2.2 - PENDING
 
 === Added

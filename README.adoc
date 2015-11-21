@@ -5,6 +5,9 @@
 The _tiles-maven-plugin_ is a Maven Plugin that tries to bringing the *composition* that is available to
 dependencies to the parent structure as well.
 
+[[img-sunset]]
+image::https://travis-ci.org/repaint-io/maven-tiles.svg[caption="Travis Build Status"]
+
 == How do I make a Maven Tile?
 
 Tiles are https://github.com/maoo/maven-tiles-examples/tree/master/tiles[plain Maven pom artifacts] which contain

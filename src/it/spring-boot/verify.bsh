@@ -1,0 +1,16 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+if (!content.contains("[INFO] Mixed 'com.theoryinpractise.frege:frege-maven-tile:1.0.4' with original parent")) {
+  throw new Exception("Tile not injected");
+}
+
+if (!content.contains("Spring boot lives!")) {
+  throw new Exception("Compiled example output not found.");
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ac7a964_79e4460d",
+        "filename": "README.adoc",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-11-21T22:16:15Z",
+      "side": 1,
+      "message": "You can actually - and we do. \n\nThe plugin actually prevents you from running with it configured in a pom module UNLESS you configure the tile plugin to be \u003cinherited\u003efalse\u003c/inherited\u003e\n\nThis change was made to allow using a release tile in the multi-module build.\n\nAs far as the maven build process is concerned - there is no different to a reactor or multi-module build.",
+      "range": {
+        "startLine": 30,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 9
+      },
+      "revId": "564a439980e469374cbb98cb912d0303ffe7d340",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac7a964_99f122d0",
+        "filename": "README.adoc",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2015-11-21T22:16:15Z",
+      "side": 1,
+      "message": "100% disagree. The point of tiles is to move OFF inheritance as far as the build is concerned.\n\nPretty much any problem arising from a multi-module build IS a reactor build problem, or how IntelliJ/Eclipse loads multiple projects into single instance of a Maven Server.\n\nThey will however, be given less priority. Any issues raised still need to be checked for being valid issues. Just because they manifested IN a multi-module build, doesn\u0027t mean they\u0027re not bugs.",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 89
+      },
+      "revId": "564a439980e469374cbb98cb912d0303ffe7d340",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

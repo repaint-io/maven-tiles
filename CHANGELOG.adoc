@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.7
+
+- Clear collected tiles before processing each project in reactor.
++
+Removes warning for duplicate tiles in reactor builds and fixes
+bad behaviour if projects in reactor don't use the same set of tiles.
+
+== 2.6
+
+- When resolving tile artifacts, we were only resolving the .xml tile artifact
+  and not it's .pom artifact as well, this caused resolution issues with the
+  flatten plugin ( among others ) when the artifact didn't exist in your
+  local ``~/.m2/repository`.
+
 == 2.5
 
 === Added
@@ -16,7 +30,7 @@ All notable changes to this project will be documented in this file.
  and insert it into the MavenProject so the Deploy plugin can pick it up. Much like the deploy
  plugin does for supporting overrides.
 
-== 2.2 - PENDING
+== 2.2
 
 === Added
 
@@ -145,4 +159,3 @@ All notable changes to this project will be documented in this file.
 === Changed
 - Fixed faulty merging of `<dependencyManagement>` sections from parent POMs
   when the tiles plugin was included in your project POM.
-

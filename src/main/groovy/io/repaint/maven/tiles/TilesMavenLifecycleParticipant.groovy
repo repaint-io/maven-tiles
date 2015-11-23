@@ -323,6 +323,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @throws MavenExecutionException
 	 */
 	protected void orchestrateMerge(MavenProject project) throws MavenExecutionException {
+		// Clear collected tiles from previous project in reactor
+		processedTiles.clear();
+		tileDiscoveryOrder.clear();
+		unprocessedTiles.clear();
+
 		// collect the first set of tiles
 		parseConfiguration(project.model, project.getFile(), true)
 

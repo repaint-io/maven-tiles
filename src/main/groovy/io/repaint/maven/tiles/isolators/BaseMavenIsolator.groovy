@@ -46,8 +46,20 @@ abstract class BaseMavenIsolator implements MavenVersionIsolator {
 
 		def versionRangeResult = versionRangeResolver.resolveVersionRange(repositorySystemSession, versionRangeRequest)
 
+		// Allow SNAPSHOT only if one of the bounds of version range is SNAPSHOT
+		boolean allowSnaphsot = (tileArtifact.version && tileArtifact.version.contains("-SNAPSHOT")) \
+			|| (tileArtifact.versionRange && tileArtifact.versionRange.toString().contains("-SNAPSHOT"))
+		
 		if (versionRangeResult.versions) {
-			tileArtifact.version = versionRangeResult.highestVersion
+			if(allowSnaphsot) {
+				tileArtifact.version = versionRangeResult.highestVersion
+			} else {
+				versionRangeResult.versions.each { Object version ->
+					if(!version.toString().endsWith("-SNAPSHOT")) {
+						tileArtifact.version = version
+					}
+				}
+			}
 		}
 	}
 }

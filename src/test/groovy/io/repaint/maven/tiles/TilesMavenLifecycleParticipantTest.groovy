@@ -102,7 +102,7 @@ public class TilesMavenLifecycleParticipantTest {
 	protected MavenVersionIsolator createFakeIsolate() {
 		return new MavenVersionIsolator() {
 			@Override
-			void resolveVersionRange(Artifact tileArtifact) {
+			void resolveVersionRange(Artifact tileArtifact, boolean allowSnapshots) {
 			}
 
 			@Override
@@ -132,7 +132,7 @@ public class TilesMavenLifecycleParticipantTest {
 		Artifact snapshot = getTileTestCoordinates()
 		System.setProperty(PERFORM_RELEASE, "true")
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(snapshot)
+			participant.resolveTile(snapshot,true)
 		}
 	}
 
@@ -147,7 +147,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(badbadbad)
+			participant.resolveTile(badbadbad,true)
 		}
 		participant.resolver = [
 			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
@@ -156,7 +156,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(badbadbad)
+			participant.resolveTile(badbadbad,true)
 		}
 	}
 
@@ -235,12 +235,12 @@ public class TilesMavenLifecycleParticipantTest {
 		File licensePom = new File('src/test/resources/session-license-pom.xml')
 
 		participant.mavenVersionIsolate = [
-			resolveVersionRange: { Artifact artifact ->
+			resolveVersionRange: { Artifact artifact, boolean allowSnapshots ->
 				artifact.file = licensePom
 			}
 		] as MavenVersionIsolator
 
-		def resolver = participant.createModelResolver()
+		def resolver = participant.createModelResolver(true)
 		def model = resolver.resolveModel('my', 'left', 'foot')
 
 		assert model.inputStream.text == licensePom.text
@@ -312,7 +312,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		stuffParticipant()
 
-		participant.orchestrateMerge(new MavenProject())
+		participant.orchestrateMerge(new MavenProject(),true)
 	}
 
 	@Test
@@ -326,7 +326,7 @@ public class TilesMavenLifecycleParticipantTest {
 		MavenProject project = new MavenProject(model)
 
 		Throwable failure = shouldFail {
-			participant.orchestrateMerge(project)
+			participant.orchestrateMerge(project,true)
 		}
 
 		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range"
@@ -347,11 +347,11 @@ public class TilesMavenLifecycleParticipantTest {
 	protected resetParticipantToLoadTilesFromDisk() {
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
-			protected void thunkModelBuilder(MavenProject project1) {
+			protected void thunkModelBuilder(MavenProject project1, boolean allowSnapshots) {
 			}
 
 			@Override
-			protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
+			protected Artifact resolveTile(Artifact tileArtifact, boolean allowSnapshots) throws MavenExecutionException {
 				tileArtifact.file = new File("src/test/resources/${tileArtifact.artifactId}.xml")
 
 				return tileArtifact
@@ -376,7 +376,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(project)
+		participant.orchestrateMerge(project,true)
 
 		assert participant.processedTiles.size() == 4
 	}
@@ -387,7 +387,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(project)
+		participant.orchestrateMerge(project,true)
 		assert participant.processedTiles.size() == 4
 	}
 

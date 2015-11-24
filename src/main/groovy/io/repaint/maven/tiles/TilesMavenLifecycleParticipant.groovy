@@ -17,6 +17,10 @@
  **********************************************************************************************************************/
 package io.repaint.maven.tiles
 
+import com.google.common.collect.ListMultimap
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
+
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import io.repaint.maven.tiles.isolators.AetherIsolator
@@ -137,6 +141,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	List<String> tileDiscoveryOrder = []
 	Map<String, Artifact> unprocessedTiles = [:]
 
+	// Versionned plugins declared in discovered tiles
+	ListMultimap<String,Plugin> versionnedPlugins = MultimapBuilder.hashKeys().arrayListValues().build()
+
 	/**
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
 	 * pom itself (because we don't care about that).
@@ -211,6 +218,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 		try {
 			TileModel modelLoader = new TileModel(artifact.getFile(), artifact)
+			modelLoader.registerVersionnedPlugins(versionnedPlugins)
 
 			logger.debug(String.format("Loaded Maven Tile %s", artifactGav(artifact)))
 
@@ -324,15 +332,18 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	protected void orchestrateMerge(MavenProject project) throws MavenExecutionException {
 		// Clear collected tiles from previous project in reactor
-		processedTiles.clear();
-		tileDiscoveryOrder.clear();
-		unprocessedTiles.clear();
+		processedTiles.clear()
+		tileDiscoveryOrder.clear()
+		unprocessedTiles.clear()
+		
+		// Clear collected plugins from previous project in reactor
+		versionnedPlugins.clear()
 
 		// collect the first set of tiles
 		parseConfiguration(project.model, project.getFile(), true)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		loadAllDiscoveredTiles()
+		loadAllDiscoveredTiles(project)
 
 		// don't do anything if there are no tiles
 		if (processedTiles) {
@@ -550,7 +561,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.properties = newModel.properties
 	}
 
-	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles(MavenProject project) throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
@@ -565,7 +576,29 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 		}
 
+		resolvePluginsVersion(project)
 		ensureAllTilesDiscoveredAreAccountedFor()
+	}
+
+	/**
+	 * resolve plugins version for plugins declared in multiple tiles
+	 */
+	void resolvePluginsVersion(MavenProject project) {
+		versionnedPlugins.keySet().each { String key ->
+			List<Plugin> plugins = versionnedPlugins.get(key)
+			if(plugins) {
+				VersionRange versionRange = VersionRange.createFromVersionSpec(plugins.get(0).version)
+				plugins.subList(1,plugins.size()).each {Plugin plugin ->
+					versionRange = versionRange.restrict(VersionRange.createFromVersionSpec(plugin.version))
+				}
+				if(!versionRange.recommendedVersion && !versionRange.restrictions) {
+					throw new MavenExecutionException("Over-constrainted version for plugin ${key}.", project.getFile())
+				}
+				plugins.each { Plugin plugin ->
+					mavenVersionIsolate.resolvePluginVersionRange(plugin,versionRange)
+				}
+			}
+		}
 	}
 
 	/**

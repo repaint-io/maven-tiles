@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
+import org.apache.maven.model.Plugin
 
 @CompileStatic
 class GavUtil {
@@ -26,6 +27,10 @@ class GavUtil {
 		} else {
 			return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 		}
+	}
+
+	public static String pluginName(Plugin plugin) {
+		return String.format("%s:%s", plugin.groupId, plugin.artifactId)
 	}
 
 	public static String getRealGroupId(Model model) {

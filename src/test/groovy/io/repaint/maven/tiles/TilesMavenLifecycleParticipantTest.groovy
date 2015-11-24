@@ -24,6 +24,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
@@ -103,6 +104,10 @@ public class TilesMavenLifecycleParticipantTest {
 		return new MavenVersionIsolator() {
 			@Override
 			void resolveVersionRange(Artifact tileArtifact) {
+			}
+			
+			@Override
+			void resolvePluginVersionRange(Plugin plugin, VersionRange versionRange) {
 			}
 
 			@Override

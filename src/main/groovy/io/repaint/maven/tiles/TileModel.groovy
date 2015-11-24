@@ -1,10 +1,16 @@
 package io.repaint.maven.tiles
+
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
 import org.apache.maven.artifact.Artifact
+import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.model.Model
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+
+import com.google.common.collect.Multimap;
+
 /**
  * This will parse a tile.xml file with the intent of removing extra syntax, holding onto it and then
  * pushing the rest into a standard model. We could have used a Delegate or a Mixin here potentially, but
@@ -50,8 +56,22 @@ class TileModel {
 
 		model = pomReader.read(strippedPom())
 	}
+	
+	public void registerVersionnedPlugins(Multimap<String, Plugin> pluginMap) {
+		// Register versionned plugin to interpolate the best shared version if plugin is declared in several tiles
+		if (model.build) {
+			if (model.build.plugins) {
+				model.build.plugins.each { plugin ->
+					if(plugin.version) {
+						pluginMap.put(GavUtil.pluginName(plugin),plugin)
+					}
+				}
+			}
+		}
+	}
 
 	public TileModel() {}
+	
 	public TileModel(File tilePom, Artifact artifact) {
 		loadTile(tilePom)
 
@@ -75,6 +95,5 @@ class TileModel {
 				}
 			}
 		}
-
 	}
 }

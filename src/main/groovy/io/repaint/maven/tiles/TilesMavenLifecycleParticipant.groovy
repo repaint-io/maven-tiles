@@ -153,9 +153,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
-	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
+	protected Artifact resolveTile(Artifact tileArtifact, boolean allowSnapshots) throws MavenExecutionException {
 		try {
-			mavenVersionIsolate.resolveVersionRange(tileArtifact)
+			mavenVersionIsolate.resolveVersionRange(tileArtifact,allowSnapshots)
 
 			// Resolve the .xml file for the tile
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
@@ -280,7 +280,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 						}
 					}
 					
-					orchestrateMerge(currentProject)
+					Xpp3Dom pluginConfig = plugin.configuration as Xpp3Dom
+					String allowSnapshots = pluginConfig?.getChild("allowSnapshots")?.getValue()
+					orchestrateMerge(currentProject,(allowSnapshots != null) ? Boolean.valueOf(allowSnapshots) : true)
 
 					// did we expect but not get a distribution artifact repository?
 					if (!currentProject.distributionManagementArtifactRepository) {
@@ -322,7 +324,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @param project - the currently evaluated project
 	 * @throws MavenExecutionException
 	 */
-	protected void orchestrateMerge(MavenProject project) throws MavenExecutionException {
+	protected void orchestrateMerge(MavenProject project, boolean allowSnapshots) throws MavenExecutionException {
 		// Clear collected tiles from previous project in reactor
 		processedTiles.clear();
 		tileDiscoveryOrder.clear();
@@ -332,18 +334,18 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		parseConfiguration(project.model, project.getFile(), true)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		loadAllDiscoveredTiles()
+		loadAllDiscoveredTiles(allowSnapshots)
 
 		// don't do anything if there are no tiles
 		if (processedTiles) {
-			thunkModelBuilder(project)
+			thunkModelBuilder(project,allowSnapshots)
 		}
 	}
 
 
 
 	@CompileStatic(TypeCheckingMode.SKIP)
-	protected void thunkModelBuilder(MavenProject project) {
+	protected void thunkModelBuilder(MavenProject project, boolean allowSnapshots) {
 		List<TileModel> tiles = processedTiles.values().collect({it.tileModel})
 
 		if (!tiles) return
@@ -360,7 +362,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// parent structure
 		ModelSource mainArtifactModelSource = createModelSource(project.file)
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
-			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
+			pomFile: project.file, modelResolver: createModelResolver(allowSnapshots), modelCache: modelCache,
 		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
 			profiles: mavenSession.request.projectBuildingRequest.profiles,
 		  activeProfileIds: mavenSession.request.projectBuildingRequest.activeProfileIds,
@@ -433,7 +435,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected ModelResolver createModelResolver() {
+	protected ModelResolver createModelResolver(boolean allowSnapshots) {
 		// this is for resolving parents, so always poms
 
 		return new ModelResolver() {
@@ -441,7 +443,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
-				mavenVersionIsolate.resolveVersionRange(artifact)
+				mavenVersionIsolate.resolveVersionRange(artifact,allowSnapshots)
 				resolver.resolve(artifact, remoteRepositories, localRepository)
 
 				return createModelSource(artifact.file)
@@ -461,10 +463,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 
 			ModelResolver newCopy() {
-				return createModelResolver()
+				return createModelResolver(allowSnapshots)
 			}
 		}
-
 	}
 
 	/**
@@ -550,11 +551,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.properties = newModel.properties
 	}
 
-	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles(boolean allowSnapshots) throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
-			Artifact resolvedTile = resolveTile(unprocessedTiles.remove(unresolvedTile))
+			Artifact resolvedTile = resolveTile(unprocessedTiles.remove(unresolvedTile),allowSnapshots)
 
 			TileModel tileModel = loadModel(resolvedTile)
 

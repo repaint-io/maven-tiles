@@ -39,15 +39,28 @@ abstract class BaseMavenIsolator implements MavenVersionIsolator {
 			throw new MavenExecutionException("Unable to load, try another Isolator.", (Throwable)null)
 		}
 	}
-
-	public void resolveVersionRange(Artifact tileArtifact) {
+	
+	public void resolveVersionRange(Artifact tileArtifact, boolean allowSnapshots) {
 		def versionRangeRequest = versionRangeRequestClass.newInstance(RepositoryUtils.toArtifact(tileArtifact),
 			RepositoryUtils.toRepos(remoteRepositories), null)
 
 		def versionRangeResult = versionRangeResolver.resolveVersionRange(repositorySystemSession, versionRangeRequest)
 
+		// Allow SNAPSHOT only if one of the bounds of version range is SNAPSHOT
+		boolean doAllowSnaphsot = allowSnapshots \
+			|| (tileArtifact.version && tileArtifact.version.contains("-SNAPSHOT")) \
+			|| (tileArtifact.versionRange && tileArtifact.versionRange.toString().contains("-SNAPSHOT"))
+		
 		if (versionRangeResult.versions) {
-			tileArtifact.version = versionRangeResult.highestVersion
+			if(doAllowSnaphsot) {
+				tileArtifact.version = versionRangeResult.highestVersion
+			} else {
+				versionRangeResult.versions.each { Object version ->
+					if(!version.toString().endsWith("-SNAPSHOT")) {
+						tileArtifact.version = version
+					}
+				}
+			}
 		}
 	}
 }

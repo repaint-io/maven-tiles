@@ -8,7 +8,7 @@ import org.apache.maven.model.merge.MavenModelMerger
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
 interface MavenVersionIsolator {
-	public void resolveVersionRange(Artifact tileArtifact)
+	public void resolveVersionRange(Artifact tileArtifact, boolean allowSnapshots)
 	public ModelProblemCollector createModelProblemCollector()
 	public def createModelData(Model model, File pomFile)
 }

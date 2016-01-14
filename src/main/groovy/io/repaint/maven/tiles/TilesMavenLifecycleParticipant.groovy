@@ -337,6 +337,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// don't do anything if there are no tiles
 		if (processedTiles) {
 			thunkModelBuilder(project)
+			
+			// update model (test) source directory, which is the first entry and might have been set through a tile
+			if (project.model.build.sourceDirectory) {
+				project.compileSourceRoots[0] = project.model.build.sourceDirectory;
+			}
+			if (project.model.build.testSourceDirectory) {
+				project.testCompileSourceRoots[0] = project.model.build.testSourceDirectory;
+			}
 		}
 	}
 

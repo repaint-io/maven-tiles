@@ -414,7 +414,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			ModelBuildingResult interimBuild = modelBuilder.build(request)
 
 			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
-			copyModel(project.model, finalModel.effectiveModel)
+			copyModel(project, finalModel.effectiveModel)
 		} finally {
 			// restore original ModelProcessor
 			((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
@@ -559,9 +559,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	}
 
-	protected void copyModel(Model projectModel, Model newModel) {
+	protected void copyModel(MavenProject project, Model newModel) {
 
 		// no setting parent, we have generated an effective model which is now all copied in
+		Model projectModel = project.model
 		projectModel.build = newModel.build
 		projectModel.dependencyManagement = newModel.dependencyManagement
 		projectModel.dependencies = newModel.dependencies
@@ -579,6 +580,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.profiles = newModel.profiles
 		projectModel.prerequisites = newModel.prerequisites
 		projectModel.properties = newModel.properties
+
+		// update model (test) source directory, which is the first entry and might have been set through a tile
+		if (projectModel.build.sourceDirectory) {
+			project.compileSourceRoots[0] = projectModel.build.sourceDirectory;
+		}
+		if (projectModel.build.testSourceDirectory) {
+			project.testCompileSourceRoots[0] = projectModel.build.testSourceDirectory;
+		}
 	}
 
 	protected void loadAllDiscoveredTiles() throws MavenExecutionException {

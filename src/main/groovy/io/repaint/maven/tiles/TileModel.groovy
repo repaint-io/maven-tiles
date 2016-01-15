@@ -5,6 +5,7 @@ import groovy.xml.XmlUtil
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.codehaus.plexus.util.xml.Xpp3Dom
 /**
  * This will parse a tile.xml file with the intent of removing extra syntax, holding onto it and then
  * pushing the rest into a standard model. We could have used a Delegate or a Mixin here potentially, but
@@ -69,6 +70,11 @@ class TileModel {
 				model.build.plugins.each { plugin ->
 					if (plugin.executions) {
 						plugin.executions.each { execution ->
+							Xpp3Dom configuration = execution.configuration as Xpp3Dom
+							if (configuration?.getAttribute("tiles-keep-id") == "true") {
+								// do not rewrite the current execution id
+								return
+							}
 							execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
 						}
 					}

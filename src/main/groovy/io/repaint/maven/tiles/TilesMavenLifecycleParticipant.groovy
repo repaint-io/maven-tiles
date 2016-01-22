@@ -501,6 +501,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		if (tiles) {
 			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifact's...")
 			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as it's new parent.")
+			
+			// if there is a parent make sure the inherited groupId / version is correct
+			if (!pomModel.groupId) {
+				pomModel.groupId = originalParent.groupId
+				logger.info("Explicitly set groupId to '${pomModel.groupId}' from original parent '${parentGav(originalParent)}'.")
+			}
+			if (!pomModel.version) {
+				pomModel.version = originalParent.version
+				logger.info("Explicitly set version to '${pomModel.version}' from original parent '${parentGav(originalParent)}'.")
+			}
 		}
 
 		tiles.each { TileModel tileModel ->

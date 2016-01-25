@@ -65,6 +65,7 @@ import static io.repaint.maven.tiles.GavUtil.artifactGav
 import static io.repaint.maven.tiles.GavUtil.artifactName
 import static io.repaint.maven.tiles.GavUtil.modelGav
 import static io.repaint.maven.tiles.GavUtil.parentGav
+import static io.repaint.maven.tiles.GavUtil.getRealGroupId
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
@@ -136,6 +137,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	Map<String, ArtifactModel> processedTiles = [:]
 	List<String> tileDiscoveryOrder = []
 	Map<String, Artifact> unprocessedTiles = [:]
+	String applyBeforeParent;
 
 	/**
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
@@ -368,6 +370,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		  modelBuildingListener: modelBuildingListener,
 			locationTracking: true, twoPhaseBuilding: true, processPlugins: true)
 
+		boolean tilesInjected = false
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {
 			@Override
 			File locatePom(File projectDirectory) {
@@ -387,11 +390,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			@Override
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
-
+				
 				use(GavUtil) {
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
 						&& model.realVersion == project.version && model.packaging == project.packaging) {
+						// apply after first parent, but only if no explicit parent is set
+						if (!applyBeforeParent) {
+							injectTilesIntoParentStructure(tiles, model, request)
+							tilesInjected = true
+						}
+					} else if (modelGav(model) == applyBeforeParent) {
+						// apply after specific parent
 						injectTilesIntoParentStructure(tiles, model, request)
+						tilesInjected = true
 					} else if (model.packaging == 'tile' || model.packaging == 'pom') {
 						TileModel oneOfUs = tiles.find { TileModel tm ->
 							Model tileModel = tm.model
@@ -402,6 +413,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 						if (oneOfUs) {
 							model = oneOfUs.model
 						}
+					}
+					if(applyBeforeParent && !tilesInjected && model.parent) {
+						Artifact parentArtifact = getArtifactFromCoordinates(model.parent.groupId, model.parent.artifactId, 'pom', '', model.parent.version)
+						resolver.resolve(parentArtifact, remoteRepositories, localRepository)
+
+						// need to use an artifical ID for the parent (will be filtered out by the resolver)
+						model.parent.artifactId += "#" + getRealGroupId(project.model) + "-" + project.artifactId;
 					}
 				}
 
@@ -414,6 +432,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		ModelBuildingResult interimBuild = modelBuilder.build(request)
 
 		ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
+		if (!tilesInjected && applyBeforeParent) {
+			throw new MavenExecutionException("Cannot apply tiles, the expected parent ${applyBeforeParent} is not found.",
+				project.file)
+		}
 		copyModel(project.model, finalModel.effectiveModel)
 	}
 
@@ -438,6 +460,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		return new ModelResolver() {
 			ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
+				int artificialPart = artifactId.indexOf('#');
+				if (artificialPart >= 0) {
+					// remove artificial part
+					artifactId = artifactId.substring(0, artificialPart)
+				}
 				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
@@ -597,6 +624,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
+			applyBeforeParent = configuration.getChild("applyBefore")?.value;
 		}
 	}
 

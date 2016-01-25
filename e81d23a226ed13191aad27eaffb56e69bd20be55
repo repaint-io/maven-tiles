@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa81d914_49640f49",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-01-25T07:15:17Z",
+      "side": 1,
+      "message": "I\u0027ve been thinking about this patch over the Xmas/New Year break and finally getting around to looking at it again.\n\nI\u0027m wondering tho - I\u0027m open to allowing/disallowing snapshots and the functionality here, but I\u0027m not sure I want to play with modifying the basic POM syntax - not without acknowledging that we\u0027re doing something.... nasty here.  \n\nWe already have a means for tracking this with the \"smells\" settings, I wonder if adding something like \"rangemanipulation\" as a tile-smell might be a good idea here, without enabling that smell if we add allowSnapshots to any tile - the build of the tile fails - similar to adding dependencies etc.\n\nIt\u0027s a small thing, but just adds a small measure of double opt-in that we\u0027re doing something that\u0027s not just the standard parent-manipulation of Apache Maven.",
+      "revId": "e81d23a226ed13191aad27eaffb56e69bd20be55",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

@@ -205,6 +205,48 @@ If you don't wish to include `<repository>` definitions in your project source, 
 
 NOTE: This introduces an element of inconsistentcy/non-reproducability to your build and should be done with care.
 
+== Parent structure
+
+Tiles will always be applied as parents of the project that is built. Any orignal parent of that project will be added
+as the parent of the last applied tile. So if you apply Tiles `T1` and `T2` to a project `X` with a parent `P`, the 
+resulting hierarchy will be `X` - `T1` - `T2` - `P`. Thus (see section _Additional Notes_), the definitions in the parent
+can be overwritten by a tile, but not the other way around.
+
+However, there are situations where you want to define your tiles in a parent, e.g. when you have a lot of artifacts
+that are built in the same way. In this case you would want a structure like this: `X` - `P` - `T1` - `T2`. While you'd
+maybe expect it to work this way if the tiles are included in `P`, due to the way Maven works there's no way to know
+where a configuration comes from. To still enable this use case you can manually choose a parent where the tiles will
+be applied (in this case before `P`) resulting in the desired structure:
+
+[source,xml,indent=0]
+.pom.xml
+----
+<parent>
+	<groupId>group</groupId>
+	<artifactId>P</artifactId>
+	<version>1.0.0</version>
+</parent>
+<artifactId>X</artifactId>
+...
+<build>
+  <plugins>
+    <plugin>
+      <groupId>io.repaint.maven</groupId>
+      <artifactId>tiles-maven-plugin</artifactId>
+      <version>2.7</version>
+      <configuration>
+        <applyBefore>group:P</applyBefore>
+        <tiles>
+          <tile>group:T1:1.0.0</tile>
+          <tile>group:T2:1.0.0</tile>
+        </tiles>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+----
+
+
 == Mojos
 
 There are two mojos in the plugin, attach-tile and validate. attach-tile is only used by the deploy/install

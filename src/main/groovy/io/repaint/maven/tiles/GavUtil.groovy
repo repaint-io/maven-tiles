@@ -19,6 +19,10 @@ class GavUtil {
 	public static String modelGav(Model model) {
 		return String.format("%s:%s:%s", model.groupId, model.artifactId, model.version)
 	}
+	
+	public static String modelGa(Model model) {
+		return String.format("%s:%s", model.groupId, model.artifactId)
+	}
 
 	public static String parentGav(Parent model) {
 		if (!model) {

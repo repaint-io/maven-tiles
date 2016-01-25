@@ -25,6 +25,9 @@ abstract class AbstractTileMojo extends AbstractMojo {
 
 	@Parameter(property = "tiles", readonly = false, required = false)
 	List<String> tiles
+	
+	@Parameter(property = "applyBefore", readonly = false, required = false)
+	String applyBefore;
 
 	@Parameter(property = "buildSmells", readonly = false, required = false)
 	String buildSmells

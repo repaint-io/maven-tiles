@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa81d914_690d5390",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 4
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-01-25T07:05:03Z",
+      "side": 1,
+      "message": "It would be good to log the list of constraints/ranges resolved so that anyone using the plugin has something they can quickly scan against. Having dealt with lots of range issues in the past, being told that tile-a wanted [1,2] whilst tile-b wanted [2,3] and nothing could resolve would be a good thing.\n\nNot sure if this patch keeps a track of all the requested ranges in a usable manner at this point or not?",
+      "range": {
+        "startLine": 596,
+        "startChar": 40,
+        "endLine": 596,
+        "endChar": 77
+      },
+      "revId": "9a02b9780ad2df63274a262e3a284d7432521308",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa81d914_a9266b14",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/isolators/BaseMavenIsolator.groovy",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-01-25T07:05:03Z",
+      "side": 1,
+      "message": "This was rebased on-top of the patch to provide the allowSnapshots, ALSO looking at the presence of -SNAPSHOT in the range itself feels a little awkward.\n\nHaving two ways to enable that feature starts to make the magic of tiles a little more black magic.",
+      "range": {
+        "startLine": 84,
+        "startChar": 11,
+        "endLine": 84,
+        "endChar": 19
+      },
+      "revId": "9a02b9780ad2df63274a262e3a284d7432521308",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

@@ -59,3 +59,30 @@ git push origin HEAD:refs/for/master
 
 **IMPORTANT**: By submitting a patch, you agree to allow the project owners to
 license your work under the terms of the Apache 2.0 License.
+
+If you've already forked the Maven Tiles Github repository, you can configure
+your existing clone to support GerritHub submission as follows:
+
+Configure an existing clone::
+[source,shell]
+----
+git add remote gerrithub https://review.gerrithub.io/repaint-io/maven-tiles
+----
+Install Gerrit Commit Message Hook
+[source,shell]
+curl -Lo .git/hooks/commit-msg http://review.gerrithub.io/tools/hooks/commit-msg
+----
+Make changes and submit::
+[source,shell]
+----
+git add ...
+git commit ...
+git push gerrithub HEAD:refs/for/master
+----
+Update changes and resubmit::
+[source,shell]
+----
+git add ...
+git commit --amend ...
+git push gerrithub HEAD:refs/for/master
+----

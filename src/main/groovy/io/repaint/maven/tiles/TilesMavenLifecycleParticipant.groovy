@@ -410,11 +410,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
-
-		ModelBuildingResult interimBuild = modelBuilder.build(request)
-
-		ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
-		copyModel(project.model, finalModel.effectiveModel)
+		try {
+			ModelBuildingResult interimBuild = modelBuilder.build(request)
+	
+			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
+			copyModel(project.model, finalModel.effectiveModel)
+		} finally {
+			// restore original ModelProcessor
+			((DefaultModelBuilder)modelBuilder).setModelProcessor(modelProcessor)
+		}
 	}
 
 	ModelSource createModelSource(File pomFile) {

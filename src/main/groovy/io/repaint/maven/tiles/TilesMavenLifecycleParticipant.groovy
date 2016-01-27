@@ -420,6 +420,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 						// need to use an artifical ID for the parent (will be filtered out by the resolver)
 						model.parent.artifactId += "#" + getRealGroupId(project.model) + "-" + project.artifactId;
+						
+						if (request.modelCache.get(model.parent.groupId, model.parent.artifactId, model.parent.version,
+							org.apache.maven.model.building.ModelCacheTag.RAW.getName())) {
+							// tile combination already cached
+							tilesInjected = true
+						}
 					}
 				}
 

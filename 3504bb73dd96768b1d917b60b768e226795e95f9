@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa81d914_640d5f3e",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-01-31T02:42:41Z",
+      "side": 1,
+      "message": "We don\u0027t import ModelSource2?  Why not - does this even compile me?",
+      "revId": "3504bb73dd96768b1d917b60b768e226795e95f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

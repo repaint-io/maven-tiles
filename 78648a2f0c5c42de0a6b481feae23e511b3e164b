@@ -22,6 +22,30 @@
       "revId": "78648a2f0c5c42de0a6b481feae23e511b3e164b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_578316cc",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 4
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1007313
+      },
+      "writtenOn": "2016-02-19T10:34:20Z",
+      "side": 0,
+      "message": "This won\u0027t work for several reasons: \n\nfirst of all, it will only work if you want to apply the tiles before the direct parent. \n\nThen, it will only work if the parent is not used for any other project with different tiles, as it will be cached/reused. Every project that comes before the application of any tile must be unique in the reactor. If you apply it to project only, that is the case. It\u0027s not the case if you start applying it to parents. That\u0027s the whole reason for the \"#projectGroup:projectArtifact\" suffix to prevent reusing a previously cached parent directly.",
+      "parentUuid": "ba7be1f8_b7cd3260",
+      "range": {
+        "startLine": 507,
+        "startChar": 2,
+        "endLine": 508,
+        "endChar": 26
+      },
+      "revId": "78648a2f0c5c42de0a6b481feae23e511b3e164b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }

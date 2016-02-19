@@ -1,5 +1,7 @@
 = Tiles Maven Plugin - Version 2.7
 
+image:https://badges.gitter.im/repaint-io/maven-tiles.svg[link="https://gitter.im/repaint-io/maven-tiles?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
+
 == Overview
 
 The _tiles-maven-plugin_ is a Maven Plugin that tries to bringing the *composition* that is available to

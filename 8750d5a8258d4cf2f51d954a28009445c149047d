@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7be1f8_b721b2b6",
+        "filename": "README.adoc",
+        "patchSetId": 5
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-19T11:10:30Z",
+      "side": 1,
+      "message": "I spotted the bit of code where this reports if the declared parent doesn\u0027t exist ( somehow I missed that before ) and it sparked a thought that given Maven now supports ranges for parent references, would it be best to drop the version portion of the GAV here, so only have GA - otherwise we\u0027d have to play the annoying dance of parent patching all the time if this was used - or support ranges in these GAVs as well.",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 61
+      },
+      "revId": "8750d5a8258d4cf2f51d954a28009445c149047d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

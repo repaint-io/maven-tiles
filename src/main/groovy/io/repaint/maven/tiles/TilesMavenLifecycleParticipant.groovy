@@ -442,7 +442,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			@Override
 			ModelSource2 getRelatedSource( String relPath ) {
-				return createModelSource(new File(pomFile, relPath))
+				File relatedPom = new File(pomFile.parentFile, relPath);
+				if (relatedPom.isDirectory()) {
+					relatedPom = new File(relatedPom, "pom.xml");
+				}
+				if (relatedPom.isFile()&& relatedPom.canRead()) {
+					return createModelSource(relatedPom.canonicalFile);
+				}
+				return null;
 			}
 		}
 	}

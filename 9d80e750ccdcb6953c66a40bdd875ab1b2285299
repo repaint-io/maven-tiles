@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7be1f8_9d768fd7",
+        "filename": "README.adoc",
+        "patchSetId": 6
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-19T23:30:03Z",
+      "side": 1,
+      "message": "Minor quibble - we should probably be consistent in the spacing in the README, so unlike the code which is tabs (currently) we have 2sp elsewhere in here.",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 225,
+        "endChar": 1
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_ef6b5283",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-19T23:30:03Z",
+      "side": 1,
+      "message": "These two blocks feel hard to read/follow to me.  On this line we\u0027re checking if applyBeforeParent, but on 399 we check if !applyBeforeParent buried inside outer if.\n\nTo me, this would be more readable with everything from 396-417 being moved into a \"else\" clause of a standalone \"if applyBeforeParent\" ( removing the now unneeded dupe if on 399 ) - this gives two clear separate modes of operation  ( these could also be split out to new methods each for even better readability ).\n\nThe call to \"(modelGa(model) \u003d\u003d applyBeforeParent)\" on 403 could also be moved into the first check of the \"we have a specific parent set\".\n\nReworking this to be cleaner might be better done as a later commit maybe? The big blocks of ifs feel like the code is getting a bit overly complected ( the original code is already quite hard to follow IMHO as well ).",
+      "range": {
+        "startLine": 418,
+        "startChar": 8,
+        "endLine": 418,
+        "endChar": 25
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_6f0f62e2",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-19T23:30:03Z",
+      "side": 1,
+      "message": "Do we record anywhere ( or can record ) which model defined the plugin instance declared the applyBeforeParent - might be useful to log that out, not sure... thoughts?",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 443,
+        "endChar": 115
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_8f1496f6",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-19T23:30:03Z",
+      "side": 1,
+      "message": "white space niggle.",
+      "range": {
+        "startLine": 552,
+        "startChar": 0,
+        "endLine": 552,
+        "endChar": 3
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

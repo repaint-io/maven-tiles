@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7be1f8_1cd0e552",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 2
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1000430
+      },
+      "writtenOn": "2016-02-19T00:19:05Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be done in the merge of the models?",
+      "revId": "9621b92a24465867edf9b4a08d08b188db4e7d64",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

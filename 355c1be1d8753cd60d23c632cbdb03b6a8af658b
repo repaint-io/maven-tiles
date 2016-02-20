@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7be1f8_2fa1eaa9",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 4
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-02-20T02:09:40Z",
+      "side": 1,
+      "message": "Will these ever be null? I thought sourceDirectory and testSourceDirectory would have been filled with the defaults from the super pom ( or does this reflect the model as it is in the pom.xml - it\u0027s been awhile since I\u0027ve debugged into this ).\n\nI still feel somewhat uneasy with just replacing the [0]\u0027th element, it just reads wrong to me. But it doesn\u0027t seem to break any existing code.",
+      "range": {
+        "startLine": 578,
+        "startChar": 25,
+        "endLine": 578,
+        "endChar": 40
+      },
+      "revId": "355c1be1d8753cd60d23c632cbdb03b6a8af658b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

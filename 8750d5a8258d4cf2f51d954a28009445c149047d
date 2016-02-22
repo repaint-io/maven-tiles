@@ -22,6 +22,30 @@
       "revId": "8750d5a8258d4cf2f51d954a28009445c149047d",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_a2aed2e5",
+        "filename": "README.adoc",
+        "patchSetId": 5
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1007313
+      },
+      "writtenOn": "2016-02-22T10:18:09Z",
+      "side": 1,
+      "message": "you\u0027re right, just GA would be enough. I\u0027ll push another change",
+      "parentUuid": "ba7be1f8_b721b2b6",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 61
+      },
+      "revId": "8750d5a8258d4cf2f51d954a28009445c149047d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }

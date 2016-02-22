@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "7a75e904_69b5a1cc",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1007313
+      },
+      "writtenOn": "2016-02-22T10:18:09Z",
+      "side": 1,
+      "message": "The check on line 418 is necessary to check replace the parent reference with a project-specific one. This needs to be done if we want to apply to a specific parent and have not yet come by it.\n\nThe blocks 396-417 should read as:\n- if were at the first level (project), inject the tiles if we did not specify an explicit parent\n- otherwise if the current level is the explicit parent inject the tiles here\n- otherwise if we come by a tile itself use the tile model\n\nI don\u0027t see how we could write that in clearer way. I will add some more comments to make it clear what\u0027s happening",
+      "parentUuid": "ba7be1f8_ef6b5283",
+      "range": {
+        "startLine": 418,
+        "startChar": 8,
+        "endLine": 418,
+        "endChar": 25
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba7be1f8_6f0f62e2",
         "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
         "patchSetId": 6
@@ -59,6 +83,30 @@
       "writtenOn": "2016-02-19T23:30:03Z",
       "side": 1,
       "message": "Do we record anywhere ( or can record ) which model defined the plugin instance declared the applyBeforeParent - might be useful to log that out, not sure... thoughts?",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 443,
+        "endChar": 115
+      },
+      "revId": "9d80e750ccdcb6953c66a40bdd875ab1b2285299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a75e904_09dd0d15",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/TilesMavenLifecycleParticipant.groovy",
+        "patchSetId": 6
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1007313
+      },
+      "writtenOn": "2016-02-22T10:18:09Z",
+      "side": 1,
+      "message": "unfortunately we don\u0027t have that information (it\u0027s from the effective project model).",
+      "parentUuid": "ba7be1f8_6f0f62e2",
       "range": {
         "startLine": 443,
         "startChar": 0,

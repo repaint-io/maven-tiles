@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.8
+
+- Updated to Groovy 2.4.6
+- Optionally apply tiles to specific parent. By default, tiles are injected as parents of
+  the primary Maven Project, the `applyBefore` configuration property can now be used to define
+  a partial GAV ( groupId:artifactId ) to declare a injection target.
+- Reset source/test directories after processing tiles to detect assignment inside tiles.
+- Added Gittr Chat at https://gitter.im/repaint-io/maven-tiles
+- Restore original ModelProcessor after processing ( fixes issues with M2E and Eclipse ) 
+- Copy groupId/version from original parent if inherited (Fixes #47)
+- Optionally supress title plugin's execution id rewriting (Fixes #12)
+
+Thanks to contributions from Erwin Tratar for making this release.
+
 == 2.7
 
 - Clear collected tiles before processing each project in reactor.

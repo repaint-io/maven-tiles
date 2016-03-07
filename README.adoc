@@ -260,7 +260,7 @@ Some interesting notes:
 - Tiles support version ranges, so use them. [1.1, 2) allows you to update and release new versions of tiles and have them
 propagate out. Maven 3.2.2 allows this with the version ranges in parents, but it isn't a good solution because of single
 inheritance.
-- You can include as many tiles as you like in a pom and poms can refer to other tiles. The plugin will search through
+- You can include as many tiles as you like in a pom and tiles can refer to other tiles. The plugin will search through
 the poms, telling you which ones it is picking up and then load their configurations in *reverse order*. This means the
 poms _closer_ to your artifact get their definitions being the most important ones. If you have duplicate plugins, the one
 closest to your pom wins.

@@ -20,6 +20,14 @@ import org.codehaus.plexus.logging.Logger
 abstract class AbstractTileMojo extends AbstractMojo {
 	public static final String TILE_POM = "tile.xml"
 
+	public static enum BuildSmell {
+		DependencyManagement,
+		Dependencies,
+		Repositories,
+		PluginRepositories,
+		PluginManagement;
+	}
+
 	@Parameter(property = "project", readonly = true, required = true)
 	MavenProject project
 
@@ -30,7 +38,7 @@ abstract class AbstractTileMojo extends AbstractMojo {
 	String applyBefore;
 
 	@Parameter(property = "buildSmells", readonly = false, required = false)
-	String buildSmells
+	List<BuildSmell> buildSmells
 
 	@Parameter(property = "filtering", readonly = false, required = false, defaultValue = "false")
 	boolean filtering
@@ -77,4 +85,5 @@ abstract class AbstractTileMojo extends AbstractMojo {
 			return baseTile
 		}
 	}
+
 }

@@ -35,10 +35,12 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
+import org.apache.maven.model.Build
 import org.apache.maven.model.DistributionManagement
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.PluginManagement
 import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
@@ -627,6 +629,22 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 		if (projectModel.build.testSourceDirectory) {
 			project.testCompileSourceRoots[0] = projectModel.build.testSourceDirectory;
+		}
+
+		// for tile provided LifecycleMapping in m2e we need to modifiy the original model
+		Plugin m2ePlugin = projectModel.build.pluginManagement?.getPluginsAsMap()?.get("org.eclipse.m2e:lifecycle-mapping")
+		if (m2ePlugin) {
+			Build build = project.originalModel.build
+			if (!build) {
+				build = new Build()
+				project.originalModel.build = build
+			}
+			if (build.pluginManagement) {
+				build.pluginManagement = build.pluginManagement.clone()
+			} else {
+				build.pluginManagement = new PluginManagement()
+			}
+			build.pluginManagement.addPlugin(m2ePlugin)
 		}
 	}
 

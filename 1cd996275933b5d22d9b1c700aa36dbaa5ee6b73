@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baa041b7_7873774e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-04-06T23:06:48Z",
+      "side": 1,
+      "message": "Can you raise a github issue and reference it in the commit.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 10
+      },
+      "revId": "1cd996275933b5d22d9b1c700aa36dbaa5ee6b73",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_3894cf35",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-04-06T23:06:48Z",
+      "side": 1,
+      "message": "Will this break existing usages of the lower-case variants? Or does maven choose the correct one regardless of case?",
+      "range": {
+        "startLine": 24,
+        "startChar": 2,
+        "endLine": 24,
+        "endChar": 22
+      },
+      "revId": "1cd996275933b5d22d9b1c700aa36dbaa5ee6b73",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

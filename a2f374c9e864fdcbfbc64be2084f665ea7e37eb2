@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baa041b7_b8233f05",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-04-07T00:22:56Z",
+      "side": 1,
+      "message": "Will that update the github ticket?\n\nI think it responds to things like \"Fixes #68\" or whatever and auto updates the ticket.  No biggy tho.",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 5
+      },
+      "revId": "a2f374c9e864fdcbfbc64be2084f665ea7e37eb2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}

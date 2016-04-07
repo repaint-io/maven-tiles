@@ -45,6 +45,30 @@
       "revId": "1cd996275933b5d22d9b1c700aa36dbaa5ee6b73",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_98207bf9",
+        "filename": "src/main/groovy/io/repaint/maven/tiles/AbstractTileMojo.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000264
+      },
+      "writtenOn": "2016-04-07T00:22:56Z",
+      "side": 1,
+      "message": "No change or comment?",
+      "parentUuid": "baa041b7_3894cf35",
+      "range": {
+        "startLine": 24,
+        "startChar": 2,
+        "endLine": 24,
+        "endChar": 22
+      },
+      "revId": "1cd996275933b5d22d9b1c700aa36dbaa5ee6b73",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }

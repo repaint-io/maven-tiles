@@ -22,6 +22,30 @@
       "revId": "3e42af7807cb189f705a86ad19fc34a568073afe",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_102762b7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1007313
+      },
+      "writtenOn": "2016-04-21T08:32:49Z",
+      "side": 1,
+      "message": "shall I raise a new ticket or is #9 ok?",
+      "parentUuid": "baa041b7_f8eb07af",
+      "range": {
+        "startLine": 7,
+        "startChar": 3,
+        "endLine": 7,
+        "endChar": 4
+      },
+      "revId": "3e42af7807cb189f705a86ad19fc34a568073afe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }

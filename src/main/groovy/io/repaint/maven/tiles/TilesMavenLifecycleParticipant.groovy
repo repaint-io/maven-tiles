@@ -416,23 +416,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 							model = oneOfUs.model
 						}
 					}
-					
+
 					// if we want to apply tiles at a specific parent and have not come by it yet, we need
 					// to make the parent reference project specific, so that it will not pick up a cached
 					// version. We do this by adding a project specific suffix, which will later be removed
 					// when actually loading that parent.
 					if(applyBeforeParent && !tilesInjected && model.parent) {
-						Artifact parentArtifact = getArtifactFromCoordinates(model.parent.groupId, model.parent.artifactId, 'pom', '', model.parent.version)
-						resolver.resolve(parentArtifact, remoteRepositories, localRepository)
-
-						// need to use an artifical ID for the parent (will be filtered out by the resolver)
-						model.parent.artifactId += "#" + getRealGroupId(project.model) + "-" + project.artifactId;
-
-						if (request.modelCache.get(model.parent.groupId, model.parent.artifactId, model.parent.version,
-							org.apache.maven.model.building.ModelCacheTag.RAW.getName())) {
-							// tile combination already cached
-							tilesInjected = true
-						}
+						// remove the parent from the cache which causes it to be reloaded through our ModelProcessor
+						request.modelCache.put(model.parent.groupId, model.parent.artifactId, model.parent.version,
+							org.apache.maven.model.building.ModelCacheTag.RAW.getName(), null)
 					}
 				}
 
@@ -494,11 +486,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		return new ModelResolver() {
 			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
-				int artificialPart = artifactId.indexOf('#');
-				if (artificialPart >= 0) {
-					// remove artificial part
-					artifactId = artifactId.substring(0, artificialPart)
-				}
 				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 

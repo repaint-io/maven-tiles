@@ -364,7 +364,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		ModelSource2 mainArtifactModelSource = createModelSource(project.file)
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
 			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
-		  systemProperties: System.getProperties(), userProperties: mavenSession.request.userProperties,
+		  systemProperties: mavenSession.request.systemProperties, userProperties: mavenSession.request.userProperties,
 			profiles: mavenSession.request.projectBuildingRequest.profiles,
 		  activeProfileIds: mavenSession.request.projectBuildingRequest.activeProfileIds,
 			inactiveProfileIds: mavenSession.request.projectBuildingRequest.inactiveProfileIds,

@@ -156,12 +156,36 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
-	protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
+	protected Artifact resolveTile(MavenSession mavenSession, Artifact tileArtifact) throws MavenExecutionException {
+		// try to find tile from reactor
+		if (mavenSession != null) {
+			List<MavenProject> allProjects = mavenSession.getProjects()
+			if (allProjects != null) {
+				for (MavenProject currentProject : allProjects) {
+					// when loading from reactor ignore version
+					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId) {
+						tileArtifact.version = currentProject.version
+						tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
+						return tileArtifact
+					}
+				}
+			}
+		}
+
 		try {
 			mavenVersionIsolate.resolveVersionRange(tileArtifact)
 
 			// Resolve the .xml file for the tile
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
+			
+			// When resolving from workspace (e.g. m2e) we might receive the path to pom.xml instead of the attached tile
+			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
+				tileArtifact.file = new File(tileArtifact.file.parent, "tile.xml")
+				if (!tileArtifact.file.exists()) {
+					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.",
+						tileArtifact.getFile())
+				}
+			}
 
 			// Resolve the .pom file for the tile
 			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
@@ -283,7 +307,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 						}
 					}
 
-					orchestrateMerge(currentProject)
+					orchestrateMerge(mavenSession, currentProject)
 
 					// did we expect but not get a distribution artifact repository?
 					if (!currentProject.distributionManagementArtifactRepository) {
@@ -325,7 +349,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @param project - the currently evaluated project
 	 * @throws MavenExecutionException
 	 */
-	protected void orchestrateMerge(MavenProject project) throws MavenExecutionException {
+	protected void orchestrateMerge(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 		// Clear collected tiles from previous project in reactor
 		processedTiles.clear();
 		tileDiscoveryOrder.clear();
@@ -335,7 +359,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		parseConfiguration(project.model, project.getFile(), true)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		loadAllDiscoveredTiles()
+		loadAllDiscoveredTiles(mavenSession)
 
 		// don't do anything if there are no tiles
 		if (processedTiles) {
@@ -617,11 +641,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected void loadAllDiscoveredTiles() throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles(MavenSession mavenSession) throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
-			Artifact resolvedTile = resolveTile(unprocessedTiles.remove(unresolvedTile))
+			Artifact resolvedTile = resolveTile(mavenSession, unprocessedTiles.remove(unresolvedTile))
 
 			TileModel tileModel = loadModel(resolvedTile)
 

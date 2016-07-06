@@ -56,6 +56,8 @@ import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuildingHelper
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
+import org.codehaus.plexus.interpolation.PropertiesBasedValueSource
+import org.codehaus.plexus.interpolation.StringSearchInterpolator
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
@@ -397,12 +399,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 						&& model.realVersion == project.version && model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {
-							injectTilesIntoParentStructure(tiles, model, request)
+							injectTilesIntoParentStructure(project.properties, tiles, model, request)
 							tilesInjected = true
 						}
 					} else if (modelGa(model) == applyBeforeParent) {
 						// we're at the level with the explicitly selected parent. Apply the tiles here
-						injectTilesIntoParentStructure(tiles, model, request)
+						injectTilesIntoParentStructure(project.properties, tiles, model, request)
 						tilesInjected = true
 					} else if (model.packaging == 'tile' || model.packaging == 'pom') {
 						// we could be at a parent that is a tile. In this case return the precomputed model
@@ -540,7 +542,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @param pomModel - the current project
 	 * @param request - the request to build the current project
 	 */
-	public void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel,
+	public void injectTilesIntoParentStructure(Properties projectProperties, List<TileModel> tiles, Model pomModel,
 	                                            ModelBuildingRequest request) {
 		Parent originalParent = pomModel.parent
 		Model lastPom = pomModel
@@ -558,6 +560,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			if (!pomModel.version) {
 				pomModel.version = originalParent.version
 				logger.info("Explicitly set version to '${pomModel.version}' from original parent '${parentGav(originalParent)}'.")
+			}
+
+			// original parent version might need to be interpolated
+			if (originalParent?.version?.contains("\$")) {
+				StringSearchInterpolator interpolator = new StringSearchInterpolator()
+				interpolator.addValueSource(new PropertiesBasedValueSource(projectProperties))
+				originalParent.version = interpolator.interpolate(originalParent.version)
 			}
 		}
 

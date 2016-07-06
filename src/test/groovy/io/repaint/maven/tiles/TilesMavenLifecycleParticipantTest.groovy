@@ -288,7 +288,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		stuffParticipant()
 
-		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+		participant.injectTilesIntoParentStructure(new Properties(), tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 
 		assert pomModel.parent.artifactId == 'session-license'
 		assert sessionLicenseTile.model.parent.artifactId == 'extended-syntax'
@@ -297,7 +297,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		pomModel.parent = new Parent(groupId: 'io.repaint.tiles', artifactId: 'fake-parent', version: '1')
 
-		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+		participant.injectTilesIntoParentStructure(new Properties(), tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 		assert antrunTile.model.parent.artifactId == 'fake-parent'
 	}
 

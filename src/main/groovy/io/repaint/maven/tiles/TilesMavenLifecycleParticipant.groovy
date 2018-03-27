@@ -67,6 +67,7 @@ import static io.repaint.maven.tiles.GavUtil.artifactGav
 import static io.repaint.maven.tiles.GavUtil.artifactName
 import static io.repaint.maven.tiles.GavUtil.modelGav
 import static io.repaint.maven.tiles.GavUtil.modelGa
+import static io.repaint.maven.tiles.GavUtil.modelRealGa
 import static io.repaint.maven.tiles.GavUtil.parentGav
 import static io.repaint.maven.tiles.GavUtil.getRealGroupId
 
@@ -426,7 +427,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 							injectTilesIntoParentStructure(tiles, model, request)
 							tilesInjected = true
 						}
-					} else if (modelGa(model) == applyBeforeParent) {
+					} else if (modelRealGa(model) == applyBeforeParent) {
 						// we're at the level with the explicitly selected parent. Apply the tiles here
 						injectTilesIntoParentStructure(tiles, model, request)
 						tilesInjected = true
@@ -573,7 +574,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		File lastPomFile = request.pomFile
 
 		if (tiles) {
-			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifact's...")
+			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${modelRealGa(pomModel)}...")
 			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as it's new parent.")
 
 			// if there is a parent make sure the inherited groupId / version is correct

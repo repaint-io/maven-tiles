@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.10
+
+- Updated to Groovy 2.4.8 - now works under JDK 9
+
+== 2.9
+
+- m2e LifecycleMapping support in tiles (#9)
+- Improved compatibility when tiles are applied to specific parent
+- Fixed interpolation of env.XXX properties
+
+
 == 2.8
 
 - Updated to Groovy 2.4.6
@@ -10,7 +21,7 @@ All notable changes to this project will be documented in this file.
   a partial GAV ( groupId:artifactId ) to declare a injection target.
 - Reset source/test directories after processing tiles to detect assignment inside tiles.
 - Added Gittr Chat at https://gitter.im/repaint-io/maven-tiles
-- Restore original ModelProcessor after processing ( fixes issues with M2E and Eclipse ) 
+- Restore original ModelProcessor after processing ( fixes issues with M2E and Eclipse )
 - Copy groupId/version from original parent if inherited (Fixes #47)
 - Optionally supress title plugin's execution id rewriting (Fixes #12)
 

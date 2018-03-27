@@ -132,7 +132,7 @@ public class TilesMavenLifecycleParticipantTest {
 		Artifact snapshot = getTileTestCoordinates()
 		System.setProperty(PERFORM_RELEASE, "true")
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(snapshot)
+			participant.resolveTile(null, snapshot)
 		}
 	}
 
@@ -147,7 +147,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(badbadbad)
+			participant.resolveTile(null, badbadbad)
 		}
 		participant.resolver = [
 			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
@@ -156,7 +156,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(badbadbad)
+			participant.resolveTile(null, badbadbad)
 		}
 	}
 
@@ -312,7 +312,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		stuffParticipant()
 
-		participant.orchestrateMerge(new MavenProject())
+		participant.orchestrateMerge(null, new MavenProject())
 	}
 
 	@Test
@@ -326,7 +326,7 @@ public class TilesMavenLifecycleParticipantTest {
 		MavenProject project = new MavenProject(model)
 
 		Throwable failure = shouldFail {
-			participant.orchestrateMerge(project)
+			participant.orchestrateMerge(null, project)
 		}
 
 		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range"
@@ -351,7 +351,7 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected Artifact resolveTile(Artifact tileArtifact) throws MavenExecutionException {
+			protected Artifact resolveTile(MavenSession mavenSession, Artifact tileArtifact) throws MavenExecutionException {
 				tileArtifact.file = new File("src/test/resources/${tileArtifact.artifactId}.xml")
 
 				return tileArtifact
@@ -376,7 +376,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(project)
+		participant.orchestrateMerge(null, project)
 
 		assert participant.processedTiles.size() == 4
 	}
@@ -387,7 +387,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(project)
+		participant.orchestrateMerge(null, project)
 		assert participant.processedTiles.size() == 4
 	}
 

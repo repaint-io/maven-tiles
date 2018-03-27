@@ -609,7 +609,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		lastPom.parent = originalParent
-		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as its  new top level parent.")
+		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
 		logger.info("")
 
 		if (pomModel != lastPom) {

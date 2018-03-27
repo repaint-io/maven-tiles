@@ -24,6 +24,10 @@ class GavUtil {
 		return String.format("%s:%s", model.groupId, model.artifactId)
 	}
 
+	public static String modelRealGa(Model model) {
+		return String.format("%s:%s", getRealGroupId(model), model.artifactId)
+	}
+
 	public static String parentGav(Parent model) {
 		if (!model) {
 			return "(no parent)"

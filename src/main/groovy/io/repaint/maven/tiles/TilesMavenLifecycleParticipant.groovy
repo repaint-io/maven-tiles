@@ -580,7 +580,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		if (tiles) {
 			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${modelRealGa(pomModel)}...")
-			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as it's new parent.")
+			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as its new parent.")
 
 			// if there is a parent make sure the inherited groupId / version is correct
 			if (!pomModel.groupId) {
@@ -601,7 +601,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			if (pomModel != lastPom) {
 				putModelInCache(lastPom, request, lastPomFile)
-				logger.info("Mixed '${modelGav(lastPom)}' with tile '${parentGav(modelParent)}' as it's new parent.")
+				logger.info("Mixed '${modelGav(lastPom)}' with tile '${parentGav(modelParent)}' as its new parent.")
 			}
 
 			lastPom = model
@@ -609,7 +609,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		lastPom.parent = originalParent
-		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as it's  new top level parent.")
+		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as its  new top level parent.")
 		logger.info("")
 
 		if (pomModel != lastPom) {

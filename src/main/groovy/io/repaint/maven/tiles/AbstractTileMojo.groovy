@@ -41,7 +41,7 @@ abstract class AbstractTileMojo extends AbstractMojo {
 	@Component
 	Logger logger
 
-	@Component
+	@Parameter( defaultValue = "\${session}", readonly = true )
 	MavenSession mavenSession
 
 	@Component

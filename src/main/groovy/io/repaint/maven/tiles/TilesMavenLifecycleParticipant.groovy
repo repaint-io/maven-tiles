@@ -36,6 +36,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
+import org.apache.maven.model.Dependency
 import org.apache.maven.model.DistributionManagement
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
@@ -513,13 +514,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		return new ModelResolver() {
 			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
-				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
+                                Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
 				mavenVersionIsolate.resolveVersionRange(artifact)
 				resolver.resolve(artifact, remoteRepositories, localRepository)
 
 				return createModelSource(artifact.file)
+			}
+
+			ModelSource2 resolveModel(Dependency dependency) throws UnresolvableModelException {
+				return resolveModel(dependency.groupId, dependency.artifactId, dependency.version)
 			}
 
 			ModelSource2 resolveModel(Parent parent) throws UnresolvableModelException {

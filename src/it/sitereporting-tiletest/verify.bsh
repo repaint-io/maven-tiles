@@ -1,0 +1,21 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+if (!content.contains("[INFO] configuring report plugin org.apache.maven.plugins:maven-changes-plugin")) {
+  throw new Exception("Tile not injected fully");
+}
+
+if (!content.contains("[INFO] configuring report plugin org.apache.maven.plugins:maven-project-info-reports-plugin")) {
+  throw new Exception("Tile not injected fully");
+}
+
+File file = new File( basedir, "target/site/github-report.html" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find github-report: " + file );
+}

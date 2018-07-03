@@ -181,7 +181,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// Resolve the .xml file for the tile
 			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
-			
+
 			// When resolving from workspace (e.g. m2e) we might receive the path to pom.xml instead of the attached tile
 			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
 				tileArtifact.file = new File(tileArtifact.file.parent, "tile.xml")
@@ -639,6 +639,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		projectModel.profiles = newModel.profiles
 		projectModel.prerequisites = newModel.prerequisites
 		projectModel.properties = newModel.properties
+		projectModel.reporting = newModel.reporting
+
 
 		// update model (test) source directory, which is the first entry and might have been set through a tile
 		if (projectModel.build.sourceDirectory) {

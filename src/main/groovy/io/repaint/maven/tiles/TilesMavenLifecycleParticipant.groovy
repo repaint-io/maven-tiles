@@ -55,6 +55,9 @@ import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
 import org.apache.maven.model.resolution.UnresolvableModelException
+import org.apache.maven.plugin.MojoExecution
+import org.apache.maven.plugin.PluginParameterExpressionEvaluator
+import org.apache.maven.plugin.descriptor.MojoDescriptor
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuildingHelper
 import org.codehaus.plexus.component.annotations.Component
@@ -421,8 +424,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				Model model = modelProcessor.read(input, options)
 
 				use(GavUtil) {
+					// evaluate the model version to deal with CI friendly build versions
+					String evalModelRealVersion = model.realVersion
+					if (mavenSession != null) {
+						PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
+						if (expEval != null) {
+							evalModelRealVersion = expEval.evaluate(evalModelRealVersion,String.class)
+						}
+					}
+
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
-						&& model.realVersion == project.version && model.packaging == project.packaging) {
+						&& evalModelRealVersion == project.version && model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {
 							injectTilesIntoParentStructure(tiles, model, request)
@@ -579,8 +591,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		File lastPomFile = request.pomFile
 
 		if (tiles) {
+			// evaluate the model version to deal with CI friendly build versions
+			String evalModelGav = modelGav(pomModel)
+			if (mavenSession != null) {
+				PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
+				if (expEval != null && evalModelGav != null) {
+					evalModelGav = expEval.evaluate(evalModelGav,String.class)
+				}
+			}
+
 			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${modelRealGa(pomModel)}...")
-			logger.info("Mixed '${modelGav(pomModel)}' with tile '${modelGav(tiles.first().model)}' as its new parent.")
+			logger.info("Mixed '${evalModelGav}' with tile '${modelGav(tiles.first().model)}' as its new parent.")
 
 			// if there is a parent make sure the inherited groupId / version is correct
 			if (!pomModel.groupId) {

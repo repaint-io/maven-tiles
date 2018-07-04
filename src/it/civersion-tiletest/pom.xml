@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.test</groupId>
+    <artifactId>civersion-tiletest</artifactId>
+    <version>0.1.${changelist}</version>
+
+    <packaging>pom</packaging>
+
+    <name>CI Friendly Build Version Maven Tiles Test</name>
+
+    <properties>
+        <changelist>0-SNAPSHOT</changelist>
+    </properties>
+
+    <modules>
+        <module>tile-tile</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.repaint.maven</groupId>
+                <artifactId>tiles-maven-plugin</artifactId>
+                <version>@project.version@</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <tiles>
+                        <tile>com.test:civersion-tiletest-tile:1</tile>
+                    </tiles>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

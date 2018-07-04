@@ -1,0 +1,20 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest:0.1.0-SNAPSHOT' with tile 'com.test:civersion-tiletest-tile:1' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile:1' with original parent '(no parent)' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}
+
+if (!content.contains("<foo.bar>bar none</foo.bar>")) {
+  throw new Exception("Tile not injected");
+}

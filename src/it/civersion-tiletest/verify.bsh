@@ -7,14 +7,48 @@ if ( !file.isFile() ) {
 
 String content = new Scanner(file).useDelimiter("\\Z").next();
 
-if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest:0.1.0-SNAPSHOT' with tile 'com.test:civersion-tiletest-tile:1' as its new parent.")) {
+// check for pom->tile->parent inclusion
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest:0.1.0-SNAPSHOT' with tile 'com.test:civersion-tiletest-tile1:1' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile1:1' with original parent 'com.test:civersion-tiletest-parent1:1' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("<foo.bar.root>parent1|tile1</foo.bar.root>")) {
   throw new Exception("Tile not injected");
 }
 
-if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile:1' with original parent '(no parent)' as its new top level parent.")) {
+// check for pom->tile inclusion
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-noparent:0.1.0-SNAPSHOT' with tile 'com.test:civersion-tiletest-tile2:1' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile2:1' with original parent '(no parent)' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("<foo.bar.noparent>tile2</foo.bar.noparent>")) {
   throw new Exception("Tile not injected");
 }
 
-if (!content.contains("<foo.bar>bar none</foo.bar>")) {
+// check for pom->parent->tile inclusion
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-parent2:1' with tile 'com.test:civersion-tiletest-tile2:1' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile2:1' with original parent 'com.test:civersion-tiletest-parent1:1' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("<foo.bar.twoparents>parent1|tile2</foo.bar.twoparents>")) {
+  throw new Exception("Tile not injected");
+}
+
+
+// check for using a CI version in a parent
+
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-ciparent:0.1.0-SNAPSHOT' with tile 'com.test:civersion-tiletest-tile2:1' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile2:1' with original parent 'com.test:civersion-tiletest-parent3:0.1.0-SNAPSHOT' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("<foo.bar.ciparent>parent3|tile2</foo.bar.ciparent>")) {
   throw new Exception("Tile not injected");
 }

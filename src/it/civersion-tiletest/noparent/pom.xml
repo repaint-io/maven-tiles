@@ -3,35 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.test</groupId>
-    <artifactId>civersion-tiletest</artifactId>
+    <artifactId>civersion-tiletest-noparent</artifactId>
     <version>0.1.${changelist}</version>
 
     <packaging>pom</packaging>
 
-    <parent>
-        <groupId>com.test</groupId>
-        <artifactId>civersion-tiletest-parent1</artifactId>
-        <version>1</version>
-        <relativePath>parent1/pom.xml</relativePath>
-    </parent>
-
-    <name>CI Friendly Build Version Maven Tiles Test</name>
+    <name>CI Friendly Build Version Maven Tiles Test - No Parent</name>
 
     <properties>
         <changelist>0-SNAPSHOT</changelist>
-        <foo.bar.root>${foo.bar.parent1}|${foo.bar.tile1}</foo.bar.root>
+        <foo.bar.noparent>${foo.bar.tile2}</foo.bar.noparent>
     </properties>
-
-    <modules>
-        <module>ciparent</module>
-        <module>noparent</module>
-        <module>twoparents</module>
-        <module>parent1</module>
-        <module>parent2</module>
-        <module>parent3</module>
-        <module>tile-tile1</module>
-        <module>tile-tile2</module>
-    </modules>
 
     <build>
         <plugins>
@@ -42,7 +24,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <tiles>
-                        <tile>com.test:civersion-tiletest-tile1:1</tile>
+                        <tile>com.test:civersion-tiletest-tile2:1</tile>
                     </tiles>
                 </configuration>
             </plugin>

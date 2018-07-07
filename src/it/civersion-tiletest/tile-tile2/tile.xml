@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <properties>
-        <foo.bar>bar none</foo.bar>
+        <foo.bar.tile2>tile2</foo.bar.tile2>
     </properties>
 </project>

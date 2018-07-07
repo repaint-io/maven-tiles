@@ -425,16 +425,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 				use(GavUtil) {
 					// evaluate the model version to deal with CI friendly build versions
-					String evalModelRealVersion = model.realVersion
-					if (mavenSession != null) {
-						PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
-						if (expEval != null) {
-							evalModelRealVersion = expEval.evaluate(evalModelRealVersion,String.class)
-						}
-					}
-
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
-						&& evalModelRealVersion == project.version && model.packaging == project.packaging) {
+						&& evaluateString(model.realVersion) == project.version && model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {
 							injectTilesIntoParentStructure(tiles, model, request)
@@ -570,7 +562,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@CompileStatic(TypeCheckingMode.SKIP)
 	protected void putModelInCache(Model model, ModelBuildingRequest request, File pomFile) {
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
-		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, model.version,
+		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
 			org.apache.maven.model.building.ModelCacheTag.RAW,
 			mavenVersionIsolate.createModelData(model, pomFile));
 //				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
@@ -590,18 +582,15 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Model lastPom = pomModel
 		File lastPomFile = request.pomFile
 
-		if (tiles) {
-			// evaluate the model version to deal with CI friendly build versions
-			String evalModelGav = modelGav(pomModel)
-			if (mavenSession != null) {
-				PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
-				if (expEval != null && evalModelGav != null) {
-					evalModelGav = expEval.evaluate(evalModelGav,String.class)
-				}
-			}
+        // fix up the version of the originalParent
+        if (originalParent != null) {
+            originalParent.version = evaluateString(originalParent.version)
+        }
 
-			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${modelRealGa(pomModel)}...")
-			logger.info("Mixed '${evalModelGav}' with tile '${modelGav(tiles.first().model)}' as its new parent.")
+        if (tiles) {
+			// evaluate the model version to deal with CI friendly build versions
+			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${evaluateString(modelRealGa(pomModel))}...")
+			logger.info("Mixed '${evaluateString(modelGav(pomModel))}' with tile '${evaluateString(modelGav(tiles.first().model))}' as its new parent.")
 
 			// if there is a parent make sure the inherited groupId / version is correct
 			if (!pomModel.groupId) {
@@ -617,20 +606,20 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		tiles.each { TileModel tileModel ->
 			Model model = tileModel.model
 
-			Parent modelParent = new Parent(groupId: model.groupId, version: model.version, artifactId: model.artifactId)
+			Parent modelParent = new Parent(groupId: model.groupId, version: evaluateString(model.version), artifactId: model.artifactId)
 			lastPom.parent = modelParent
 
 			if (pomModel != lastPom) {
 				putModelInCache(lastPom, request, lastPomFile)
-				logger.info("Mixed '${modelGav(lastPom)}' with tile '${parentGav(modelParent)}' as its new parent.")
+				logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with tile '${evaluateString(parentGav(modelParent))}' as its new parent.")
 			}
 
 			lastPom = model
 			lastPomFile = tileModel.tilePom
 		}
 
-		lastPom.parent = originalParent
-		logger.info("Mixed '${modelGav(lastPom)}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
+        lastPom.parent = originalParent
+		logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
 		logger.info("")
 
 		if (pomModel != lastPom) {
@@ -769,5 +758,24 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
 				modelGav(model), artifactGav(unprocessedTile)))
 		}
+	}
+
+	/**
+	 * Evaluate a string for property substitution.  This method is null tolerant and utilizes the mavenSession
+	 * class member if set.
+	 *
+	 * @param value The String to evaluate
+	 * @return The evaluated String
+	 */
+	protected String evaluateString(String value) {
+		String ret = value
+		if (mavenSession != null) {
+			PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
+			if (expEval != null && value != null) {
+				ret = expEval.evaluate(ret,String.class)
+			}
+		}
+
+		return ret;
 	}
 }

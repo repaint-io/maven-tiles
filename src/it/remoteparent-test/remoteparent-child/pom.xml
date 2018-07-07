@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>remoteparent-child</artifactId>
+    <version>${revision}.${changelist}</version>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>com.test</groupId>
+        <artifactId>remoteparent-parent</artifactId>
+        <version>${revision}.${changelist}</version>
+        <relativePath>../remoteparent-parent/pom.xml</relativePath>
+    </parent>
+
+    <name>Parent with Remote Tile Test - Child</name>
+
+    <build>
+        <plugins>
+                <plugin>
+                    <groupId>io.repaint.maven</groupId>
+                    <artifactId>tiles-maven-plugin</artifactId>
+                    <version>@project.version@</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <tiles>
+                            <tile>net.stickycode.tile:sticky-tile-library:1.2</tile>
+                        </tiles>
+                    </configuration>
+                </plugin>
+        </plugins>
+    </build>
+</project>

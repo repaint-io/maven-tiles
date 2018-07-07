@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>remoteparent-agg</artifactId>
+    <version>${revision}.${changelist}</version>
+
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>com.test</groupId>
+        <artifactId>remoteparent-parent</artifactId>
+        <version>${revision}.${changelist}</version>
+        <relativePath>./remoteparent-parent/pom.xml</relativePath>
+    </parent>
+
+    <name>Parent with Remote Tile Test - Aggregator</name>
+
+    <modules>
+        <module>remoteparent-parent</module>
+        <module>remoteparent-child</module>
+    </modules>
+</project>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.test</groupId>
+    <artifactId>civersion-tiletest-parent3</artifactId>
+    <version>0.1.${changelist}</version>
+
+    <packaging>pom</packaging>
+
+    <name>CI Friendly Build Version Maven Tiles Test - Parent3</name>
+
+    <properties>
+        <changelist>0-SNAPSHOT</changelist>
+        <foo.bar.parent3>parent3</foo.bar.parent3>
+    </properties>
+</project>

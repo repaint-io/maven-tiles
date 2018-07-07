@@ -1,0 +1,19 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+// check for pom->tile->parent inclusion
+if (!content.contains("[INFO] Mixed 'null:remoteparent-child:1.0.0-SNAPSHOT' with tile 'net.stickycode.tile:sticky-tile-library:1.2' as its new parent.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Explicitly set groupId to 'com.test' from original parent 'com.test:remoteparent-parent:1.0.0-SNAPSHOT'.")) {
+  throw new Exception("Tile not injected");
+}
+if (!content.contains("[INFO] Mixed 'net.stickycode.tile:sticky-tile-library:1.2' with original parent 'com.test:remoteparent-parent:1.0.0-SNAPSHOT' as its new top level parent.")) {
+  throw new Exception("Tile not injected");
+}

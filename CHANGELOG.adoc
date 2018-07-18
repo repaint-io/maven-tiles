@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.12
+
+- Evaluate property substitution when processing pom parents and the applyBefore configuration directive.
+- Perform property substitution in version numbers before merging tiles to pickup CI Friendly version numbers.
+- Copy reporting plugins when copying tile for merging.
+
 == 2.10
 
 - Updated to Groovy 2.4.8 - now works under JDK 9
@@ -11,7 +17,6 @@ All notable changes to this project will be documented in this file.
 - m2e LifecycleMapping support in tiles (#9)
 - Improved compatibility when tiles are applied to specific parent
 - Fixed interpolation of env.XXX properties
-
 
 == 2.8
 

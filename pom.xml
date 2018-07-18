@@ -48,7 +48,7 @@
   </developers>
 
   <properties>
-    <mavenVersion>3.5.3</mavenVersion>
+    <mavenVersion>3.3.9</mavenVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 
@@ -193,7 +193,7 @@
         <configuration>
           <rules>
             <requireMavenVersion>
-              <version>[3.5.3,)</version>
+              <version>[3.3.9,)</version>
             </requireMavenVersion>
             <requireReleaseDeps>
               <!--  Don't allow releases with snapshop deps or parents -->

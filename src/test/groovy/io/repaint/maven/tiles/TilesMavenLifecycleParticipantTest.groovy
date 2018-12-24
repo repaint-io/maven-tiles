@@ -20,10 +20,11 @@ import groovy.transform.CompileStatic
 import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
-import org.apache.maven.artifact.repository.ArtifactRepository
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.artifact.resolver.DefaultResolutionErrorHandler
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
@@ -96,6 +97,12 @@ public class TilesMavenLifecycleParticipantTest {
 	void stuffParticipant() {
 		participant.logger = logger
 		participant.resolver = mockResolver
+		participant.resolver = [
+			resolve: { ArtifactResolutionRequest request ->
+				return new ArtifactResolutionResult()
+			}
+		] as ArtifactResolver
+		participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
 		participant.mavenVersionIsolate = createFakeIsolate()
 	}
 
@@ -141,8 +148,8 @@ public class TilesMavenLifecycleParticipantTest {
 		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad", "bad")
 
 		participant.resolver = [
-			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
-				throw new ArtifactResolutionException("failed", badbadbad)
+			resolve: { ArtifactResolutionRequest request ->
+				new ArtifactResolutionResult().addErrorArtifactException(new ArtifactResolutionException("failed", badbadbad))
 			}
 		] as ArtifactResolver
 
@@ -150,8 +157,8 @@ public class TilesMavenLifecycleParticipantTest {
 			participant.resolveTile(null, badbadbad)
 		}
 		participant.resolver = [
-			resolve: { Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository ->
-				throw new ArtifactNotFoundException("failed", badbadbad)
+			resolve: { ArtifactResolutionRequest request ->
+				new ArtifactResolutionResult().addMissingArtifact(badbadbad)
 			}
 		] as ArtifactResolver
 

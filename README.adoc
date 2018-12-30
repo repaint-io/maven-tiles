@@ -123,6 +123,70 @@ A tile can define the tiles plugin if it wishes to cascade tile inclusion, or it
 Although this will appear to not validate when editing in an IDE, the tile plugin will strip off the tiles
 section when processing and use it directly.
 
+== Execution Ids
+
+Execution ids within tiles are prepended with the gav parameters of the tile that included the execution, for easier
+debugging / tracing. If this is not desired, adding a configuration entry `<tiles-keep-id>true<tiles-keep-id>` will
+keep the original id.
+
+[source,xml,indent=0]
+.tile.xml
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>test</groupId>
+        <artifactId>test</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>1</id>
+          </execution>
+          <execution>
+            <id>2</id>
+            <configuration>
+              <tiles-keep-id>true</tiles-keep-id>
+            </configuration>
+         </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>test</groupId>
+            <artifactId>test</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>3</id>
+              </execution>
+              <execution>
+                <id>4</id>
+                <configuration>
+                  <tiles-keep-id>true</tiles-keep-id>
+                </configuration>
+             </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
+----
+
+In the above tile, executions with ids 1 and 3 (in profile) will have their ids changed to
+`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::1` and
+`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::3` respectively, while executions with ids 2 and 4 (in
+profile) will retain their original execution id.
+
 == Build Smells
 
 When migrating from a parent structure, it is worthwhile to take the opportunity to reduce your build smells. You

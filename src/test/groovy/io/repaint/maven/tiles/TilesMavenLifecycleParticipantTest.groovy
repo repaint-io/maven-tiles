@@ -172,7 +172,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testFiltering() {
-        Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", null, "1.1-SNAPSHOT")
+        Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 
 		Model model = new Model()
 		model.setGroupId("io.repaint.tiles")
@@ -207,7 +207,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testNoFiltering() {
-		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", null, "1.1-SNAPSHOT")
+		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 
 		Model model = new Model()
 		model.setGroupId("io.repaint.tiles")

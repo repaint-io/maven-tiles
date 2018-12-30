@@ -44,7 +44,7 @@ class TileModel {
 		}
 	}
 
-	public void loadTile(File tilePom) {
+	void loadTile(File tilePom) {
 		this.tilePom = tilePom
 
 		MavenXpp3Reader pomReader = new MavenXpp3Reader()
@@ -52,8 +52,9 @@ class TileModel {
 		model = pomReader.read(strippedPom())
 	}
 
-	public TileModel() {}
-	public TileModel(File tilePom, Artifact artifact) {
+	TileModel() {}
+
+	TileModel(File tilePom, Artifact artifact) {
 		loadTile(tilePom)
 
 		// this is in the artifact but isn't actually in the file, we need it
@@ -65,17 +66,31 @@ class TileModel {
 		model.packaging = "pom"
 
 		// Update each tile'd plugin's execution id with the tile GAV for easier debugging/tracing
-		if (model.build) {
-			if (model.build.plugins) {
-				model.build.plugins.each { plugin ->
-					if (plugin.executions) {
-						plugin.executions.each { execution ->
-							Xpp3Dom configuration = execution.configuration as Xpp3Dom
-							if (configuration?.getAttribute("tiles-keep-id") == "true") {
-								// do not rewrite the current execution id
-								return
+		if (model.build?.plugins) {
+			model.build.plugins.each { plugin ->
+				if (plugin.executions) {
+					plugin.executions.each { execution ->
+						if ((execution.configuration as Xpp3Dom)?.getChild("tiles-keep-id")?.getValue() == "true") {
+							// do not rewrite the current execution id
+							return
+						}
+						execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+					}
+				}
+			}
+		}
+		if (model.profiles) {
+			model.profiles.each { profile ->
+				if (profile.build?.plugins) {
+					profile.build.plugins.each { plugin ->
+						if (plugin.executions) {
+							plugin.executions.each { execution ->
+								if ((execution.configuration as Xpp3Dom)?.getChild("tiles-keep-id")?.getValue() == "true") {
+									// do not rewrite the current execution id
+									return
+								}
+								execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
 							}
-							execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
 						}
 					}
 				}

@@ -25,6 +25,8 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult
 import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.resolver.DefaultResolutionErrorHandler
+import org.apache.maven.execution.MavenExecutionRequest
+import org.apache.maven.execution.MavenExecutionResult
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
@@ -46,6 +48,7 @@ import org.mockito.runners.MockitoJUnitRunner
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.when
 
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
@@ -106,7 +109,7 @@ public class TilesMavenLifecycleParticipantTest {
 		participant.mavenVersionIsolate = createFakeIsolate()
 	}
 
-	protected MavenVersionIsolator createFakeIsolate() {
+	protected static MavenVersionIsolator createFakeIsolate() {
 		return new MavenVersionIsolator() {
 			@Override
 			void resolveVersionRange(Artifact tileArtifact) {
@@ -165,6 +168,76 @@ public class TilesMavenLifecycleParticipantTest {
 		shouldFail(MavenExecutionException) {
 			participant.resolveTile(null, badbadbad)
 		}
+	}
+
+	@Test
+	public void testFiltering() {
+        Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", null, "1.1-SNAPSHOT")
+
+		Model model = new Model()
+		model.setGroupId("io.repaint.tiles")
+		model.setArtifactId("filtering-tile")
+		model.setVersion("1.1-SNAPSHOT")
+
+		model.build = new Build()
+		model.build.directory = "target/filtering"
+		model.build.addPlugin(new Plugin())
+		model.build.plugins[0].with {
+			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
+			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><filtering>true</filtering></configuration>"))
+		}
+
+		MavenProject project = new MavenProject(model)
+		project.setFile(new File("src/test/resources/filtering/pom.xml"))
+
+		MavenExecutionRequest req = mock(MavenExecutionRequest.class)
+		when(req.getUserProperties()).thenReturn(new Properties())
+		when(req.getSystemProperties()).thenReturn(new Properties())
+
+		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
+
+		Artifact tile = participant.resolveTile(session, filteredTile)
+		assert tile.file == new File("target/filtering/tmp-tile/tiles/tile.xml")
+
+		TileModel tileModel = new TileModel(tile.file, tile)
+
+		assert tileModel.tiles[0] == "groupid:antrun1-tile:1.1-SNAPSHOT"
+	}
+
+	@Test
+	public void testNoFiltering() {
+		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", null, "1.1-SNAPSHOT")
+
+		Model model = new Model()
+		model.setGroupId("io.repaint.tiles")
+		model.setArtifactId("filtering-tile")
+		model.setVersion("1.1-SNAPSHOT")
+
+		model.build = new Build()
+		model.build.directory = "target/filtering"
+		model.build.addPlugin(new Plugin())
+		model.build.plugins[0].with {
+			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
+			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+		}
+
+		MavenProject project = new MavenProject(model)
+		project.setFile(new File("src/test/resources/filtering/pom.xml"))
+
+		MavenExecutionRequest req = mock(MavenExecutionRequest.class)
+		when(req.getUserProperties()).thenReturn(new Properties())
+		when(req.getSystemProperties()).thenReturn(new Properties())
+
+		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
+
+		Artifact tile = participant.resolveTile(session, filteredTile)
+
+		assert tile.file == new File("src/test/resources/filtering/tile.xml")
+
+		TileModel tileModel = new TileModel(tile.file, tile)
+
+		assert tileModel.tiles[0] == "groupid:antrun1-tile:@project.version@"
 	}
 
 	@Test
@@ -256,7 +329,7 @@ public class TilesMavenLifecycleParticipantTest {
 		model.inputStream.close()
 	}
 
-	protected Model readModel(File pomFile) {
+	protected static Model readModel(File pomFile) {
 		MavenXpp3Reader modelReader = new MavenXpp3Reader()
 		Model pomModel
 
@@ -398,7 +471,7 @@ public class TilesMavenLifecycleParticipantTest {
 		assert participant.processedTiles.size() == 4
 	}
 
-	protected Model createBasicModel() {
+	protected static Model createBasicModel() {
 		Model model = new Model()
 
 		model.setGroupId("com.bluetrainsoftware.maven")

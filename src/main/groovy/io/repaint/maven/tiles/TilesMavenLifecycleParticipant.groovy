@@ -30,29 +30,11 @@ import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.repository.ArtifactRepositoryFactory
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException
-import org.apache.maven.artifact.resolver.ArtifactResolutionException
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
-import org.apache.maven.artifact.resolver.ArtifactResolver
-import org.apache.maven.artifact.resolver.ResolutionErrorHandler
+import org.apache.maven.artifact.resolver.*
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
-import org.apache.maven.model.Build
-import org.apache.maven.model.Dependency
-import org.apache.maven.model.DistributionManagement
-import org.apache.maven.model.Model
-import org.apache.maven.model.Parent
-import org.apache.maven.model.Plugin
-import org.apache.maven.model.PluginManagement
-import org.apache.maven.model.Repository
-import org.apache.maven.model.building.DefaultModelBuilder
-import org.apache.maven.model.building.DefaultModelBuildingRequest
-import org.apache.maven.model.building.ModelBuilder
-import org.apache.maven.model.building.ModelBuildingListener
-import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelBuildingResult
-import org.apache.maven.model.building.ModelProcessor
-import org.apache.maven.model.building.ModelSource2
+import org.apache.maven.model.*
+import org.apache.maven.model.building.*
 import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
 import org.apache.maven.model.resolution.ModelResolver
@@ -69,11 +51,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 import org.xml.sax.SAXParseException
 
-import static io.repaint.maven.tiles.GavUtil.artifactGav
-import static io.repaint.maven.tiles.GavUtil.artifactName
-import static io.repaint.maven.tiles.GavUtil.modelGav
-import static io.repaint.maven.tiles.GavUtil.modelRealGa
-import static io.repaint.maven.tiles.GavUtil.parentGav
+import static io.repaint.maven.tiles.GavUtil.*
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
@@ -134,7 +112,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		public Artifact artifact
 		public TileModel tileModel
 
-		public ArtifactModel(Artifact artifact, TileModel tileModel) {
+		ArtifactModel(Artifact artifact, TileModel tileModel) {
 			this.artifact = artifact
 			this.tileModel = tileModel
 		}
@@ -153,7 +131,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
 	 * pom itself (because we don't care about that).
 	 */
-	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String classifier, String version) {
+	protected static Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String classifier, String version) {
 		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 			type, classifier, new DefaultArtifactHandler(type))
 	}
@@ -161,7 +139,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	/**
 	 * Return the given Artifact's .pom artifact
 	 */
-	protected Artifact getPomArtifactForArtifact(Artifact artifact) {
+	protected static Artifact getPomArtifactForArtifact(Artifact artifact) {
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
@@ -220,7 +198,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return tileArtifact
 	}
 
-	protected Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile)
+	protected static Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile)
 	  throws MavenExecutionException {
 
 		String[] gav = artifactGav.tokenize(":")
@@ -263,7 +241,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
+	protected static MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
 		MavenVersionIsolator isolator
 
 		try {
@@ -281,7 +259,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * This callback is intended to allow extensions to manipulate MavenProjects
 	 * before they are sorted and actual build execution starts.
 	 */
-	public void afterProjectsRead(MavenSession mavenSession)
+	void afterProjectsRead(MavenSession mavenSession)
 		throws MavenExecutionException {
 
 		this.mavenSession = mavenSession
@@ -303,9 +281,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains(TILEPLUGIN_KEY)
 
 				if (containsTiles) {
-					Plugin plugin = currentProject.getPlugin(TILEPLUGIN_KEY);
+					Plugin plugin = currentProject.getPlugin(TILEPLUGIN_KEY)
 					if (plugin.isInherited() && subModules != null && subModules.size() > 0) {
-						Model currentModel = currentProject.getModel();
+						Model currentModel = currentProject.getModel()
 						for (MavenProject otherProject : allProjects) {
 							Parent otherParent = otherProject.getModel().getParent()
 							if(otherParent!=null && parentGav(otherParent).equals(modelGav(currentModel))) {
@@ -361,12 +339,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	protected void orchestrateMerge(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 		// Clear collected tiles from previous project in reactor
-		processedTiles.clear();
-		tileDiscoveryOrder.clear();
-		unprocessedTiles.clear();
+		processedTiles.clear()
+		tileDiscoveryOrder.clear()
+		unprocessedTiles.clear()
 
 		// collect the first set of tiles
-		parseConfiguration(project.model, project.getFile(), true)
+		parseConfiguration(project.model, project.getFile())
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
 		loadAllDiscoveredTiles(mavenSession)
@@ -504,14 +482,14 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			@Override
 			ModelSource2 getRelatedSource( String relPath ) {
-				File relatedPom = new File(pomFile.parentFile, relPath);
+				File relatedPom = new File(pomFile.parentFile, relPath)
 				if (relatedPom.isDirectory()) {
-					relatedPom = new File(relatedPom, "pom.xml");
+					relatedPom = new File(relatedPom, "pom.xml")
 				}
 				if (relatedPom.isFile()&& relatedPom.canRead()) {
-					return createModelSource(relatedPom.canonicalFile);
+					return createModelSource(relatedPom.canonicalFile)
 				}
-				return null;
+				return null
 			}
 		}
 	}
@@ -567,8 +545,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected void putModelInCache(Model model, ModelBuildingRequest request, File pomFile) {
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
 		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
-			org.apache.maven.model.building.ModelCacheTag.RAW,
-			mavenVersionIsolate.createModelData(model, pomFile));
+				org.apache.maven.model.building.ModelCacheTag.RAW, mavenVersionIsolate.createModelData(model, pomFile))
 //				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
 	}
 
@@ -580,8 +557,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @param pomModel - the current project
 	 * @param request - the request to build the current project
 	 */
-	public void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel,
-	                                            ModelBuildingRequest request) {
+	void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel, ModelBuildingRequest request) {
 		Parent originalParent = pomModel.parent
 		Model lastPom = pomModel
 		File lastPomFile = request.pomFile
@@ -632,7 +608,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	}
 
-	protected void copyModel(MavenProject project, Model newModel) {
+	protected static void copyModel(MavenProject project, Model newModel) {
 
 		// no setting parent, we have generated an effective model which is now all copied in
 		Model projectModel = project.model
@@ -658,10 +634,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		// update model (test) source directory, which is the first entry and might have been set through a tile
 		if (projectModel.build.sourceDirectory) {
-			project.compileSourceRoots[0] = projectModel.build.sourceDirectory;
+			project.compileSourceRoots[0] = projectModel.build.sourceDirectory
 		}
 		if (projectModel.build.testSourceDirectory) {
-			project.testCompileSourceRoots[0] = projectModel.build.testSourceDirectory;
+			project.testCompileSourceRoots[0] = projectModel.build.testSourceDirectory
 		}
 
 		// for tile provided LifecycleMapping in m2e we need to modifiy the original model
@@ -718,7 +694,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * Normally used inside the current project's pom file when declaring the tile plugin. People may prefer this
 	 * to use to include tiles however in a tile.xml
 	 */
-	protected void parseConfiguration(Model model, File pomFile, boolean projectModel) {
+	protected void parseConfiguration(Model model, File pomFile) {
 		Xpp3Dom configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP &&
@@ -728,7 +704,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
-			applyBeforeParent = configuration.getChild("applyBefore")?.value;
+			applyBeforeParent = configuration.getChild("applyBefore")?.value
 		}
 	}
 
@@ -740,7 +716,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			processConfigurationTile(model.model, tileGav, pomFile)
 		}
 
-		parseConfiguration(model.model, pomFile, false)
+		parseConfiguration(model.model, pomFile)
 	}
 
 	protected void processConfigurationTile(Model model, String tileDependencyName, File pomFile) {
@@ -780,6 +756,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 		}
 
-		return ret;
+		return ret
 	}
 }

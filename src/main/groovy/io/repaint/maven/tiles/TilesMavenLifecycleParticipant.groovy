@@ -545,7 +545,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected void putModelInCache(Model model, ModelBuildingRequest request, File pomFile) {
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
 		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
-				org.apache.maven.model.building.ModelCacheTag.RAW, mavenVersionIsolate.createModelData(model, pomFile))
+			org.apache.maven.model.building.ModelCacheTag.RAW,
+			mavenVersionIsolate.createModelData(model, pomFile))
 //				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
 	}
 
@@ -748,14 +749,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @return The evaluated String
 	 */
 	protected String evaluateString(String value) {
-		String ret = value
-		if (mavenSession != null) {
-			PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
-			if (expEval != null && value != null) {
-				ret = expEval.evaluate(ret,String.class)
-			}
+		if ((value != null) && (mavenSession != null)) {
+			return new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
+				.evaluate(value, String.class)
+		} else {
+			return value
 		}
-
-		return ret
 	}
 }

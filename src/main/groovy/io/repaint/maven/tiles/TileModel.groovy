@@ -4,6 +4,7 @@ import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.codehaus.plexus.util.xml.Xpp3Dom
 /**
@@ -67,35 +68,29 @@ class TileModel {
 
 		// Update each tile'd plugin's execution id with the tile GAV for easier debugging/tracing
 		if (model.build?.plugins) {
-			model.build.plugins.each { plugin ->
-				if (plugin.executions) {
-					plugin.executions.each { execution ->
-						if ((execution.configuration as Xpp3Dom)?.getChild("tiles-keep-id")?.getValue() == "true") {
-							// do not rewrite the current execution id
-							return
-						}
-						execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
-					}
-				}
-			}
+            rewritePluginExecutionIds(model.build.plugins, artifact)
 		}
 		if (model.profiles) {
 			model.profiles.each { profile ->
 				if (profile.build?.plugins) {
-					profile.build.plugins.each { plugin ->
-						if (plugin.executions) {
-							plugin.executions.each { execution ->
-								if ((execution.configuration as Xpp3Dom)?.getChild("tiles-keep-id")?.getValue() == "true") {
-									// do not rewrite the current execution id
-									return
-								}
-								execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
-							}
-						}
-					}
+                    rewritePluginExecutionIds(profile.build.plugins, artifact)
 				}
 			}
 		}
 
 	}
+
+    private static List<Plugin> rewritePluginExecutionIds(List<Plugin> plugins, Artifact artifact) {
+        plugins.each { plugin ->
+            if (plugin.executions) {
+                plugin.executions.each { execution ->
+                    if ((execution.configuration as Xpp3Dom)?.getChild("tiles-keep-id")?.getValue() == "true") {
+                        // do not rewrite the current execution id
+                        return
+                    }
+                    execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+                }
+            }
+        }
+    }
 }

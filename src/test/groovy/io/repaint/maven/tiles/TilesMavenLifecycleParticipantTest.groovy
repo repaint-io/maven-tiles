@@ -16,8 +16,7 @@
  **********************************************************************************************************************/
 package io.repaint.maven.tiles
 
-import groovy.transform.CompileStatic
-import io.repaint.maven.tiles.isolators.MavenVersionIsolator
+
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
@@ -33,18 +32,21 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelData
-import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
+import org.apache.maven.shared.filtering.DefaultMavenFileFilter
+import org.apache.maven.shared.filtering.DefaultMavenReaderFilter
+import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
+import org.eclipse.aether.impl.VersionRangeResolver
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
+import org.sonatype.plexus.build.incremental.DefaultBuildContext
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.mockito.Mockito.mock
@@ -55,11 +57,11 @@ import static org.mockito.Mockito.when
  * (No such file or directory)) when running the test from your IDE, make sure you configure the Working
  * Directory as maven-tiles/tiles-maven-plugin (absolute path)
  */
-@CompileStatic
 @RunWith(MockitoJUnitRunner.class)
 public class TilesMavenLifecycleParticipantTest {
 
 	TilesMavenLifecycleParticipant participant
+	MavenSession mockMavenSession
 	ArtifactResolver mockResolver
 	Logger logger
 
@@ -84,6 +86,7 @@ public class TilesMavenLifecycleParticipantTest {
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
 
+		mockMavenSession = mock(MavenSession.class)
 		mockResolver = mock(ArtifactResolver.class)
 		logger = [
 		  warn: { String msg -> println msg },
@@ -106,30 +109,13 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 		] as ArtifactResolver
 		participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
-		participant.mavenVersionIsolate = createFakeIsolate()
-	}
-
-	protected static MavenVersionIsolator createFakeIsolate() {
-		return new MavenVersionIsolator() {
-			@Override
-			void resolveVersionRange(Artifact tileArtifact) {
-			}
-
-			@Override
-			ModelProblemCollector createModelProblemCollector() {
-				return [
-					add: { req ->
-
-					}
-				] as ModelProblemCollector
-			}
-
-			@Override
-			ModelData createModelData(Model model, File pomFile) {
+		participant.versionRangeResolver = [
+			resolveVersionRange: { session, request ->
 				return null
 			}
-
-		}
+		] as VersionRangeResolver
+		participant.mavenSession = mockMavenSession
+//		participant.mavenVersionIsolate = createFakeIsolate()
 	}
 
 	public Artifact getTileTestCoordinates() {
@@ -172,6 +158,18 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testFiltering() {
+		final def context = new DefaultBuildContext()
+
+		participant.mavenFileFilter = new DefaultMavenFileFilter()
+		participant.mavenFileFilter.enableLogging(participant.logger)
+		participant.mavenFileFilter.buildContext = context
+		participant.mavenFileFilter.readerFilter = new DefaultMavenReaderFilter()
+
+		participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering()
+		participant.mavenResourcesFiltering.enableLogging(participant.logger)
+		participant.mavenResourcesFiltering.buildContext = context
+		participant.mavenResourcesFiltering.mavenFileFilter = participant.mavenFileFilter
+
         Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 
 		Model model = new Model()
@@ -314,11 +312,20 @@ public class TilesMavenLifecycleParticipantTest {
 	public void canUseModelResolver() {
 		File licensePom = new File('src/test/resources/session-license-pom.xml')
 
-		participant.mavenVersionIsolate = [
-			resolveVersionRange: { Artifact artifact ->
-				artifact.file = licensePom
+		participant = new TilesMavenLifecycleParticipant() {
+			@Override
+			void resolveVersionRange(Artifact tileArtifact) {
+				tileArtifact.file = licensePom
 			}
-		] as MavenVersionIsolator
+		}
+
+		stuffParticipant()
+
+//		participant.mavenVersionIsolate = [
+//			resolveVersionRange: { Artifact artifact ->
+//				artifact.file = licensePom
+//			}
+//		] as MavenVersionIsolator
 
 		def resolver = participant.createModelResolver()
 		def model = resolver.resolveModel('my', 'left', 'foot')
@@ -342,6 +349,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void injectModelLayerTiles() {
+
 		TileModel sessionLicenseTile = new TileModel(new File('src/test/resources/session-license-tile.xml'),
 			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:session-license:1', null))
 
@@ -367,6 +375,8 @@ public class TilesMavenLifecycleParticipantTest {
 		}
 
 		stuffParticipant()
+
+		participant.mavenSession = null
 
 		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 

@@ -29,7 +29,7 @@ class AttachTileMojo extends AbstractTileMojo {
 
 		if (new TileValidator().loadModel(logger, tile, buildSmells)) {
 			if ("tile".equals(project.getPackaging())) {
-				project.getArtifact().setFile(tile);
+				project.getArtifact().setFile(tile)
 			} else {
 				projectHelper.attachArtifact(project, "tile", tile)
 			}

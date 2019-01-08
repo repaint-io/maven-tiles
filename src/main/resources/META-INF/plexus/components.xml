@@ -14,18 +14,19 @@
 -->
 <component-set>
 	<components>
+
+		<component>
+			<role>org.apache.maven.project.ProjectBuilder</role>
+			<role-hint>default</role-hint>
+			<implementation>io.repaint.maven.tiles.TilesProjectBuilder</implementation>
+			<isolated-realm>true</isolated-realm>
+		</component>
+
 		<component>
 			<role>org.apache.maven.AbstractMavenLifecycleParticipant</role>
 			<role-hint>TilesMavenLifecycleParticipant</role-hint>
 			<implementation>io.repaint.maven.tiles.TilesMavenLifecycleParticipant</implementation>
-			<isolated-realm>false</isolated-realm>
-			<requirements>
-				<requirement>
-					<role>org.codehaus.plexus.logging.Logger</role>
-					<role-hint>default</role-hint>
-					<field-name>logger</field-name>
-				</requirement>
-			</requirements>
+			<isolated-realm>true</isolated-realm>
 		</component>
 
 		<component>
@@ -50,21 +51,14 @@
 					<lifecycle>
 						<id>default</id>
 						<phases>
-							<package>
-								io.repaint.maven:tiles-maven-plugin:attach-tile
-							</package>
-							<install>
-								org.apache.maven.plugins:maven-install-plugin:install
-							</install>
-							<deploy>
-								org.apache.maven.plugins:maven-deploy-plugin:deploy
-							</deploy>
+							<package>io.repaint.maven:tiles-maven-plugin:attach-tile</package>
+							<install>org.apache.maven.plugins:maven-install-plugin:install</install>
+							<deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
 						</phases>
 					</lifecycle>
 				</lifecycles>
 			</configuration>
 		</component>
-
 
 	</components>
 </component-set>

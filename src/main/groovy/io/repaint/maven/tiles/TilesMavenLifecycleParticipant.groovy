@@ -19,11 +19,9 @@ package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
-import io.repaint.maven.tiles.isolators.AetherIsolator
-import io.repaint.maven.tiles.isolators.Maven30Isolator
-import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
+import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
@@ -47,6 +45,7 @@ import org.apache.maven.model.PluginManagement
 import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.FileModelSource
 import org.apache.maven.model.building.ModelBuilder
 import org.apache.maven.model.building.ModelBuildingListener
 import org.apache.maven.model.building.ModelBuildingRequest
@@ -62,11 +61,14 @@ import org.apache.maven.plugin.PluginParameterExpressionEvaluator
 import org.apache.maven.plugin.descriptor.MojoDescriptor
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuildingHelper
+import org.apache.maven.shared.filtering.MavenFileFilter
+import org.apache.maven.shared.filtering.MavenResourcesFiltering
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
-import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
+import org.eclipse.aether.impl.VersionRangeResolver
+import org.eclipse.aether.resolution.VersionRangeRequest
 import org.xml.sax.SAXParseException
 
 import static io.repaint.maven.tiles.GavUtil.artifactGav
@@ -84,7 +86,6 @@ import static io.repaint.maven.tiles.GavUtil.parentGav
  * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  *
  */
-@CompileStatic
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
@@ -113,15 +114,23 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	/**
 	 * Component used to create a repository.
 	 */
+	@Requirement
 	ArtifactRepositoryFactory repositoryFactory
 
 	/**
 	 * Map that contains the layouts.
 	 */
 	@Requirement( role = ArtifactRepositoryLayout.class )
-	private Map<String, ArtifactRepositoryLayout> repositoryLayouts
+	Map<String, ArtifactRepositoryLayout> repositoryLayouts
 
-	protected MavenVersionIsolator mavenVersionIsolate
+	@Requirement
+	VersionRangeResolver versionRangeResolver
+
+	@Requirement
+	MavenFileFilter mavenFileFilter
+
+	@Requirement
+	MavenResourcesFiltering mavenResourcesFiltering
 
 	List<ArtifactRepository> remoteRepositories
 	ArtifactRepository localRepository
@@ -172,8 +181,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			if (allProjects != null) {
 				for (MavenProject currentProject : allProjects) {
 					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId && currentProject.version == tileArtifact.version) {
-						//tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
-						tileArtifact.file = FilteringHelper.getTile(currentProject, new File(currentProject.build.directory, "tmp-tile"), mavenSession, logger)
+//						tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
+						tileArtifact.file = FilteringHelper.getTile(currentProject, new File(currentProject.build.directory, "tmp-tile"), mavenSession, mavenFileFilter, mavenResourcesFiltering)
 						return tileArtifact
 					}
 				}
@@ -181,7 +190,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		try {
-			mavenVersionIsolate.resolveVersionRange(tileArtifact)
+			resolveVersionRange(tileArtifact)
 
 			// Resolve the .xml file for the tile
 			final def tileReq = new ArtifactResolutionRequest().setArtifact(tileArtifact).setRemoteRepositories(remoteRepositories).setLocalRepository(localRepository)
@@ -192,7 +201,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				tileArtifact.file = new File(tileArtifact.file.parent, FilteringHelper.TILE_POM)
 				if (!tileArtifact.file.exists()) {
 					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.",
-						tileArtifact.getFile())
+						tileArtifact.getFile() as File)
 				}
 			}
 
@@ -206,7 +215,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				if (tileArtifact.version.endsWith("-SNAPSHOT")) {
 
 					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} is a SNAPSHOT and we are releasing.",
-						tileArtifact.getFile())
+						tileArtifact.getFile() as File)
 
 				}
 			}
@@ -226,7 +235,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		String[] gav = artifactGav.tokenize(":")
 
 		if (gav.size() != 3 && gav.size() != 5) {
-			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range", pomFile)
+			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range", pomFile as File)
 		}
 
 		String groupId = gav[0]
@@ -263,18 +272,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected static MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-		MavenVersionIsolator isolator
-
-		try {
-			isolator = new AetherIsolator(mavenSession)
-		} catch (MavenExecutionException mee) {
-			isolator = new Maven30Isolator(mavenSession)
-		}
-
-		return isolator
-	}
-
 	/**
 	 * Invoked after all MavenProject instances have been created.
 	 *
@@ -289,27 +286,25 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		this.remoteRepositories = mavenSession.request.remoteRepositories
 		this.localRepository = mavenSession.request.localRepository
 
-		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
-
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-		repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory)
-		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+//		repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
+//		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
 			for (MavenProject currentProject : allProjects) {
-				List<String> subModules = currentProject.getModules()
 				boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains(TILEPLUGIN_KEY)
 
 				if (containsTiles) {
 					Plugin plugin = currentProject.getPlugin(TILEPLUGIN_KEY)
+					List<String> subModules = currentProject.getModules()
 					if (plugin.isInherited() && subModules != null && subModules.size() > 0) {
 						Model currentModel = currentProject.getModel()
 						for (MavenProject otherProject : allProjects) {
 							Parent otherParent = otherProject.getModel().getParent()
 							if(otherParent!=null && parentGav(otherParent).equals(modelGav(currentModel))) {
-								//We're in project with children, fail the build immediate. This is both an opinionated choice, but also
+								//We're in project with children, fail the build immediately. This is both an opinionated choice, but also
 								//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
 								//are limited.
 								throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds where reactor is used as parent.", currentProject.getFile())
@@ -366,7 +361,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		unprocessedTiles.clear()
 
 		// collect the first set of tiles
-		parseConfiguration(project.model, project.getFile())
+		parseConfiguration(project.model, project.file)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
 		loadAllDiscoveredTiles(mavenSession)
@@ -407,6 +402,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		boolean tilesInjected = false
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {
+
 			@Override
 			File locatePom(File projectDirectory) {
 				return modelProcessor.locatePom(projectDirectory)
@@ -524,7 +520,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
                                 Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
-				mavenVersionIsolate.resolveVersionRange(artifact)
+				resolveVersionRange(artifact)
 				final def req = new ArtifactResolutionRequest().setArtifact(artifact).setRemoteRepositories(remoteRepositories).setLocalRepository(localRepository)
 				resolutionErrorHandler.throwErrors(req, resolver.resolve(req))
 
@@ -568,7 +564,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
 		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
 			org.apache.maven.model.building.ModelCacheTag.RAW,
-			mavenVersionIsolate.createModelData(model, pomFile))
+			org.apache.maven.model.building.ModelData.newInstance(
+				new FileModelSource(pomFile), model, model.groupId, model.artifactId, model.version))
 //				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
 	}
 
@@ -718,13 +715,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * to use to include tiles however in a tile.xml
 	 */
 	protected void parseConfiguration(Model model, File pomFile) {
-		Xpp3Dom configuration = model?.build?.plugins?.
+		def configuration = model?.build?.plugins?.
 			find({ Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP &&
-						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration as Xpp3Dom
+						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration
 
 		if (configuration) {
-			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
+			configuration.getChild("tiles")?.children?.each { tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
 			applyBeforeParent = configuration.getChild("applyBefore")?.value
@@ -778,4 +775,16 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			return value
 		}
 	}
+
+	void resolveVersionRange(Artifact tileArtifact) {
+		def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
+			RepositoryUtils.toRepos(remoteRepositories), null)
+
+		def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession.repositorySession, versionRangeRequest)
+
+		if (versionRangeResult?.versions) {
+			tileArtifact.version = versionRangeResult.highestVersion
+		}
+	}
+
 }

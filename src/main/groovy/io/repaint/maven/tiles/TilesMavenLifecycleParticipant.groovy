@@ -25,7 +25,6 @@ import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
-import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.repository.ArtifactRepositoryFactory
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
@@ -111,15 +110,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@Requirement
 	ProjectBuildingHelper projectBuildingHelper
 
-	/**
-	 * Component used to create a repository.
-	 */
 	@Requirement
 	ArtifactRepositoryFactory repositoryFactory
 
-	/**
-	 * Map that contains the layouts.
-	 */
 	@Requirement( role = ArtifactRepositoryLayout.class )
 	Map<String, ArtifactRepositoryLayout> repositoryLayouts
 
@@ -131,9 +124,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	MavenResourcesFiltering mavenResourcesFiltering
-
-	List<ArtifactRepository> remoteRepositories
-	ArtifactRepository localRepository
 
 	NotDefaultModelCache modelCache
 
@@ -174,7 +164,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
-	protected Artifact resolveTile(MavenSession mavenSession, Artifact tileArtifact) throws MavenExecutionException {
+	protected Artifact resolveTile(MavenSession mavenSession, MavenProject project, Artifact tileArtifact) throws MavenExecutionException {
 		// try to find tile from reactor
 		if (mavenSession != null) {
 			List<MavenProject> allProjects = mavenSession.getProjects()
@@ -182,7 +172,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				for (MavenProject currentProject : allProjects) {
 					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId && currentProject.version == tileArtifact.version) {
 //						tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
-						tileArtifact.file = FilteringHelper.getTile(currentProject, new File(currentProject.build.directory, "tmp-tile"), mavenSession, mavenFileFilter, mavenResourcesFiltering)
+						tileArtifact.file = FilteringHelper.getTile(currentProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
 						return tileArtifact
 					}
 				}
@@ -190,10 +180,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		try {
-			resolveVersionRange(tileArtifact)
+			resolveVersionRange(project, tileArtifact)
 
 			// Resolve the .xml file for the tile
-			final def tileReq = new ArtifactResolutionRequest().setArtifact(tileArtifact).setRemoteRepositories(remoteRepositories).setLocalRepository(localRepository)
+			final def tileReq = new ArtifactResolutionRequest()
+				.setArtifact(tileArtifact)
+				.setRemoteRepositories(project?.remoteArtifactRepositories)
+				.setLocalRepository(mavenSession?.localRepository)
 			resolutionErrorHandler.throwErrors(tileReq, resolver.resolve(tileReq))
 
 			// When resolving from workspace (e.g. m2e) we might receive the path to pom.xml instead of the attached tile
@@ -207,7 +200,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// Resolve the .pom file for the tile
 			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
-			final def pomReq = new ArtifactResolutionRequest().setArtifact(pomArtifact).setRemoteRepositories(remoteRepositories).setLocalRepository(localRepository)
+			final def pomReq = new ArtifactResolutionRequest()
+				.setArtifact(pomArtifact)
+				.setRemoteRepositories(project?.remoteArtifactRepositories)
+				.setLocalRepository(mavenSession?.localRepository)
 			resolutionErrorHandler.throwErrors(pomReq, resolver.resolve(pomReq))
 
 			if (System.getProperty("performRelease")?.asBoolean()) {
@@ -283,13 +279,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.mavenSession = mavenSession
 
-		this.remoteRepositories = mavenSession.request.remoteRepositories
-		this.localRepository = mavenSession.request.localRepository
-
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-//		repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
-//		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+		if (repositoryFactory == null) {
+			repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
+		}
+		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
@@ -364,7 +359,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		parseConfiguration(project.model, project.file)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		loadAllDiscoveredTiles(mavenSession)
+		loadAllDiscoveredTiles(mavenSession, project)
 
 		// don't do anything if there are no tiles
 		if (processedTiles) {
@@ -520,8 +515,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
                                 Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
-				resolveVersionRange(artifact)
-				final def req = new ArtifactResolutionRequest().setArtifact(artifact).setRemoteRepositories(remoteRepositories).setLocalRepository(localRepository)
+				resolveVersionRange(null, artifact)
+				final def req = new ArtifactResolutionRequest()
+					.setArtifact(artifact)
+					.setRemoteRepositories(mavenSession?.currentProject?.remoteArtifactRepositories ?: mavenSession?.request?.remoteRepositories)
+					.setLocalRepository(mavenSession?.localRepository)
 				resolutionErrorHandler.throwErrors(req, resolver.resolve(req))
 
 				return createModelSource(artifact.file)
@@ -677,11 +675,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected void loadAllDiscoveredTiles(MavenSession mavenSession) throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
-			Artifact resolvedTile = resolveTile(mavenSession, unprocessedTiles.remove(unresolvedTile))
+			Artifact resolvedTile = resolveTile(mavenSession, project, unprocessedTiles.remove(unresolvedTile))
 
 			TileModel tileModel = loadModel(resolvedTile)
 
@@ -776,9 +774,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	void resolveVersionRange(Artifact tileArtifact) {
+	void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
 		def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
-			RepositoryUtils.toRepos(remoteRepositories), null)
+			RepositoryUtils.toRepos(project?.remoteArtifactRepositories ?: mavenSession?.currentProject?.remoteArtifactRepositories ?: mavenSession?.request?.remoteRepositories), 
+			null)
 
 		def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession.repositorySession, versionRangeRequest)
 

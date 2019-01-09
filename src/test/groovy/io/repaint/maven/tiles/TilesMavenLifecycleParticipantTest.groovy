@@ -128,7 +128,7 @@ public class TilesMavenLifecycleParticipantTest {
 		Artifact snapshot = getTileTestCoordinates()
 		System.setProperty(PERFORM_RELEASE, "true")
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, snapshot)
+			participant.resolveTile(null, null, snapshot)
 		}
 	}
 
@@ -143,7 +143,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, badbadbad)
+			participant.resolveTile(null, null, badbadbad)
 		}
 		participant.resolver = [
 			resolve: { ArtifactResolutionRequest request ->
@@ -152,7 +152,7 @@ public class TilesMavenLifecycleParticipantTest {
 		] as ArtifactResolver
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, badbadbad)
+			participant.resolveTile(null, null, badbadbad)
 		}
 	}
 
@@ -183,7 +183,7 @@ public class TilesMavenLifecycleParticipantTest {
 		model.build.plugins[0].with {
 			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
 			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
-			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><filtering>true</filtering></configuration>"))
+			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><filtering>true</filtering><generatedSourcesDirectory>target/filtering/generated-tiles</generatedSourcesDirectory></configuration>"))
 		}
 
 		MavenProject project = new MavenProject(model)
@@ -195,8 +195,8 @@ public class TilesMavenLifecycleParticipantTest {
 
 		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
 
-		Artifact tile = participant.resolveTile(session, filteredTile)
-		assert tile.file == new File("target/filtering/tmp-tile/tiles/tile.xml")
+		Artifact tile = participant.resolveTile(session, project, filteredTile)
+		assert tile.file == new File("target/filtering/generated-tiles/tiles/tile.xml")
 
 		TileModel tileModel = new TileModel(tile.file, tile)
 
@@ -229,7 +229,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
 
-		Artifact tile = participant.resolveTile(session, filteredTile)
+		Artifact tile = participant.resolveTile(session, project, filteredTile)
 
 		assert tile.file == new File("src/test/resources/filtering/tile.xml")
 
@@ -314,7 +314,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		participant = new TilesMavenLifecycleParticipant() {
 			@Override
-			void resolveVersionRange(Artifact tileArtifact) {
+			void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
 				tileArtifact.file = licensePom
 			}
 		}
@@ -441,9 +441,8 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 
 			@Override
-			protected Artifact resolveTile(MavenSession mavenSession, Artifact tileArtifact) throws MavenExecutionException {
+			protected Artifact resolveTile(MavenSession mavenSession, MavenProject project, Artifact tileArtifact) throws MavenExecutionException {
 				tileArtifact.file = new File("src/test/resources/${tileArtifact.artifactId}.xml")
-
 				return tileArtifact
 			}
 		}
@@ -451,7 +450,7 @@ public class TilesMavenLifecycleParticipantTest {
 		stuffParticipant()
 	}
 
-	protected MavenProject fakeProjectFromFile(String pom) {
+	protected static MavenProject fakeProjectFromFile(String pom) {
 		File pomFile = new File("src/test/resources/${pom}.xml")
 
 		return [

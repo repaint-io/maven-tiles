@@ -8,14 +8,12 @@ import org.apache.maven.shared.filtering.MavenFileFilter
 import org.apache.maven.shared.filtering.MavenFileFilterRequest
 import org.apache.maven.shared.filtering.MavenResourcesExecution
 import org.apache.maven.shared.filtering.MavenResourcesFiltering
-import org.codehaus.plexus.util.xml.Xpp3Dom
 
 class FilteringHelper {
 
     public static final String TILE_POM = "tile.xml"
 
     static File getTile(final MavenProject project,
-                        final File generatedSourcesDirectory,
                         final MavenSession mavenSession,
                         final MavenFileFilter mavenFileFilter,
                         final MavenResourcesFiltering mavenResourcesFiltering) {
@@ -28,9 +26,12 @@ class FilteringHelper {
         final boolean filtering = (plugins.size() == 1) && (plugins[0].configuration?.getChild("filtering")?.getValue() == "true")
 
         if (filtering) {
+            String generatedSourcesDirectoryStr = plugins[0].configuration?.getChild("generatedSourcesDirectory")?.getValue()
+            File generatedSourcesDirectory = generatedSourcesDirectoryStr
+                ? new File(generatedSourcesDirectoryStr) : new File(project.build.directory, "generated-sources")
             return getTile(project, true, generatedSourcesDirectory, mavenSession, mavenFileFilter, mavenResourcesFiltering)
         } else {
-            return getTile(project, false, generatedSourcesDirectory, mavenSession, null, null)
+            return getTile(project, false, null, mavenSession, null, null)
         }
     }
 

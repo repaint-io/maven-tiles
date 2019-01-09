@@ -465,6 +465,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		try {
 			ModelBuildingResult interimBuild = modelBuilder.build(request)
 
+            // this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they 
+            // served their purpose of correctly ordering projects, so we can now do without them
 			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
 			if (!tilesInjected && applyBeforeParent) {
 				throw new MavenExecutionException("Cannot apply tiles, the expected parent ${applyBeforeParent} is not found.",

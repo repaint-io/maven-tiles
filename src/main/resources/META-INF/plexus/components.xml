@@ -19,14 +19,12 @@
 			<role>org.apache.maven.project.ProjectBuilder</role>
 			<role-hint>default</role-hint>
 			<implementation>io.repaint.maven.tiles.TilesProjectBuilder</implementation>
-			<isolated-realm>true</isolated-realm>
 		</component>
 
 		<component>
 			<role>org.apache.maven.AbstractMavenLifecycleParticipant</role>
 			<role-hint>TilesMavenLifecycleParticipant</role-hint>
 			<implementation>io.repaint.maven.tiles.TilesMavenLifecycleParticipant</implementation>
-			<isolated-realm>true</isolated-realm>
 		</component>
 
 		<component>

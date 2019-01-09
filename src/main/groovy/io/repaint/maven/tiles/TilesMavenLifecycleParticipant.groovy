@@ -281,10 +281,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
+        // why are these looked up explicitly? seem to be injected just fine
 		if (repositoryFactory == null) {
 			repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
 		}
-		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+        if (repositoryLayouts == null) {
+            repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+        }
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {

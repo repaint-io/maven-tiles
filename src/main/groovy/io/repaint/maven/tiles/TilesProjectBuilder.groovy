@@ -48,9 +48,9 @@ class TilesProjectBuilder extends DefaultProjectBuilder {
 	private ProjectBuildingResult injectTileDependecies(ProjectBuildingResult result) {
 		MavenProject project = result.project
 		def configuration = project.model?.build?.plugins
-			?.find({ Plugin plugin ->
+			?.find { Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT
-			})
+			}
 			?.configuration
 
 		if (configuration) {

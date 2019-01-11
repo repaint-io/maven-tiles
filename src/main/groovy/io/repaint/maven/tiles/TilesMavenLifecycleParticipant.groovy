@@ -716,9 +716,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	protected void parseConfiguration(Model model, File pomFile) {
 		def configuration = model?.build?.plugins
-			?.find({ Plugin plugin ->
+			?.find { Plugin plugin ->
 				return plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT
-			})
+			}
 			?.configuration
 
 		if (configuration) {

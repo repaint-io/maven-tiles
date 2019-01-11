@@ -171,7 +171,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			if (allProjects != null) {
 				for (MavenProject currentProject : allProjects) {
 					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId && currentProject.version == tileArtifact.version) {
-//						tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
 						tileArtifact.file = FilteringHelper.getTile(currentProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
 						return tileArtifact
 					}
@@ -285,9 +284,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		if (repositoryFactory == null) {
 			repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
 		}
-        if (repositoryLayouts == null) {
-            repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
-        }
+		if (repositoryLayouts == null) {
+			repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+		}
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {

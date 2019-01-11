@@ -449,7 +449,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 					// to make the parent reference project specific, so that it will not pick up a cached
 					// version. We do this by adding a project specific suffix, which will later be removed
 					// when actually loading that parent.
-					if(applyBeforeParent && !tilesInjected && model.parent) {
+					if (applyBeforeParent && !tilesInjected && model.parent) {
 						// remove the parent from the cache which causes it to be reloaded through our ModelProcessor
 						request.modelCache.put(model.parent.groupId, model.parent.artifactId, model.parent.version,
 							org.apache.maven.model.building.ModelCacheTag.RAW.getName(), null)
@@ -629,7 +629,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected static void copyModel(MavenProject project, Model newModel) {
-
 		// no setting parent, we have generated an effective model which is now all copied in
 		Model projectModel = project.model
 		projectModel.build = newModel.build

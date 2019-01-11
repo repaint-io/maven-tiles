@@ -8,7 +8,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -280,7 +280,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-        // why are these looked up explicitly? seem to be injected just fine
+		// why are these looked up explicitly? seem to be injected just fine
 		if (repositoryFactory == null) {
 			repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory.class)
 		}
@@ -464,8 +464,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		try {
 			ModelBuildingResult interimBuild = modelBuilder.build(request)
 
-            // this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they 
-            // served their purpose of correctly ordering projects, so we can now do without them
+			// this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they 
+			// served their purpose of correctly ordering projects, so we can now do without them
 			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
 			if (!tilesInjected && applyBeforeParent) {
 				throw new MavenExecutionException("Cannot apply tiles, the expected parent ${applyBeforeParent} is not found.",
@@ -516,8 +516,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		return new ModelResolver() {
 			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
-                                Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
-					"pom", null, new DefaultArtifactHandler("pom"))
+				Artifact artifact = new DefaultArtifact(groupId, artifactId, 
+					VersionRange.createFromVersion(version), "compile", "pom", null, new DefaultArtifactHandler("pom"))
 
 				resolveVersionRange(null, artifact)
 				final def req = new ArtifactResolutionRequest()
@@ -566,9 +566,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
 		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
 			org.apache.maven.model.building.ModelCacheTag.RAW,
-			org.apache.maven.model.building.ModelData.newInstance(
-				new FileModelSource(pomFile), model, model.groupId, model.artifactId, model.version))
-//				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
+			new org.apache.maven.model.building.ModelData(new FileModelSource(pomFile), model, model.groupId, model.artifactId, model.version))
 	}
 
 	/**
@@ -584,12 +582,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		Model lastPom = pomModel
 		File lastPomFile = request.pomFile
 
-        // fix up the version of the originalParent
-        if (originalParent != null) {
-            originalParent.version = evaluateString(originalParent.version)
-        }
+		// fix up the version of the originalParent
+		if (originalParent != null) {
+			originalParent.version = evaluateString(originalParent.version)
+		}
 
-        if (tiles) {
+		if (tiles) {
 			// evaluate the model version to deal with CI friendly build versions
 			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${evaluateString(modelRealGa(pomModel))}...")
 			logger.info("Mixed '${evaluateString(modelGav(pomModel))}' with tile '${evaluateString(modelGav(tiles.first().model))}' as its new parent.")
@@ -620,7 +618,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			lastPomFile = tileModel.tilePom
 		}
 
-        lastPom.parent = originalParent
+		lastPom.parent = originalParent
 		logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
 		logger.info("")
 
@@ -717,10 +715,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * to use to include tiles however in a tile.xml
 	 */
 	protected void parseConfiguration(Model model, File pomFile) {
-		def configuration = model?.build?.plugins?.
-			find({ Plugin plugin ->
-				return plugin.groupId == TILEPLUGIN_GROUP &&
-						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration
+		def configuration = model?.build?.plugins
+			?.find({ Plugin plugin ->
+				return plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT
+			})
+			?.configuration
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { tile ->

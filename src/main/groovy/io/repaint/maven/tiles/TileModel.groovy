@@ -68,29 +68,30 @@ class TileModel {
 
 		// Update each tile'd plugin's execution id with the tile GAV for easier debugging/tracing
 		if (model.build?.plugins) {
-            rewritePluginExecutionIds(model.build.plugins, artifact)
+			rewritePluginExecutionIds(model.build.plugins, artifact)
 		}
 		if (model.profiles) {
 			model.profiles.each { profile ->
 				if (profile.build?.plugins) {
-                    rewritePluginExecutionIds(profile.build.plugins, artifact)
+					rewritePluginExecutionIds(profile.build.plugins, artifact)
 				}
 			}
 		}
 
 	}
 
-    private static List<Plugin> rewritePluginExecutionIds(List<Plugin> plugins, Artifact artifact) {
-        plugins.each { plugin ->
-            if (plugin.executions) {
-                plugin.executions.each { execution ->
-                    if (execution.configuration?.getChild("tiles-keep-id")?.getValue() == "true") {
-                        // do not rewrite the current execution id
-                        return
-                    }
-                    execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
-                }
-            }
-        }
-    }
+	private static List<Plugin> rewritePluginExecutionIds(List<Plugin> plugins, Artifact artifact) {
+		plugins.each { plugin ->
+			if (plugin.executions) {
+				plugin.executions.each { execution ->
+					if (execution.configuration?.getChild("tiles-keep-id")?.getValue() == "true") {
+						// do not rewrite the current execution id
+						return
+					}
+					execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+				}
+			}
+		}
+	}
+
 }

@@ -9,24 +9,25 @@ import org.apache.maven.shared.filtering.MavenFileFilterRequest
 import org.apache.maven.shared.filtering.MavenResourcesExecution
 import org.apache.maven.shared.filtering.MavenResourcesFiltering
 
-class FilteringHelper {
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
+import static io.repaint.maven.tiles.Constants.TILE_POM
 
-    public static final String TILE_POM = "tile.xml"
+class FilteringHelper {
 
     static File getTile(final MavenProject project,
                         final MavenSession mavenSession,
                         final MavenFileFilter mavenFileFilter,
                         final MavenResourcesFiltering mavenResourcesFiltering) {
         // determine whether filtering is enabled
-        final List<Plugin> plugins = project.build.plugins
-            .stream()
-            .filter { p -> p.groupId == "io.repaint.maven" && p.artifactId == "tiles-maven-plugin" }
-            .collect()
+        def configuration = project.build.plugins
+            ?.find({ Plugin plugin -> plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT})
+            ?.configuration
 
-        final boolean filtering = (plugins.size() == 1) && (plugins[0].configuration?.getChild("filtering")?.getValue() == "true")
+        final boolean filtering = configuration?.getChild("filtering")?.getValue() == "true"
 
         if (filtering) {
-            String generatedSourcesDirectoryStr = plugins[0].configuration?.getChild("generatedSourcesDirectory")?.getValue()
+            String generatedSourcesDirectoryStr = configuration?.getChild("generatedSourcesDirectory")?.getValue()
             File generatedSourcesDirectory = generatedSourcesDirectoryStr
                 ? new File(generatedSourcesDirectoryStr) : new File(project.build.directory, "generated-sources")
             return getTile(project, true, generatedSourcesDirectory, mavenSession, mavenFileFilter, mavenResourcesFiltering)

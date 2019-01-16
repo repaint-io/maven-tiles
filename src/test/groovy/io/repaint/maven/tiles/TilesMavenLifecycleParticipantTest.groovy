@@ -49,6 +49,8 @@ import org.mockito.runners.MockitoJUnitRunner
 import org.sonatype.plexus.build.incremental.DefaultBuildContext
 
 import static groovy.test.GroovyAssert.shouldFail
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
@@ -181,8 +183,8 @@ public class TilesMavenLifecycleParticipantTest {
 		model.build.directory = "target/filtering"
 		model.build.addPlugin(new Plugin())
 		model.build.plugins[0].with {
-			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
-			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
 			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><filtering>true</filtering><generatedSourcesDirectory>target/filtering/generated-tiles</generatedSourcesDirectory></configuration>"))
 		}
 
@@ -216,8 +218,8 @@ public class TilesMavenLifecycleParticipantTest {
 		model.build.directory = "target/filtering"
 		model.build.addPlugin(new Plugin())
 		model.build.plugins[0].with {
-			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
-			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
 		}
 
 		MavenProject project = new MavenProject(model)
@@ -427,8 +429,8 @@ public class TilesMavenLifecycleParticipantTest {
 		model.build = new Build()
 		model.build.addPlugin(new Plugin())
 		model.build.plugins[0].with {
-			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
-			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
 			// bad GAV
 			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${gav}</tile></tiles></configuration>"))
 		}

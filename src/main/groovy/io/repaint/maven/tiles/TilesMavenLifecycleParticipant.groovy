@@ -70,6 +70,8 @@ import org.eclipse.aether.impl.VersionRangeResolver
 import org.eclipse.aether.resolution.VersionRangeRequest
 import org.xml.sax.SAXParseException
 
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static io.repaint.maven.tiles.GavUtil.artifactGav
 import static io.repaint.maven.tiles.GavUtil.artifactName
 import static io.repaint.maven.tiles.GavUtil.modelGav
@@ -88,8 +90,6 @@ import static io.repaint.maven.tiles.GavUtil.parentGav
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
-	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
-	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 	public static final String TILEPLUGIN_KEY = "${TILEPLUGIN_GROUP}:${TILEPLUGIN_ARTIFACT}"
 
 	@Requirement
@@ -718,10 +718,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * to use to include tiles however in a tile.xml
 	 */
 	protected void parseConfiguration(Model model, File pomFile) {
-		def configuration = model?.build?.plugins?.
-			find({ Plugin plugin ->
-				return plugin.groupId == TILEPLUGIN_GROUP &&
-						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration
+		def configuration = model.build?.plugins
+			?.find({ Plugin plugin -> plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT})
+			?.configuration
 
 		if (configuration) {
 			configuration.getChild("tiles")?.children?.each { tile ->

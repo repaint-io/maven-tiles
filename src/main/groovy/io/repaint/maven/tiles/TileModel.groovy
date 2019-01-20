@@ -1,11 +1,13 @@
 package io.repaint.maven.tiles
+
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
+import org.apache.maven.model.Plugin
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
-import org.codehaus.plexus.util.xml.Xpp3Dom
+
 /**
  * This will parse a tile.xml file with the intent of removing extra syntax, holding onto it and then
  * pushing the rest into a standard model. We could have used a Delegate or a Mixin here potentially, but
@@ -13,7 +15,6 @@ import org.codehaus.plexus.util.xml.Xpp3Dom
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
-@CompileStatic
 class TileModel {
 	Model model
 	List<String> tiles = []
@@ -44,7 +45,7 @@ class TileModel {
 		}
 	}
 
-	public void loadTile(File tilePom) {
+	void loadTile(File tilePom) {
 		this.tilePom = tilePom
 
 		MavenXpp3Reader pomReader = new MavenXpp3Reader()
@@ -52,8 +53,9 @@ class TileModel {
 		model = pomReader.read(strippedPom())
 	}
 
-	public TileModel() {}
-	public TileModel(File tilePom, Artifact artifact) {
+	TileModel() {}
+
+	TileModel(File tilePom, Artifact artifact) {
 		loadTile(tilePom)
 
 		// this is in the artifact but isn't actually in the file, we need it
@@ -65,22 +67,31 @@ class TileModel {
 		model.packaging = "pom"
 
 		// Update each tile'd plugin's execution id with the tile GAV for easier debugging/tracing
-		if (model.build) {
-			if (model.build.plugins) {
-				model.build.plugins.each { plugin ->
-					if (plugin.executions) {
-						plugin.executions.each { execution ->
-							Xpp3Dom configuration = execution.configuration as Xpp3Dom
-							if (configuration?.getAttribute("tiles-keep-id") == "true") {
-								// do not rewrite the current execution id
-								return
-							}
-							execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
-						}
-					}
+		if (model.build?.plugins) {
+			rewritePluginExecutionIds(model.build.plugins, artifact)
+		}
+		if (model.profiles) {
+			model.profiles.each { profile ->
+				if (profile.build?.plugins) {
+					rewritePluginExecutionIds(profile.build.plugins, artifact)
 				}
 			}
 		}
 
 	}
+
+	private static List<Plugin> rewritePluginExecutionIds(List<Plugin> plugins, Artifact artifact) {
+		plugins.each { plugin ->
+			if (plugin.executions) {
+				plugin.executions.each { execution ->
+					if (execution.configuration?.getChild("tiles-keep-id")?.getValue() == "true") {
+						// do not rewrite the current execution id
+						return
+					}
+					execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+				}
+			}
+		}
+	}
+
 }

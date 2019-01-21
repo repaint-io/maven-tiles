@@ -27,12 +27,13 @@ import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
-import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.repository.ArtifactRepositoryFactory
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
 import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.apache.maven.artifact.resolver.ResolutionErrorHandler
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
@@ -88,7 +89,6 @@ import static io.repaint.maven.tiles.GavUtil.getRealGroupId
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
-	protected static final String TILE_EXTENSION = 'pom'
 	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
 	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 	public static final String TILEPLUGIN_KEY = "${TILEPLUGIN_GROUP}:${TILEPLUGIN_ARTIFACT}"
@@ -100,6 +100,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	ArtifactResolver resolver
 
 	@Requirement
+	ResolutionErrorHandler resolutionErrorHandler
+
+	@Requirement
 	ModelBuilder modelBuilder
 
 	@Requirement
@@ -108,21 +111,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@Requirement
 	ProjectBuildingHelper projectBuildingHelper
 
-	/**
-	 * Component used to create a repository.
-	 */
-	ArtifactRepositoryFactory repositoryFactory;
+	@Requirement
+	ArtifactRepositoryFactory repositoryFactory
 
-	/**
-	 * Map that contains the layouts.
-	 */
 	@Requirement( role = ArtifactRepositoryLayout.class )
-	private Map<String, ArtifactRepositoryLayout> repositoryLayouts;
+	Map<String, ArtifactRepositoryLayout> repositoryLayouts
 
 	protected MavenVersionIsolator mavenVersionIsolate
-
-	List<ArtifactRepository> remoteRepositories
-	ArtifactRepository localRepository
 
 	NotDefaultModelCache modelCache
 
@@ -163,7 +158,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
-	protected Artifact resolveTile(MavenSession mavenSession, Artifact tileArtifact) throws MavenExecutionException {
+	protected Artifact resolveTile(MavenSession mavenSession, MavenProject project, Artifact tileArtifact) throws MavenExecutionException {
 		// try to find tile from reactor
 		if (mavenSession != null) {
 			List<MavenProject> allProjects = mavenSession.getProjects()
@@ -183,7 +178,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			mavenVersionIsolate.resolveVersionRange(tileArtifact)
 
 			// Resolve the .xml file for the tile
-			resolver.resolve(tileArtifact, remoteRepositories, localRepository)
+			final def tileReq = new ArtifactResolutionRequest()
+				.setArtifact(tileArtifact)
+				.setRemoteRepositories(project?.remoteArtifactRepositories)
+				.setLocalRepository(mavenSession?.localRepository)
+			resolutionErrorHandler.throwErrors(tileReq, resolver.resolve(tileReq))
 
 			// When resolving from workspace (e.g. m2e) we might receive the path to pom.xml instead of the attached tile
 			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
@@ -196,7 +195,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// Resolve the .pom file for the tile
 			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
-			resolver.resolve(pomArtifact, remoteRepositories, localRepository)
+			final def pomReq = new ArtifactResolutionRequest()
+				.setArtifact(pomArtifact)
+				.setRemoteRepositories(project?.remoteArtifactRepositories)
+				.setLocalRepository(mavenSession?.localRepository)
+			resolutionErrorHandler.throwErrors(pomReq, resolver.resolve(pomReq))
 
 			if (System.getProperty("performRelease")?.asBoolean()) {
 
@@ -283,15 +286,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.mavenSession = mavenSession
 
-		this.remoteRepositories = mavenSession.request.remoteRepositories
-		this.localRepository = mavenSession.request.localRepository
-
 		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
 
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
-		repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory)
-		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+		// disabled explicit lookup as these seem to be injected just fine. Are these required for eclipse m2e>
+		//repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory)
+		//repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
@@ -366,7 +367,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		parseConfiguration(project.model, project.getFile(), true)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
-		loadAllDiscoveredTiles(mavenSession)
+		loadAllDiscoveredTiles(mavenSession, project)
 
 		// don't do anything if there are no tiles
 		if (processedTiles) {
@@ -394,7 +395,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		// parent structure
 		ModelSource2 mainArtifactModelSource = createModelSource(project.file)
 		ModelBuildingRequest request = new DefaultModelBuildingRequest(modelSource: mainArtifactModelSource,
-			pomFile: project.file, modelResolver: createModelResolver(), modelCache: modelCache,
+			pomFile: project.file, modelResolver: createModelResolver(project), modelCache: modelCache,
 		  systemProperties: mavenSession.request.systemProperties, userProperties: mavenSession.request.userProperties,
 			profiles: mavenSession.request.projectBuildingRequest.profiles,
 		  activeProfileIds: mavenSession.request.projectBuildingRequest.activeProfileIds,
@@ -482,6 +483,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	ModelSource2 createModelSource(File pomFile) {
 		return new ModelSource2() {
+
 			InputStream stream = pomFile.newInputStream()
 
 			@Override
@@ -500,52 +502,56 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 
 			@Override
-			ModelSource2 getRelatedSource( String relPath ) {
-				File relatedPom = new File(pomFile.parentFile, relPath);
+			ModelSource2 getRelatedSource(String relPath) {
+				File relatedPom = new File(pomFile.parentFile, relPath)
 				if (relatedPom.isDirectory()) {
-					relatedPom = new File(relatedPom, "pom.xml");
+					relatedPom = new File(relatedPom, "pom.xml")
 				}
 				if (relatedPom.isFile()&& relatedPom.canRead()) {
-					return createModelSource(relatedPom.canonicalFile);
+					return createModelSource(relatedPom.canonicalFile)
 				}
-				return null;
+				return null
 			}
+
 		}
 	}
 
-	protected ModelResolver createModelResolver() {
+	protected ModelResolver createModelResolver(MavenProject project) {
 		// this is for resolving parents, so always poms
 
 		return new ModelResolver() {
+
+			@Override
 			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
                                 Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
 				mavenVersionIsolate.resolveVersionRange(artifact)
-				resolver.resolve(artifact, remoteRepositories, localRepository)
+				final def req = new ArtifactResolutionRequest()
+					.setArtifact(artifact)
+					.setRemoteRepositories(project?.remoteArtifactRepositories)
+					.setLocalRepository(mavenSession?.localRepository)
+				resolutionErrorHandler.throwErrors(req, resolver.resolve(req))
 
 				return createModelSource(artifact.file)
 			}
 
-			ModelSource2 resolveModel(Dependency dependency) throws UnresolvableModelException {
-				return resolveModel(dependency.groupId, dependency.artifactId, dependency.version)
-			}
-
+			@Override
 			ModelSource2 resolveModel(Parent parent) throws UnresolvableModelException {
 				return resolveModel(parent.groupId, parent.artifactId, parent.version)
 			}
 
+			@Override
 			void addRepository(Repository repository) throws InvalidRepositoryException {
 			}
 
+			@Override
 			void addRepository(Repository repository, boolean wat) throws InvalidRepositoryException {
 			}
 
-			void resetRepositories() {
-			}
-
+			@Override
 			ModelResolver newCopy() {
-				return createModelResolver()
+				return createModelResolver(project)
 			}
 		}
 
@@ -677,11 +683,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected void loadAllDiscoveredTiles(MavenSession mavenSession) throws MavenExecutionException {
+	protected void loadAllDiscoveredTiles(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
-			Artifact resolvedTile = resolveTile(mavenSession, unprocessedTiles.remove(unresolvedTile))
+			Artifact resolvedTile = resolveTile(mavenSession, project, unprocessedTiles.remove(unresolvedTile))
 
 			TileModel tileModel = loadModel(resolvedTile)
 

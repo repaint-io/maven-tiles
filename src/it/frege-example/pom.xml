@@ -8,8 +8,9 @@
 	<name>Frege Tile Example</name>
 	<description>Ensure we have a plugin defined in the parent</description>
 	<url>http://repaint.io</url>
-
-
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

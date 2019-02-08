@@ -19,11 +19,9 @@ package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
-import io.repaint.maven.tiles.isolators.AetherIsolator
-import io.repaint.maven.tiles.isolators.Maven30Isolator
-import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.AbstractMavenLifecycleParticipant
 import org.apache.maven.MavenExecutionException
+import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
@@ -46,11 +44,13 @@ import org.apache.maven.model.PluginManagement
 import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
+import org.apache.maven.model.building.FileModelSource
 import org.apache.maven.model.building.ModelBuilder
 import org.apache.maven.model.building.ModelBuildingListener
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingResult
 import org.apache.maven.model.building.ModelProcessor
+import org.apache.maven.model.building.ModelSource
 import org.apache.maven.model.building.ModelSource2
 import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
@@ -59,22 +59,25 @@ import org.apache.maven.model.resolution.UnresolvableModelException
 import org.apache.maven.plugin.MojoExecution
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator
 import org.apache.maven.plugin.descriptor.MojoDescriptor
+import org.apache.maven.project.DefaultModelBuildingListener
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuildingHelper
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
-import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
+import org.eclipse.aether.impl.VersionRangeResolver
+import org.eclipse.aether.resolution.VersionRangeRequest
 import org.xml.sax.SAXParseException
 
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
+import static io.repaint.maven.tiles.Constants.TILE_POM
 import static io.repaint.maven.tiles.GavUtil.artifactGav
 import static io.repaint.maven.tiles.GavUtil.artifactName
 import static io.repaint.maven.tiles.GavUtil.modelGav
-import static io.repaint.maven.tiles.GavUtil.modelGa
 import static io.repaint.maven.tiles.GavUtil.modelRealGa
 import static io.repaint.maven.tiles.GavUtil.parentGav
-import static io.repaint.maven.tiles.GavUtil.getRealGroupId
 
 /**
  * Fetches all dependencies defined in the POM `configuration`.
@@ -89,8 +92,6 @@ import static io.repaint.maven.tiles.GavUtil.getRealGroupId
 @Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
 public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
-	public static final TILEPLUGIN_GROUP = 'io.repaint.maven'
-	public static final TILEPLUGIN_ARTIFACT = 'tiles-maven-plugin'
 	public static final String TILEPLUGIN_KEY = "${TILEPLUGIN_GROUP}:${TILEPLUGIN_ARTIFACT}"
 
 	@Requirement
@@ -117,7 +118,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@Requirement( role = ArtifactRepositoryLayout.class )
 	Map<String, ArtifactRepositoryLayout> repositoryLayouts
 
-	protected MavenVersionIsolator mavenVersionIsolate
+	@Requirement
+	VersionRangeResolver versionRangeResolver
 
 	NotDefaultModelCache modelCache
 
@@ -146,7 +148,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
 	 * pom itself (because we don't care about that).
 	 */
-	protected Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String classifier, String version) {
+	protected static Artifact getArtifactFromCoordinates(String groupId, String artifactId, String type, String classifier, String version) {
 		return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 			type, classifier, new DefaultArtifactHandler(type))
 	}
@@ -154,7 +156,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	/**
 	 * Return the given Artifact's .pom artifact
 	 */
-	protected Artifact getPomArtifactForArtifact(Artifact artifact) {
+	protected static Artifact getPomArtifactForArtifact(Artifact artifact) {
 		return getArtifactFromCoordinates(artifact.groupId, artifact.artifactId, 'pom', '', artifact.version)
 	}
 
@@ -175,7 +177,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 
 		try {
-			mavenVersionIsolate.resolveVersionRange(tileArtifact)
+			resolveVersionRange(project, tileArtifact)
 
 			// Resolve the .xml file for the tile
 			final def tileReq = new ArtifactResolutionRequest()
@@ -206,7 +208,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				if (tileArtifact.version.endsWith("-SNAPSHOT")) {
 
 					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} is a SNAPSHOT and we are releasing.",
-						tileArtifact.getFile())
+						tileArtifact.getFile() as File)
 
 				}
 			}
@@ -220,13 +222,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return tileArtifact
 	}
 
-	protected Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile)
+	protected static Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile)
 	  throws MavenExecutionException {
 
 		String[] gav = artifactGav.tokenize(":")
 
 		if (gav.size() != 3 && gav.size() != 5) {
-			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range", pomFile)
+			throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range", pomFile as File)
 		}
 
 		String groupId = gav[0]
@@ -263,18 +265,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-	protected MavenVersionIsolator discoverMavenVersion(MavenSession mavenSession) {
-		MavenVersionIsolator isolator
-
-		try {
-			isolator = new AetherIsolator(mavenSession)
-		} catch (MavenExecutionException mee) {
-			isolator = new Maven30Isolator(mavenSession)
-		}
-
-		return isolator
-	}
-
 	/**
 	 * Invoked after all MavenProject instances have been created.
 	 *
@@ -286,8 +276,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		this.mavenSession = mavenSession
 
-		this.mavenVersionIsolate = discoverMavenVersion(mavenSession)
-
 		this.modelCache = new NotDefaultModelCache(mavenSession)
 
 		// disabled explicit lookup as these seem to be injected just fine. Are these required for eclipse m2e>
@@ -297,19 +285,19 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
 			for (MavenProject currentProject : allProjects) {
-				List<String> subModules = currentProject.getModules()
 				boolean containsTiles = currentProject.getPluginArtifactMap().keySet().contains(TILEPLUGIN_KEY)
 
 				if (containsTiles) {
 					Plugin plugin = currentProject.getPlugin(TILEPLUGIN_KEY);
+					List<String> subModules = currentProject.getModules()
 					if (plugin.isInherited() && subModules != null && subModules.size() > 0) {
 						Model currentModel = currentProject.getModel();
 						for (MavenProject otherProject : allProjects) {
 							Parent otherParent = otherProject.getModel().getParent()
-							if(otherParent!=null && parentGav(otherParent).equals(modelGav(currentModel))) {
-								//We're in project with children, fail the build immediate. This is both an opinionated choice, but also
-								//one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
-								//are limited.
+							if (otherParent != null && parentGav(otherParent) == modelGav(currentModel)) {
+								// We're in project with children, fail the build immediately. This is both an opinionated choice, but also
+								// one of project health - with tile definitions in parent POMs usage of -pl, -am, and -amd maven options
+								// are limited.
 								throw new MavenExecutionException("Usage of maven-tiles prohibited from multi-module builds where reactor is used as parent.", currentProject.getFile())
 							}
 						}
@@ -364,7 +352,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		unprocessedTiles.clear();
 
 		// collect the first set of tiles
-		parseConfiguration(project.model, project.getFile(), true)
+		parseConfiguration(project.model, project.file)
 
 		// collect any unprocessed tiles, and process them causing them to potentially load more unprocessed ones
 		loadAllDiscoveredTiles(mavenSession, project)
@@ -375,18 +363,13 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		}
 	}
 
-
-
 	@CompileStatic(TypeCheckingMode.SKIP)
 	protected void thunkModelBuilder(MavenProject project) {
 		List<TileModel> tiles = processedTiles.values().collect({it.tileModel})
 
 		if (!tiles) return
 
-		// Maven 3.2.5 doesn't let you have access to this (package private), 3.3.x does
-		def modelBuildingListenerConstructor = Class.forName("org.apache.maven.project.DefaultModelBuildingListener").declaredConstructors[0]
-		modelBuildingListenerConstructor.accessible = true
-		ModelBuildingListener modelBuildingListener = modelBuildingListenerConstructor.newInstance(project,
+		ModelBuildingListener modelBuildingListener = new DefaultModelBuildingListener(project,
 			projectBuildingHelper, mavenSession.request.projectBuildingRequest)
 
 		// new org.apache.maven.project.PublicDefaultModelBuildingListener( project,
@@ -405,6 +388,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 		boolean tilesInjected = false
 		ModelProcessor delegateModelProcessor = new ModelProcessor() {
+
 			@Override
 			File locatePom(File projectDirectory) {
 				return modelProcessor.locatePom(projectDirectory)
@@ -454,7 +438,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 					// to make the parent reference project specific, so that it will not pick up a cached
 					// version. We do this by adding a project specific suffix, which will later be removed
 					// when actually loading that parent.
-					if(applyBeforeParent && !tilesInjected && model.parent) {
+					if (applyBeforeParent && !tilesInjected && model.parent) {
 						// remove the parent from the cache which causes it to be reloaded through our ModelProcessor
 						request.modelCache.put(model.parent.groupId, model.parent.artifactId, model.parent.version,
 							org.apache.maven.model.building.ModelCacheTag.RAW.getName(), null)
@@ -463,6 +447,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 				return model
 			}
+
 		}
 
 		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
@@ -525,10 +510,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			@Override
 			ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
-                                Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
+				Artifact artifact = new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), "compile",
 					"pom", null, new DefaultArtifactHandler("pom"))
 
-				mavenVersionIsolate.resolveVersionRange(artifact)
+				resolveVersionRange(project, artifact)
 				final def req = new ArtifactResolutionRequest()
 					.setArtifact(artifact)
 					.setRemoteRepositories(project?.remoteArtifactRepositories)
@@ -541,6 +526,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			@Override
 			ModelSource2 resolveModel(Parent parent) throws UnresolvableModelException {
 				return resolveModel(parent.groupId, parent.artifactId, parent.version)
+			}
+
+			// this exists in later versions of maven
+			ModelSource resolveModel(Dependency dependency) throws UnresolvableModelException {
+				return resolveModel(dependency.groupId, dependency.artifactId, dependency.version)
 			}
 
 			@Override
@@ -570,10 +560,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	@CompileStatic(TypeCheckingMode.SKIP)
 	protected void putModelInCache(Model model, ModelBuildingRequest request, File pomFile) {
 		// stuff it in the cache so it is ready when requested rather than it trying to be resolved.
-		modelBuilder.putCache(request.modelCache, model.groupId, model.artifactId, evaluateString(model.version),
-			org.apache.maven.model.building.ModelCacheTag.RAW,
-			mavenVersionIsolate.createModelData(model, pomFile));
-//				new org.apache.maven.model.building.ModelData(new FileModelSource(tileModel.tilePom), model));
+		request.modelCache.put(model.groupId, model.artifactId, evaluateString(model.version),
+			org.apache.maven.model.building.ModelCacheTag.RAW.getName(),
+			org.apache.maven.model.building.ModelCacheTag.RAW.intoCache(
+				new org.apache.maven.model.building.ModelData(new FileModelSource(pomFile), model, model.groupId, model.artifactId, model.version)))
 	}
 
 	/**
@@ -584,18 +574,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @param pomModel - the current project
 	 * @param request - the request to build the current project
 	 */
-	public void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel,
-	                                            ModelBuildingRequest request) {
+	void injectTilesIntoParentStructure(List<TileModel> tiles, Model pomModel, ModelBuildingRequest request) {
 		Parent originalParent = pomModel.parent
 		Model lastPom = pomModel
 		File lastPomFile = request.pomFile
 
-        // fix up the version of the originalParent
-        if (originalParent != null) {
-            originalParent.version = evaluateString(originalParent.version)
-        }
+		// fix up the version of the originalParent
+		if (originalParent != null) {
+			originalParent.version = evaluateString(originalParent.version)
+		}
 
-        if (tiles) {
+		if (tiles) {
 			// evaluate the model version to deal with CI friendly build versions
 			logger.info("--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for ${evaluateString(modelRealGa(pomModel))}...")
 			logger.info("Mixed '${evaluateString(modelGav(pomModel))}' with tile '${evaluateString(modelGav(tiles.first().model))}' as its new parent.")
@@ -626,7 +615,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			lastPomFile = tileModel.tilePom
 		}
 
-        lastPom.parent = originalParent
+		lastPom.parent = originalParent
 		logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
 		logger.info("")
 
@@ -636,8 +625,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	}
 
-	protected void copyModel(MavenProject project, Model newModel) {
-
+	protected static void copyModel(MavenProject project, Model newModel) {
 		// no setting parent, we have generated an effective model which is now all copied in
 		Model projectModel = project.model
 		projectModel.build = newModel.build
@@ -722,17 +710,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * Normally used inside the current project's pom file when declaring the tile plugin. People may prefer this
 	 * to use to include tiles however in a tile.xml
 	 */
-	protected void parseConfiguration(Model model, File pomFile, boolean projectModel) {
-		Xpp3Dom configuration = model?.build?.plugins?.
-			find({ Plugin plugin ->
-				return plugin.groupId == TILEPLUGIN_GROUP &&
-						plugin.artifactId == TILEPLUGIN_ARTIFACT})?.configuration as Xpp3Dom
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected void parseConfiguration(Model model, File pomFile) {
+		def configuration = model.build?.plugins
+			?.find({ Plugin plugin -> plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT})
+			?.configuration
 
 		if (configuration) {
-			configuration.getChild("tiles")?.children?.each { Xpp3Dom tile ->
+			configuration.getChild("tiles")?.children?.each { tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
-			applyBeforeParent = configuration.getChild("applyBefore")?.value;
+			applyBeforeParent = configuration.getChild("applyBefore")?.value
 		}
 	}
 
@@ -744,7 +732,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			processConfigurationTile(model.model, tileGav, pomFile)
 		}
 
-		parseConfiguration(model.model, pomFile, false)
+		parseConfiguration(model.model, pomFile)
 	}
 
 	protected void processConfigurationTile(Model model, String tileDependencyName, File pomFile) {
@@ -776,14 +764,24 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * @return The evaluated String
 	 */
 	protected String evaluateString(String value) {
-		String ret = value
-		if (mavenSession != null) {
-			PluginParameterExpressionEvaluator expEval = new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
-			if (expEval != null && value != null) {
-				ret = expEval.evaluate(ret,String.class)
-			}
+		if ((value != null) && (mavenSession != null)) {
+			return new PluginParameterExpressionEvaluator(mavenSession, new MojoExecution(new MojoDescriptor()))
+				.evaluate(value, String.class)
+		} else {
+			return value
 		}
-
-		return ret;
 	}
+
+	void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
+		def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
+			RepositoryUtils.toRepos(project?.remoteArtifactRepositories), 
+			null)
+
+		def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession?.repositorySession, versionRangeRequest)
+
+		if (versionRangeResult?.versions) {
+			tileArtifact.version = versionRangeResult.highestVersion
+		}
+	}
+
 }

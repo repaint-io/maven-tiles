@@ -17,7 +17,6 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
-import io.repaint.maven.tiles.isolators.MavenVersionIsolator
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
@@ -31,12 +30,11 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelBuildingRequest
-import org.apache.maven.model.building.ModelData
-import org.apache.maven.model.building.ModelProblemCollector
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
+import org.eclipse.aether.impl.VersionRangeResolver
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
@@ -45,6 +43,8 @@ import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
 
 import static groovy.test.GroovyAssert.shouldFail
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
+import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static org.mockito.Mockito.mock
 
 /**
@@ -103,36 +103,16 @@ public class TilesMavenLifecycleParticipantTest {
 			}
 		] as ArtifactResolver
 		participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
-		participant.mavenVersionIsolate = createFakeIsolate()
-	}
-
-	protected MavenVersionIsolator createFakeIsolate() {
-		return new MavenVersionIsolator() {
-			@Override
-			void resolveVersionRange(Artifact tileArtifact) {
-			}
-
-			@Override
-			ModelProblemCollector createModelProblemCollector() {
-				return [
-					add: { req ->
-
-					}
-				] as ModelProblemCollector
-			}
-
-			@Override
-			ModelData createModelData(Model model, File pomFile) {
+		participant.versionRangeResolver = [
+			resolveVersionRange: { session, request ->
 				return null
 			}
-
-		}
+		] as VersionRangeResolver
 	}
 
 	public Artifact getTileTestCoordinates() {
 		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "xml", "", "0.8-SNAPSHOT")
 	}
-
 
 	@Test
 	public void ensureSnapshotFailsOnRelease() {
@@ -241,11 +221,14 @@ public class TilesMavenLifecycleParticipantTest {
 	public void canUseModelResolver() {
 		File licensePom = new File('src/test/resources/session-license-pom.xml')
 
-		participant.mavenVersionIsolate = [
-			resolveVersionRange: { Artifact artifact ->
-				artifact.file = licensePom
+		participant = new TilesMavenLifecycleParticipant() {
+			@Override
+			void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
+				tileArtifact.file = licensePom
 			}
-		] as MavenVersionIsolator
+		}
+
+		stuffParticipant()
 
 		def resolver = participant.createModelResolver(null)
 		def model = resolver.resolveModel('my', 'left', 'foot')
@@ -256,7 +239,7 @@ public class TilesMavenLifecycleParticipantTest {
 		model.inputStream.close()
 	}
 
-	protected Model readModel(File pomFile) {
+	protected static Model readModel(File pomFile) {
 		MavenXpp3Reader modelReader = new MavenXpp3Reader()
 		Model pomModel
 
@@ -344,8 +327,8 @@ public class TilesMavenLifecycleParticipantTest {
 		model.build = new Build()
 		model.build.addPlugin(new Plugin())
 		model.build.plugins[0].with {
-			groupId = TilesMavenLifecycleParticipant.TILEPLUGIN_GROUP
-			artifactId = TilesMavenLifecycleParticipant.TILEPLUGIN_ARTIFACT
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
 			// bad GAV
 			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><tiles><tile>${gav}</tile></tiles></configuration>"))
 		}
@@ -367,7 +350,7 @@ public class TilesMavenLifecycleParticipantTest {
 		stuffParticipant()
 	}
 
-	protected MavenProject fakeProjectFromFile(String pom) {
+	protected static MavenProject fakeProjectFromFile(String pom) {
 		File pomFile = new File("src/test/resources/${pom}.xml")
 
 		return [
@@ -397,7 +380,7 @@ public class TilesMavenLifecycleParticipantTest {
 		assert participant.processedTiles.size() == 4
 	}
 
-	protected Model createBasicModel() {
+	protected static Model createBasicModel() {
 		Model model = new Model()
 
 		model.setGroupId("com.bluetrainsoftware.maven")

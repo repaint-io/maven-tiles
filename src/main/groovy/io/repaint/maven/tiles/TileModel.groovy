@@ -15,6 +15,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
+@CompileStatic
 class TileModel {
 	Model model
 	List<String> tiles = []
@@ -80,6 +81,7 @@ class TileModel {
 
 	}
 
+	@CompileStatic(TypeCheckingMode.SKIP)
 	private static List<Plugin> rewritePluginExecutionIds(List<Plugin> plugins, Artifact artifact) {
 		plugins.each { plugin ->
 			if (plugin.executions) {

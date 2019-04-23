@@ -28,6 +28,9 @@ if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-tile2:1' with o
 if (!content.contains("<foo.bar.noparent>tile2</foo.bar.noparent>")) {
   throw new Exception("Tile not injected");
 }
+if (!content.contains("Injecting 1 tiles as intermediary parent artifacts for com.test:civersion-tiletest-dynamic")) {
+  throw new Exception("Tile not injected");
+}
 
 // check for pom->parent->tile inclusion
 if (!content.contains("[INFO] Mixed 'com.test:civersion-tiletest-parent2:1' with tile 'com.test:civersion-tiletest-tile2:1' as its new parent.")) {

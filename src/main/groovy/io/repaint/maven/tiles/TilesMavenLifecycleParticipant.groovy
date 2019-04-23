@@ -411,7 +411,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				use(GavUtil) {
 					// evaluate the model version to deal with CI friendly build versions
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
-						&& evaluateString(model.realVersion) == project.version && model.packaging == project.packaging) {
+						&& (evaluateString(model.realVersion) == project.version || evaluateString(model.realVersion) == null)
+						&& model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {
 							injectTilesIntoParentStructure(tiles, model, request)

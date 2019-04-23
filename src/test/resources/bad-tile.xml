@@ -51,5 +51,13 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>group</groupId>
+				<artifactId>artifact</artifactId>
+				<version>version</version>
+			</extension>
+		</extensions>
 	</build>
+
 </project>

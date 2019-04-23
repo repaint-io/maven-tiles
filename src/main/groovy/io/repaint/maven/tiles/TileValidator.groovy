@@ -112,6 +112,11 @@ class TileValidator {
 			validModel = null
 		}
 
+		if (model.build?.extensions) {
+			log.error("Tile has extensions and must not have")
+			validModel = null
+		}
+
 		return validModel
 	}
 }

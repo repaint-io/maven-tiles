@@ -51,14 +51,14 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>group</groupId>
-					<artifactId>artifact</artifactId>
-					<version>version</version>
-					<extensions>true</extensions>
-				</plugin>
-			</plugins>
+		<plugins>
+			<plugin>
+				<groupId>group</groupId>
+				<artifactId>artifact</artifactId>
+				<version>version</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
 		<extensions>
 			<extension>
 				<groupId>group</groupId>

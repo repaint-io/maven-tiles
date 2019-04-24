@@ -117,6 +117,16 @@ class TileValidator {
 			validModel = null
 		}
 
+		if (model.build?.plugins) {
+			for (plugin in model.build.plugins) {
+				if (plugin.extensions) {
+					log.error("Tile has plugins with extensions and must not have")
+					validModel = null
+					break
+				}
+			}
+		}
+
 		return validModel
 	}
 }

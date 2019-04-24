@@ -31,7 +31,7 @@ class TileValidatorTest {
 	public void testValidation() {
 		new TileValidator().loadModel(logger, new File("src/test/resources/bad-tile.xml"), "")
 
-		assert errors.size() == 9
+		assert errors.size() == 10
 		assert warnings.size() == 0
 		assert infos.size() == 0
 	}

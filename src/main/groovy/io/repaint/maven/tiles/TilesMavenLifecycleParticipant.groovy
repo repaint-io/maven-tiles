@@ -407,11 +407,11 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			@Override
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
-
 				use(GavUtil) {
-					// evaluate the model version to deal with CI friendly build versions
+					// evaluate the model version to deal with CI friendly build versions.
+					// "0-SNAPSHOT" indicates an undefined property.
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
-						&& (evaluateString(model.realVersion) == project.version || evaluateString(model.realVersion) == null)
+						&& (evaluateString(model.realVersion) == project.version || evaluateString(model.realVersion) == "0-SNAPSHOT")
 						&& model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {

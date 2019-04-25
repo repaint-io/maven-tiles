@@ -16,7 +16,6 @@
  **********************************************************************************************************************/
 package io.repaint.maven.tiles
 
-import groovy.transform.CompileStatic
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
@@ -24,6 +23,8 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult
 import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.resolver.DefaultResolutionErrorHandler
+import org.apache.maven.execution.MavenExecutionRequest
+import org.apache.maven.execution.MavenExecutionResult
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
 import org.apache.maven.model.Model
@@ -32,6 +33,9 @@ import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
+import org.apache.maven.shared.filtering.DefaultMavenFileFilter
+import org.apache.maven.shared.filtering.DefaultMavenReaderFilter
+import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
 import org.eclipse.aether.impl.VersionRangeResolver
@@ -39,25 +43,23 @@ import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.runners.MockitoJUnitRunner
+import org.sonatype.plexus.build.incremental.DefaultBuildContext
 
 import static groovy.test.GroovyAssert.shouldFail
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.when
 
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
  * (No such file or directory)) when running the test from your IDE, make sure you configure the Working
  * Directory as maven-tiles/tiles-maven-plugin (absolute path)
  */
-@CompileStatic
-@RunWith(MockitoJUnitRunner.class)
 public class TilesMavenLifecycleParticipantTest {
 
 	TilesMavenLifecycleParticipant participant
-	ArtifactResolver mockResolver
+	MavenSession mockMavenSession
 	Logger logger
 
 	public final static String PERFORM_RELEASE = "performRelease"
@@ -81,7 +83,7 @@ public class TilesMavenLifecycleParticipantTest {
 	public void setupParticipant() {
 		this.participant = new TilesMavenLifecycleParticipant()
 
-		mockResolver = mock(ArtifactResolver.class)
+		mockMavenSession = mock(MavenSession.class)
 		logger = [
 		  warn: { String msg -> println msg },
 			info:{ String msg -> println msg },
@@ -96,7 +98,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	void stuffParticipant() {
 		participant.logger = logger
-		participant.resolver = mockResolver
+		participant.mavenSession = mockMavenSession
 		participant.resolver = [
 			resolve: { ArtifactResolutionRequest request ->
 				return new ArtifactResolutionResult()
@@ -145,6 +147,88 @@ public class TilesMavenLifecycleParticipantTest {
 		shouldFail(MavenExecutionException) {
 			participant.resolveTile(null, null, badbadbad)
 		}
+	}
+
+	@Test
+	public void testFiltering() {
+		final def context = new DefaultBuildContext()
+
+		participant.mavenFileFilter = new DefaultMavenFileFilter()
+		participant.mavenFileFilter.enableLogging(participant.logger)
+		participant.mavenFileFilter.buildContext = context
+		participant.mavenFileFilter.readerFilter = new DefaultMavenReaderFilter()
+
+		participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering()
+		participant.mavenResourcesFiltering.enableLogging(participant.logger)
+		participant.mavenResourcesFiltering.buildContext = context
+		participant.mavenResourcesFiltering.mavenFileFilter = participant.mavenFileFilter
+
+		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
+
+		Model model = new Model()
+		model.setGroupId("io.repaint.tiles")
+		model.setArtifactId("filtering-tile")
+		model.setVersion("1.1-SNAPSHOT")
+
+		model.build = new Build()
+		model.build.directory = "target/filtering"
+		model.build.addPlugin(new Plugin())
+		model.build.plugins[0].with {
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
+			configuration = Xpp3DomBuilder.build(new StringReader("<configuration><filtering>true</filtering><generatedSourcesDirectory>target/filtering/generated-tiles</generatedSourcesDirectory></configuration>"))
+		}
+
+		MavenProject project = new MavenProject(model)
+		project.setFile(new File("src/test/resources/filtering/pom.xml"))
+
+		MavenExecutionRequest req = mock(MavenExecutionRequest.class)
+		when(req.getUserProperties()).thenReturn(new Properties())
+		when(req.getSystemProperties()).thenReturn(new Properties())
+
+		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
+
+		Artifact tile = participant.resolveTile(session, project, filteredTile)
+		assert tile.file == new File("target/filtering/generated-tiles/tiles/tile.xml")
+
+		TileModel tileModel = new TileModel(tile.file, tile)
+
+		assert tileModel.tiles[0] == "groupid:antrun1-tile:1.1-SNAPSHOT"
+	}
+
+	@Test
+	public void testNoFiltering() {
+		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
+
+		Model model = new Model()
+		model.setGroupId("io.repaint.tiles")
+		model.setArtifactId("filtering-tile")
+		model.setVersion("1.1-SNAPSHOT")
+
+		model.build = new Build()
+		model.build.directory = "target/filtering"
+		model.build.addPlugin(new Plugin())
+		model.build.plugins[0].with {
+			groupId = TILEPLUGIN_GROUP
+			artifactId = TILEPLUGIN_ARTIFACT
+		}
+
+		MavenProject project = new MavenProject(model)
+		project.setFile(new File("src/test/resources/filtering/pom.xml"))
+
+		MavenExecutionRequest req = mock(MavenExecutionRequest.class)
+		when(req.getUserProperties()).thenReturn(new Properties())
+		when(req.getSystemProperties()).thenReturn(new Properties())
+
+		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
+
+		Artifact tile = participant.resolveTile(session, project, filteredTile)
+
+		assert tile.file == new File("src/test/resources/filtering/tile.xml")
+
+		TileModel tileModel = new TileModel(tile.file, tile)
+
+		assert tileModel.tiles[0] == "groupid:antrun1-tile:@project.version@"
 	}
 
 	@Test
@@ -277,6 +361,8 @@ public class TilesMavenLifecycleParticipantTest {
 		}
 
 		stuffParticipant()
+		when(mockMavenSession.getUserProperties()).thenReturn(new Properties())
+		when(mockMavenSession.getSystemProperties()).thenReturn(new Properties())
 
 		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 

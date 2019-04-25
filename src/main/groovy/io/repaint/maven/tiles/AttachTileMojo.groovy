@@ -16,7 +16,7 @@ import org.apache.maven.project.MavenProjectHelper
  * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 @CompileStatic
-@Mojo(name = "attach-tile", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE, defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "attach-tile", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE, defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
 class AttachTileMojo extends AbstractTileMojo {
 
 	@Component

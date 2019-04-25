@@ -1,10 +1,8 @@
 package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
-import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
-import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.ResolutionScope
 
@@ -14,7 +12,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
  * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
  */
 @CompileStatic
-@Mojo(name = "validate", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE)
+@Mojo(name = "validate", requiresProject = true, requiresDependencyResolution = ResolutionScope.NONE, threadSafe = true)
 class ValidateTileMojo extends AbstractTileMojo {
 
 	@Override

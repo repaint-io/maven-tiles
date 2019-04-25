@@ -61,7 +61,10 @@ import org.apache.maven.plugin.PluginParameterExpressionEvaluator
 import org.apache.maven.plugin.descriptor.MojoDescriptor
 import org.apache.maven.project.DefaultModelBuildingListener
 import org.apache.maven.project.MavenProject
+import org.apache.maven.project.ProjectBuilder
 import org.apache.maven.project.ProjectBuildingHelper
+import org.apache.maven.shared.filtering.MavenFileFilter
+import org.apache.maven.shared.filtering.MavenResourcesFiltering
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
@@ -104,6 +107,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	ResolutionErrorHandler resolutionErrorHandler
 
 	@Requirement
+	ProjectBuilder projectBuilder
+	
+	@Requirement
 	ModelBuilder modelBuilder
 
 	@Requirement
@@ -120,6 +126,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	VersionRangeResolver versionRangeResolver
+
+	@Requirement
+	MavenFileFilter mavenFileFilter
+
+	@Requirement
+	MavenResourcesFiltering mavenResourcesFiltering
 
 	NotDefaultModelCache modelCache
 
@@ -166,10 +178,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			List<MavenProject> allProjects = mavenSession.getProjects()
 			if (allProjects != null) {
 				for (MavenProject currentProject : allProjects) {
-					// when loading from reactor ignore version
-					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId) {
-						tileArtifact.version = currentProject.version
-						tileArtifact.file = new File(currentProject.file.parent, "tile.xml")
+					if (currentProject.groupId == tileArtifact.groupId && currentProject.artifactId == tileArtifact.artifactId && currentProject.version == tileArtifact.version) {
+						tileArtifact.file = FilteringHelper.getTile(currentProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
 						return tileArtifact
 					}
 				}
@@ -186,15 +196,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				.setLocalRepository(mavenSession?.localRepository)
 			resolutionErrorHandler.throwErrors(tileReq, resolver.resolve(tileReq))
 
-			// When resolving from workspace (e.g. m2e) we might receive the path to pom.xml instead of the attached tile
-			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
-				tileArtifact.file = new File(tileArtifact.file.parent, "tile.xml")
-				if (!tileArtifact.file.exists()) {
-					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.",
-						tileArtifact.getFile())
-				}
-			}
-
 			// Resolve the .pom file for the tile
 			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
 			final def pomReq = new ArtifactResolutionRequest()
@@ -202,6 +203,17 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				.setRemoteRepositories(project?.remoteArtifactRepositories)
 				.setLocalRepository(mavenSession?.localRepository)
 			resolutionErrorHandler.throwErrors(pomReq, resolver.resolve(pomReq))
+
+			// When resolving from workspace (e.g. m2e, intellij) we might receive the path to pom.xml instead of the attached tile
+			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
+				File tileFile = new File(tileArtifact.file.parent, TILE_POM)
+				if (!tileFile.exists()) {
+					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.",
+						tileFile as File)
+				}
+				MavenProject tileProject = projectBuilder.build(pomArtifact.file, mavenSession.request.projectBuildingRequest).getProject()
+				tileArtifact.file = FilteringHelper.getTile(tileProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
+			}
 
 			if (System.getProperty("performRelease")?.asBoolean()) {
 

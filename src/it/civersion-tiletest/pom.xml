@@ -29,8 +29,10 @@
         <module>parent1</module>
         <module>parent2</module>
         <module>parent3</module>
+        <module>dynamic</module>
         <module>tile-tile1</module>
         <module>tile-tile2</module>
+        <module>tile-tile3</module>
     </modules>
 
     <build>

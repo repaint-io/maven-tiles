@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
+import org.apache.maven.artifact.versioning.ArtifactVersion
+import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.model.Dependency
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelSource
@@ -72,7 +74,7 @@ class TilesProjectBuilder extends DefaultProjectBuilder {
 				}
 
 				if (!found) {
-					// we only need this dependency for maven to build the correct project graph. 
+					// we only need this dependency for maven to build the correct project graph.
 					// This dependency will be removed when the model is reloaded and merged with tiles
 					Dependency dependency = new Dependency()
 					dependency.groupId = gav[0]
@@ -80,17 +82,23 @@ class TilesProjectBuilder extends DefaultProjectBuilder {
 					dependency.scope = "compile"
 					if (gav.size() == 3) {
 						dependency.type = "xml"
-						dependency.version = gav[2]
+						dependency.version = extractTileVersion(gav[2])
 					} else {
 						dependency.type = gav[2]
 						dependency.classifier = gav[3]
-						dependency.version = gav[4]
+						dependency.version = extractTileVersion(gav[4])
 					}
 					project.dependencies.add(dependency)
 				}
 			}
 		}
 		return result
+	}
+
+	private static ArtifactVersion extractTileVersion(String versionSpec) {
+		def versionRange = VersionRange.createFromVersionSpec(versionSpec)
+		def lowerBound = versionRange.restrictions?.get(0)?.lowerBound
+		return lowerBound != null ? lowerBound : versionRange.recommendedVersion
 	}
 
 	private static List<ProjectBuildingResult> injectTileDependecies(List<ProjectBuildingResult> list) {

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.14
+
+- Fail tile validation if <build><extensions> is present
+- Fail tile validation when a plugin includes <extensions>
+- Allow a version property that evaluates as empty so it can be replaced by a plugin (potentially in a tile) later.
+- Filter tiles in reactor during tile injection to avoid using unfiltered properties
+- Resolve tile dependency version to the non-range value of it's lower-bound when injecting tiles as dependencies
+
+== 2.13
+
+- Remove unneeded org.codehaus.plexus.logging.Logger re-definition.
+- Fixed rewriting execution ids and rewrite them in profiles as well
+- Load tile from repositories declared in pom / settings instead of always from central
+- Inject tiles as dependencies. This is purely optional, requires .mvn/extensions.xml with the gav of this plugin to work.
+
 == 2.12
 
 - Evaluate property substitution when processing pom parents and the applyBefore configuration directive.

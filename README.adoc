@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 2.14
+= Tiles Maven Plugin - Version 2.15
 
 image:https://travis-ci.org/repaint-io/maven-tiles.svg[caption="Travis Build Status"] image:https://badges.gitter.im/repaint-io/maven-tiles.svg[link="https://gitter.im/repaint-io/maven-tiles?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
@@ -62,7 +62,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.14</version>
+        <version>2.15</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>
@@ -126,7 +126,7 @@ section when processing and use it directly.
 == Execution Ids
 
 Execution ids within tiles are prepended with the gav parameters of the tile that included the execution, for easier
-debugging / tracing. If this is not desired, adding a configuration attribute `tiles-keep-id="true"` or entry 
+debugging / tracing. If this is not desired, adding a configuration attribute `tiles-keep-id="true"` or entry
 `<tiles-keep-id>true<tiles-keep-id>` will keep the original id.
 
 [source,xml,indent=0]
@@ -192,7 +192,7 @@ debugging / tracing. If this is not desired, adding a configuration attribute `t
 
 In the above tile, executions with ids 1 and 4 will have their ids changed to
 `io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::1` and
-`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::4` respectively, while executions with ids 2, 3, 5 and 6 
+`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::4` respectively, while executions with ids 2, 3, 5 and 6
 will retain their original execution id.
 
 == Build Smells
@@ -232,7 +232,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.14</version>
+      <version>2.15</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>

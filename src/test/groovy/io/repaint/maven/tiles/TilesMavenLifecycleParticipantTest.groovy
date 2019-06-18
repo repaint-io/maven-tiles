@@ -30,6 +30,7 @@ import org.apache.maven.model.Build
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.PluginExecution
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
@@ -37,6 +38,7 @@ import org.apache.maven.shared.filtering.DefaultMavenFileFilter
 import org.apache.maven.shared.filtering.DefaultMavenReaderFilter
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
 import org.codehaus.plexus.logging.Logger
+import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
 import org.eclipse.aether.impl.VersionRangeResolver
 import org.junit.AfterClass
@@ -48,6 +50,8 @@ import org.sonatype.plexus.build.incremental.DefaultBuildContext
 import static groovy.test.GroovyAssert.shouldFail
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
+import static io.repaint.maven.tiles.GavUtil.artifactName
+import static org.junit.Assert.assertEquals
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
@@ -147,6 +151,69 @@ public class TilesMavenLifecycleParticipantTest {
 		shouldFail(MavenExecutionException) {
 			participant.resolveTile(null, null, badbadbad)
 		}
+	}
+
+	@Test
+	void testTileMerge() {
+
+		Model model = new Model()
+		model.setGroupId("io.repaint.tiles")
+		model.setArtifactId("test-merge-tile")
+		model.setVersion("1.1-SNAPSHOT")
+
+		model.build = new Build()
+		model.build.directory = "target/test-merge-tile"
+
+		MavenProject project = new MavenProject(model)
+		project.setFile(new File("src/test/resources/test-merge-tile/pom.xml"))
+
+		MavenExecutionRequest req = mock(MavenExecutionRequest.class)
+		when(req.getUserProperties()).thenReturn(new Properties())
+		when(req.getSystemProperties()).thenReturn(new Properties())
+
+		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
+
+		addUnprocessedTile('test-merge-tile/kapt-tile.xml', 'kapt-tile')
+		addUnprocessedTile('test-merge-tile/kapt-dinject-tile.xml', 'kapt-dinject-tile')
+		addUnprocessedTile('test-merge-tile/kapt-javalin-tile.xml', 'kapt-javalin-tile')
+
+		// act
+		participant.loadAllDiscoveredTiles(session, project)
+
+
+		Model tileModel = participant.processedTiles['io.repaint.tiles:kapt-tile'].tileModel.model
+		PluginExecution pluginExecution = tileModel.build.plugins[0].executions[0]
+		assert pluginExecution.id == 'kapt'
+
+		// assert properties have been merged
+		assert tileModel.properties['dinject-generator.version'] == '1.8'
+		assert tileModel.properties['kotlin.version'] == '1.3.31'
+
+		String expectedAnnotationProcessorPaths = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<annotationProcessorPaths>
+  <annotationProcessorPath>
+    <groupId>io.dinject</groupId>
+    <artifactId>javalin-generator</artifactId>
+    <version>1.6</version>
+  </annotationProcessorPath>
+  <annotationProcessorPath>
+    <groupId>io.dinject</groupId>
+    <artifactId>dinject-generator</artifactId>
+    <version>${dinject-generator.version}</version>
+  </annotationProcessorPath>
+</annotationProcessorPaths>
+'''.trim()
+
+		// assert the annotationProcessorPaths have been appended
+		Xpp3Dom paths = ((Xpp3Dom)pluginExecution.configuration).getChild('annotationProcessorPaths')
+		assertEquals(paths.toString().trim(), expectedAnnotationProcessorPaths)
+	}
+
+	def addUnprocessedTile(String testResourceName, String tileName) {
+		Artifact kaptTile = participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:$tileName:1.1", null)
+		kaptTile.file = new File("src/test/resources/$testResourceName")
+		participant.unprocessedTiles.put(artifactName(kaptTile), kaptTile)
 	}
 
 	@Test

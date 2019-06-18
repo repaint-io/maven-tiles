@@ -48,7 +48,7 @@
   </developers>
 
   <properties>
-    <mavenVersion>3.3.9</mavenVersion>
+    <mavenVersion>3.6.1</mavenVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 

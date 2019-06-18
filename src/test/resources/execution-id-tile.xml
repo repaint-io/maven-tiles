@@ -28,6 +28,10 @@
 					</execution>
 					<execution>
 						<id>2</id>
+						<configuration tiles-keep-id="true" />
+					</execution>
+					<execution>
+						<id>3</id>
 						<configuration>
 							<tiles-keep-id>true</tiles-keep-id>
 						</configuration>
@@ -47,10 +51,14 @@
 						<version>1.0</version>
 						<executions>
 							<execution>
-								<id>3</id>
+								<id>4</id>
 							</execution>
 							<execution>
-								<id>4</id>
+								<id>5</id>
+								<configuration tiles-keep-id="true" />
+							</execution>
+							<execution>
+								<id>6</id>
 								<configuration>
 									<tiles-keep-id>true</tiles-keep-id>
 								</configuration>

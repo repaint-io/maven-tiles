@@ -126,8 +126,8 @@ section when processing and use it directly.
 == Execution Ids
 
 Execution ids within tiles are prepended with the gav parameters of the tile that included the execution, for easier
-debugging / tracing. If this is not desired, adding a configuration entry `<tiles-keep-id>true<tiles-keep-id>` will
-keep the original id.
+debugging / tracing. If this is not desired, adding a configuration attribute `tiles-keep-id="true"` or entry 
+`<tiles-keep-id>true<tiles-keep-id>` will keep the original id.
 
 [source,xml,indent=0]
 .tile.xml
@@ -146,6 +146,10 @@ keep the original id.
           </execution>
           <execution>
             <id>2</id>
+            <configuration tiles-keep-id="true" />
+          </execution>
+          <execution>
+            <id>3</id>
             <configuration>
               <tiles-keep-id>true</tiles-keep-id>
             </configuration>
@@ -165,10 +169,14 @@ keep the original id.
             <version>1.0</version>
             <executions>
               <execution>
-                <id>3</id>
+                <id>4</id>
               </execution>
               <execution>
-                <id>4</id>
+                <id>5</id>
+                <configuration tiles-keep-id="true" />
+              </execution>
+              <execution>
+                <id>6</id>
                 <configuration>
                   <tiles-keep-id>true</tiles-keep-id>
                 </configuration>
@@ -182,10 +190,10 @@ keep the original id.
 </project>
 ----
 
-In the above tile, executions with ids 1 and 3 (in profile) will have their ids changed to
+In the above tile, executions with ids 1 and 4 will have their ids changed to
 `io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::1` and
-`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::3` respectively, while executions with ids 2 and 4 (in
-profile) will retain their original execution id.
+`io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::4` respectively, while executions with ids 2, 3, 5 and 6 
+will retain their original execution id.
 
 == Build Smells
 

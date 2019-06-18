@@ -86,7 +86,7 @@ class TileModel {
 		plugins.each { plugin ->
 			if (plugin.executions) {
 				plugin.executions.each { execution ->
-					if (execution.configuration?.getChild("tiles-keep-id")?.getValue() == "true") {
+					if (execution.configuration?.getAttribute("tiles-keep-id") == "true" || execution.configuration?.getChild("tiles-keep-id")?.getValue() == "true") {
 						// do not rewrite the current execution id
 						return
 					}

@@ -40,6 +40,7 @@ import org.apache.maven.model.DistributionManagement
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
+import org.apache.maven.model.PluginExecution
 import org.apache.maven.model.PluginManagement
 import org.apache.maven.model.Repository
 import org.apache.maven.model.building.DefaultModelBuilder
@@ -68,6 +69,7 @@ import org.apache.maven.shared.filtering.MavenResourcesFiltering
 import org.codehaus.plexus.component.annotations.Component
 import org.codehaus.plexus.component.annotations.Requirement
 import org.codehaus.plexus.logging.Logger
+import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 import org.eclipse.aether.impl.VersionRangeResolver
 import org.eclipse.aether.resolution.VersionRangeRequest
@@ -108,7 +110,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	@Requirement
 	ProjectBuilder projectBuilder
-	
+
 	@Requirement
 	ModelBuilder modelBuilder
 
@@ -154,6 +156,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	Map<String, ArtifactModel> processedTiles = [:]
 	List<String> tileDiscoveryOrder = []
 	Map<String, Artifact> unprocessedTiles = [:]
+	Map<String,TileModel> tilesByExecution = [:];
+
 	String applyBeforeParent;
 
 	/**
@@ -359,9 +363,10 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	protected void orchestrateMerge(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 		// Clear collected tiles from previous project in reactor
-		processedTiles.clear();
-		tileDiscoveryOrder.clear();
-		unprocessedTiles.clear();
+		processedTiles.clear()
+		tileDiscoveryOrder.clear()
+		unprocessedTiles.clear()
+		tilesByExecution.clear()
 
 		// collect the first set of tiles
 		parseConfiguration(project.model, project.file)
@@ -467,7 +472,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		try {
 			ModelBuildingResult interimBuild = modelBuilder.build(request)
 
-			// this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they 
+			// this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they
 			// served their purpose of correctly ordering projects, so we can now do without them
 			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
 			if (!tilesInjected && applyBeforeParent) {
@@ -696,12 +701,80 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// ensure we have resolved the tile (it could come from a non-tile model)
 			if (tileModel) {
-				processedTiles.put(artifactName(resolvedTile), new ArtifactModel(resolvedTile, tileModel))
-				parseForExtendedSyntax(tileModel, resolvedTile.getFile())
+				String tileName = artifactName(resolvedTile)
+
+				boolean tileMergeTarget = hasProperty(tileModel, 'tile-merge-target')
+				boolean tileMergeConfig = hasProperty(tileModel, 'tile-merge-configuration')
+
+				if (tileMergeTarget || tileMergeConfig) {
+					mergeTile(tileModel, tileMergeTarget, tileName)
+				}
+
+				if (!tileMergeConfig) {
+					processedTiles.put(tileName, new ArtifactModel(resolvedTile, tileModel))
+					parseForExtendedSyntax(tileModel, resolvedTile.getFile())
+				}
 			}
 		}
 
 		ensureAllTilesDiscoveredAreAccountedFor()
+	}
+
+	private static boolean hasProperty(TileModel tileModel, String propertyKey) {
+		// remove these properties, we don't want them in the merged result
+		return 'true'.equals(tileModel.model?.properties?.remove(propertyKey))
+	}
+
+	private List<Plugin> mergeTile(TileModel tileModel, boolean tileMergeTarget, String tileName) {
+
+		tileModel.model?.build?.plugins?.each { plugin ->
+			plugin.executions.each { execution ->
+				String eid = "$plugin.groupId:$plugin.artifactId:$execution.id"
+				if (tileMergeTarget) {
+					tilesByExecution.put(eid, tileModel)
+				} else {
+					TileModel targetTile = tilesByExecution.get(eid)
+					if (targetTile) {
+						logger.info("merged tile configuration - tile:$tileName plugin:$eid")
+						mergeProperties(targetTile, tileModel)
+						mergeExecutionConfiguration(targetTile, execution, eid)
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Merge the properties from the mergeTile into targetTile.
+	 */
+	private static void mergeProperties(TileModel targetTile, TileModel mergeTile) {
+		if (mergeTile.model.properties) {
+			targetTile.model.properties.putAll(mergeTile.model.properties)
+		}
+	}
+
+	/**
+	 * Merge the execution configuration from mergeExecution into the target tile.
+	 */
+	private void mergeExecutionConfiguration(TileModel targetTile, PluginExecution mergeExecution, String eid) {
+
+		targetTile.model?.build?.plugins?.each { plugin ->
+			plugin.executions.each { execution ->
+				String targetEid = "$plugin.groupId:$plugin.artifactId:$execution.id"
+				if (targetEid.equals(eid)) {
+					Xpp3Dom configuration = (Xpp3Dom)execution.configuration
+					String appendElementName = configuration.getAttribute('tiles-append')
+					if (appendElementName) {
+						Xpp3Dom target = configuration.getChild(appendElementName)
+						Xpp3Dom source = ((Xpp3Dom)mergeExecution.configuration).getChild(appendElementName)
+						// append from source into target
+						Xpp3Dom.mergeXpp3Dom(target, source, false)
+
+						logger.debug("merged execution configuration - $eid")
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -787,8 +860,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
 		def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
-			RepositoryUtils.toRepos(project?.remoteArtifactRepositories), 
-			null)
+			RepositoryUtils.toRepos(project?.remoteArtifactRepositories), null)
 
 		def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession?.repositorySession, versionRangeRequest)
 

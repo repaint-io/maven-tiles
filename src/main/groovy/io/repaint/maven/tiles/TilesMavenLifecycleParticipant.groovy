@@ -423,7 +423,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 					// evaluate the model version to deal with CI friendly build versions.
 					// "0-SNAPSHOT" indicates an undefined property.
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
-						&& (evaluateString(model.realVersion) == project.version || evaluateString(model.realVersion) == "0-SNAPSHOT")
+						&& (evaluateString(model.realVersion) == project.version || evaluateString(model.realVersion) == "0-SNAPSHOT" || evaluateString(model.realVersion) == null)
 						&& model.packaging == project.packaging) {
 						// we're at the first (project) level. Apply tiles here if no explicit parent is set
 						if (!applyBeforeParent) {

@@ -692,6 +692,8 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	}
 
 	protected void loadAllDiscoveredTiles(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
+
+		List<TileModel> mergeSourceTiles = []
 		while (unprocessedTiles.size() > 0) {
 			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
@@ -701,20 +703,23 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			// ensure we have resolved the tile (it could come from a non-tile model)
 			if (tileModel) {
-				String tileName = artifactName(resolvedTile)
-
-				boolean tileMergeTarget = hasProperty(tileModel, 'tile-merge-target')
-				boolean tileMergeConfig = hasProperty(tileModel, 'tile-merge-configuration')
-
-				if (tileMergeTarget || tileMergeConfig) {
-					mergeTile(tileModel, tileMergeTarget, tileName)
-				}
-
-				if (!tileMergeConfig) {
+				if (hasProperty(tileModel, 'tile-merge-source')) {
+					// hold and merge into target later
+					mergeSourceTiles.add(tileModel)
+				} else {
+					if (hasProperty(tileModel, 'tile-merge-target')) {
+						registerTargetTile(tileModel)
+					}
+					String tileName = artifactName(resolvedTile)
 					processedTiles.put(tileName, new ArtifactModel(resolvedTile, tileModel))
 					parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 				}
 			}
+		}
+
+		// merge all the source tiles last
+		for (TileModel mergeTile : mergeSourceTiles) {
+			mergeTileIntoTarget(mergeTile)
 		}
 
 		ensureAllTilesDiscoveredAreAccountedFor()
@@ -722,20 +727,28 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 	private static boolean hasProperty(TileModel tileModel, String propertyKey) {
 		// remove these properties, we don't want them in the merged result
-		return 'true'.equals(tileModel.model?.properties?.remove(propertyKey))
+		return 'true' == tileModel.model?.properties?.remove(propertyKey)
 	}
 
-	private List<Plugin> mergeTile(TileModel tileModel, boolean tileMergeTarget, String tileName) {
+	private List<Plugin> registerTargetTile(TileModel tileModel) {
+		return mergeTile(tileModel, false)
+	}
+
+	private List<Plugin> mergeTileIntoTarget(TileModel tileModel) {
+		return mergeTile(tileModel, true)
+	}
+
+	private List<Plugin> mergeTile(TileModel tileModel, boolean mergeIntoTarget) {
 
 		tileModel.model?.build?.plugins?.each { plugin ->
 			plugin.executions.each { execution ->
 				String eid = "$plugin.groupId:$plugin.artifactId:$execution.id"
-				if (tileMergeTarget) {
+				if (!mergeIntoTarget) {
 					tilesByExecution.put(eid, tileModel)
 				} else {
 					TileModel targetTile = tilesByExecution.get(eid)
 					if (targetTile) {
-						logger.info("merged tile configuration - tile:$tileName plugin:$eid")
+						logger.info("merged tile configuration - plugin:$eid")
 						mergeProperties(targetTile, tileModel)
 						mergeExecutionConfiguration(targetTile, execution, eid)
 					}

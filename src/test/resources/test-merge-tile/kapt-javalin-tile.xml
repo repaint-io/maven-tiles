@@ -6,7 +6,7 @@
   </description>
 
   <properties>
-    <tile-merge-configuration>true</tile-merge-configuration>
+    <tile-merge-source>true</tile-merge-source>
   </properties>
 
   <build>

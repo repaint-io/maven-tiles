@@ -7,7 +7,7 @@
 
   <properties>
     <dinject-generator.version>1.8</dinject-generator.version>
-    <tile-merge-configuration>true</tile-merge-configuration>
+    <tile-merge-source>true</tile-merge-source>
   </properties>
 
   <build>
@@ -31,7 +31,6 @@
               </annotationProcessorPaths>
             </configuration>
           </execution>
-         
         </executions>
       </plugin>
 

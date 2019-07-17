@@ -730,12 +730,12 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		return 'true' == tileModel.model?.properties?.remove(propertyKey)
 	}
 
-	private List<Plugin> registerTargetTile(TileModel tileModel) {
-		return mergeTile(tileModel, false)
+	private List<Plugin> registerTargetTile(TileModel targetTile) {
+		return mergeTile(targetTile, false)
 	}
 
-	private List<Plugin> mergeTileIntoTarget(TileModel tileModel) {
-		return mergeTile(tileModel, true)
+	private List<Plugin> mergeTileIntoTarget(TileModel fragmentTile) {
+		return mergeTile(fragmentTile, true)
 	}
 
 	private List<Plugin> mergeTile(TileModel tileModel, boolean mergeIntoTarget) {
@@ -746,11 +746,20 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 				if (!mergeIntoTarget) {
 					tilesByExecution.put(eid, tileModel)
 				} else {
+					String fragmentId = "$tileModel.model.groupId:$tileModel.model.artifactId"
 					TileModel targetTile = tilesByExecution.get(eid)
 					if (targetTile) {
-						logger.info("merged tile configuration - plugin:$eid")
+						String targetId = "$targetTile.model.groupId:$targetTile.model.artifactId"
+						logger.info("Merged tile $fragmentId into $targetId plugin:$eid")
 						mergeProperties(targetTile, tileModel)
 						mergeExecutionConfiguration(targetTile, execution, eid)
+					} else {
+						String missingTileId = tileModel.model?.properties?.getProperty('tile-merge-expected-target')
+						if (missingTileId) {
+							throw new MavenExecutionException("Please add missing tile $missingTileId. This is required for tile $fragmentId, plugin:$eid", (Throwable)null)
+						} else {
+							throw new MavenExecutionException("Error with tile $fragmentId - Missing target tile required with plugin:$eid. Please check the documentation for this tile.", (Throwable)null)
+						}
 					}
 				}
 			}

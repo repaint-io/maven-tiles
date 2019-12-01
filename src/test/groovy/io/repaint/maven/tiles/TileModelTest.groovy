@@ -31,10 +31,10 @@ class TileModelTest {
 
 		TileModel tileModel = new TileModel(new File("src/test/resources/execution-id-tile.xml"), artifact)
 
-		assert tileModel.model.build.plugins[0].executions[0].id == "io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::1"
+		assert tileModel.model.build.plugins[0].executions[0].id == "io.repaint.tiles_execution-id-replacing-tile_1.1-SNAPSHOT__1"
 		assert tileModel.model.build.plugins[0].executions[1].id == "2"
 		assert tileModel.model.build.plugins[0].executions[2].id == "3"
-		assert tileModel.model.profiles[0].build.plugins[0].executions[0].id == "io.repaint.tiles:execution-id-replacing-tile:1.1-SNAPSHOT::4"
+		assert tileModel.model.profiles[0].build.plugins[0].executions[0].id == "io.repaint.tiles_execution-id-replacing-tile_1.1-SNAPSHOT__4"
 		assert tileModel.model.profiles[0].build.plugins[0].executions[1].id == "5"
 		assert tileModel.model.profiles[0].build.plugins[0].executions[2].id == "6"
 	}

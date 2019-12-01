@@ -90,7 +90,7 @@ class TileModel {
 						// do not rewrite the current execution id
 						return
 					}
-					execution.id = GavUtil.artifactGav(artifact) + "::" + execution.id
+					execution.id = GavUtil.artifactGav(artifact).replaceAll(":", "_") + "__" + execution.id
 				}
 			}
 		}

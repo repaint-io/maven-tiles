@@ -269,7 +269,7 @@ release it.
 
 `-SNAPSHOT` versions of tiles work when installed into your local `~/.m2/repository`, however - if you wish to use
 a _published_ SNAPSHOT - you will need to declare a `<repository>` in your `pom.xml` that support SNAPSHOTs.
-Review the [introduction to repositories](https://maven.apache.org/guides/introduction/introduction-to-repositories.html)
+Review the https://maven.apache.org/guides/introduction/introduction-to-repositories.html[introduction to repositories]
 section on the Apache Maven website.
 
 If you don't wish to include `<repository>` definitions in your project source, declaring them in an activated

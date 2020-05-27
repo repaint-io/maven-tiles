@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 2.15
+= Tiles Maven Plugin - Version 2.17
 
 image:https://travis-ci.org/repaint-io/maven-tiles.svg[caption="Travis Build Status"] image:https://badges.gitter.im/repaint-io/maven-tiles.svg[link="https://gitter.im/repaint-io/maven-tiles?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
@@ -56,13 +56,14 @@ you specify a configuration.
   <version>1.1-SNAPSHOT</version>
   <packaging>tile</packaging>
   <description>Contains consistent license information.</description>
+  <modelVersion>4.0.0</modelVersion>
 
   <build>
     <plugins>
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.15</version>
+        <version>2.17</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>
@@ -87,6 +88,7 @@ for `@project.version@` style references is applied to the `tile.xml` file prior
 ----
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
+  <modelVersion>4.0.0</modelVersion>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -94,7 +96,6 @@ for `@project.version@` style references is applied to the `tile.xml` file prior
       <distribution>repo</distribution>
     </license>
   </licenses>
-
 </project>
 ----
 
@@ -105,6 +106,7 @@ A tile can define the tiles plugin if it wishes to cascade tile inclusion, or it
 ----
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
+  <modelVersion>4.0.0</modelVersion>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -134,6 +136,7 @@ debugging / tracing. If this is not desired, adding a configuration attribute `t
 ----
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
+  <modelVersion>4.0.0</modelVersion>
   <build>
     <plugins>
       <plugin>
@@ -228,6 +231,7 @@ If you need to use them, add them to your configuration section:
 .pom.xml
 ----
 <build>
+  <modelVersion>4.0.0</modelVersion>
   <plugins>
     <plugin>
       <groupId>io.repaint.maven</groupId>
@@ -305,7 +309,7 @@ be applied (in this case before `P`) resulting in the desired structure:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.14</version>
+      <version>2.17</version>
       <configuration>
         <applyBefore>group:P</applyBefore>
         <tiles>

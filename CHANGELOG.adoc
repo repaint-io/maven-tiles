@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.17
+
+- Ewps! We missed some changes!
+- Updated Groovy version from 2.5.8 to 3.0.4
+- Updated maven-enforcer to 3.0.0-M3
+- Updated gmavenplus-plugin to 1.9.0
+- Updated maven-source-plugin to 3.2.1
+- Updated test tiles to include the modelVersion ( upcoming maven likes to have that present )
+
+== 2.16
+
+- Switched rewritten execution id to use underscores
+- Updated build dependencies
+- Improved error messages when target tile is missing - Rob Bygrave
+- Added support explicit merging of tiles execution configuration - Rob Bygrave
+
+== 2.15
+
+- Reintroduced tiles-keep-id as attribute which was removed by mistake - brian.vella
+- Added threadSafe annotation settings
+
 == 2.14
 
 - Fail tile validation if <build><extensions> is present

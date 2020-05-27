@@ -3,6 +3,7 @@ package io.repaint.maven.tiles
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
+import groovy.xml.XmlSlurper
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
@@ -29,7 +30,7 @@ class TileModel {
 	@CompileStatic(TypeCheckingMode.SKIP)
 	Reader strippedPom() {
 		return tilePom.withReader { Reader reader ->
-			def slurper = new XmlSlurper(false, false).parse(reader)
+			def slurper = new XmlSlurper(false, false, true).parse(reader)
 
 			if (slurper.tiles) {
 				slurper.tiles.tile.each { tile ->

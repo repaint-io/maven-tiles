@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.19
+
+Security update for Groovy 3.0.7.
+
+- Updated Groovy to 3.0.7
+- Updated maven-release-plugin
+- Updated maven-surefire-plugin
+- Updated gmavenplus-plugin
+
 == 2.18
 
 - Updated Groovy to 3.0.6

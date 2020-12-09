@@ -234,7 +234,7 @@
 
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>3.0.0-M1</version>
         <configuration>
           <mavenExecutorId>forked-path</mavenExecutorId>
           <arguments>-Drepaint.release=release</arguments>
@@ -298,14 +298,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>3.0.0-M5</version>
       </plugin>
 
       <!-- not supporting mixed java/groovy compilation -->
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
         <artifactId>gmavenplus-plugin</artifactId>
-        <version>1.9.0</version>
+        <version>1.11.1</version>
         <executions>
           <execution>
             <goals>

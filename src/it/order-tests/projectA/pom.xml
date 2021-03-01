@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.repaint.maven</groupId>
+    <artifactId>projectA</artifactId>
+    <version>1</version>
+    <packaging>pom</packaging>
+
+    <name>Maven Tiles Order Test</name>
+
+    <properties>
+        <propertyAP>pom</propertyAP>
+        <propertyBP>pom</propertyBP>
+        <propertyCP>pom</propertyCP>
+        <propertyABP>pom</propertyABP>
+        <propertyACP>pom</propertyACP>
+        <propertyBCP>pom</propertyBCP>
+        <propertyABCP>pom</propertyABCP>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.repaint.maven</groupId>
+                <artifactId>tiles-maven-plugin</artifactId>
+                <version>@project.version@</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <tiles>
+                        <tile>io.repaint.maven:tileB:1</tile>
+                        <tile>io.repaint.maven:tileC:1</tile>
+                        <tile>io.repaint.maven:tileD:1</tile>
+                    </tiles>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.soebes.maven.plugins</groupId>
+                <artifactId>echo-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <executions>
+                    <execution>
+                        <id>properties</id>
+                        <phase>validate</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <echos>
+                                <echo>propertyA: ${propertyA}</echo>
+                                <echo>propertyB: ${propertyB}</echo>
+                                <echo>propertyC: ${propertyC}</echo>
+                                <echo>propertyAB: ${propertyAB}</echo>
+                                <echo>propertyAC: ${propertyAC}</echo>
+                                <echo>propertyBC: ${propertyBC}</echo>
+                                <echo>propertyABC: ${propertyABC}</echo>
+                                <echo>proj propertyA: ${propertyAP}</echo>
+                                <echo>proj propertyB: ${propertyBP}</echo>
+                                <echo>proj propertyC: ${propertyCP}</echo>
+                                <echo>proj propertyAB: ${propertyABP}</echo>
+                                <echo>proj propertyAC: ${propertyACP}</echo>
+                                <echo>proj propertyBC: ${propertyBCP}</echo>
+                                <echo>proj propertyABC: ${propertyABCP}</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,76 @@
+import java.io.*;
+import java.util.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+// tileX should win
+if (!content.contains("[INFO] propertyA: tileA"))
+  throw new Exception("tileA is expected to win at defining propertyA");
+if (!content.contains("[INFO] propertyB: tileB"))
+  throw new Exception("tileB is expected to win at defining propertyB");
+if (!content.contains("[INFO] propertyC: tileC"))
+  throw new Exception("tileC is expected to win at defining propertyC");
+if (!content.contains("[INFO] propertyAB: tileB"))
+  throw new Exception("tileB is expected to win at defining propertyAB");
+if (!content.contains("[INFO] propertyAC: tileC"))
+  throw new Exception("tileC is expected to win at defining propertyAC");
+if (!content.contains("[INFO] propertyBC: tileB"))
+  throw new Exception("tileB is expected to win at defining propertyBC");
+if (!content.contains("[INFO] propertyABC: tileB"))
+  throw new Exception("tileB is expected to win at defining propertyABC");
+
+// pom should win
+if (!content.contains("[INFO] proj propertyA: pom"))
+  throw new Exception("The pom is expected to win at defining propertyAP");
+if (!content.contains("[INFO] proj propertyB: pom"))
+  throw new Exception("The pom is expected to win at defining propertyBP");
+if (!content.contains("[INFO] proj propertyC: pom"))
+  throw new Exception("The pom is expected to win at defining propertyCP");
+if (!content.contains("[INFO] proj propertyAB: pom"))
+  throw new Exception("The pom is expected to win at defining propertyABP");
+if (!content.contains("[INFO] proj propertyAC: pom"))
+  throw new Exception("The pom is expected to win at defining propertyACP");
+if (!content.contains("[INFO] proj propertyBC: pom"))
+  throw new Exception("The pom is expected to win at defining propertyBCP");
+if (!content.contains("[INFO] proj propertyABC: pom"))
+  throw new Exception("The pom is expected to win at defining propertyABCP");
+
+// plugin executions that should be shadowed
+if (content.contains("[INFO] Tile A (E2)"))
+  throw new Exception("The tileA E2 execution should have been shadowed");
+if (content.contains("[INFO] Tile C (E2)"))
+  throw new Exception("The tileC E2 execution should have been shadowed");
+if (content.contains("[INFO] Tile D (E2)"))
+  throw new Exception("The tileD E2 execution should have been shadowed");
+
+List indexes = new LinkedList();
+indexes.add(content.indexOf("[INFO] Tile A (E1)"));
+indexes.add(content.indexOf("[INFO] Tile B (E2)"));
+indexes.add(content.indexOf("[INFO] Tile A"));
+indexes.add(content.indexOf("[INFO] Tile D (E1)"));
+indexes.add(content.indexOf("[INFO] Tile D"));
+indexes.add(content.indexOf("[INFO] Tile C (E1)"));
+indexes.add(content.indexOf("[INFO] Tile C"));
+indexes.add(content.indexOf("[INFO] Tile B (E1)"));
+indexes.add(content.indexOf("[INFO] Tile B"));
+
+// how I think it should happen
+//indexes.add(content.indexOf("[INFO] Tile D (E1)"));
+//indexes.add(content.indexOf("[INFO] Tile D"));
+//indexes.add(content.indexOf("[INFO] Tile A (E1)"));
+//indexes.add(content.indexOf("[INFO] Tile B (E2)"));
+//indexes.add(content.indexOf("[INFO] Tile A"));
+//indexes.add(content.indexOf("[INFO] Tile C (E1)"));
+//indexes.add(content.indexOf("[INFO] Tile C"));
+//indexes.add(content.indexOf("[INFO] Tile B (E1)"));
+//indexes.add(content.indexOf("[INFO] Tile B"));
+
+Integer lastindex = -1;
+for (Integer index : indexes)
+  if (lastindex > index)
+    throw new Exception("The tile execution order is not in the proper order, starting with the " + index + " output");

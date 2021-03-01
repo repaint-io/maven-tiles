@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.soebes.maven.plugins</groupId>
+                <artifactId>echo-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <executions>
+                    <execution>
+                        <id>E1</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <echos>
+                                <echo>Tile B (E1)</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>E2</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <tiles-keep-id>true</tiles-keep-id>
+                            <echos>
+                                <echo>Tile B (E2)</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tileB</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <echos>
+                                <echo>Tile B</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>default-props</id>
+            <activation>
+                <property>
+                    <name>!prop-does-not-exist</name>
+                </property>
+            </activation>
+            <properties>
+                <propertyB>tileB</propertyB>
+                <propertyAB>tileB</propertyAB>
+                <propertyBC>tileB</propertyBC>
+                <propertyABC>tileB</propertyABC>
+                <propertyBP>tileB</propertyBP>
+                <propertyABP>tileB</propertyABP>
+                <propertyBCP>tileB</propertyBCP>
+                <propertyABCP>tileB</propertyABCP>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

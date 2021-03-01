@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.soebes.maven.plugins</groupId>
+                <artifactId>echo-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <executions>
+                    <execution>
+                        <id>E1</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <echos>
+                                <echo>Tile D (E1)</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>E2</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <tiles-keep-id>true</tiles-keep-id>
+                            <echos>
+                                <echo>Tile D (E2)</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tileB</id>
+                        <phase>initialize</phase>
+                        <goals><goal>echo</goal></goals>
+                        <configuration>
+                            <echos>
+                                <echo>Tile D</echo>
+                            </echos>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

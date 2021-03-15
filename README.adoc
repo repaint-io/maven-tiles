@@ -322,6 +322,22 @@ be applied (in this case before `P`) resulting in the desired structure:
 </build>
 ----
 
+== Tile Ordering
+
+In v2.19 and earlier, all tiles declared inside tiles are loaded after all tiles declared in the project.  This meant
+that all tiles declared inside tiles became ancestors to all tiles declared in the project.
+
+In v2.20+, tile ordering has changed.  All tiles are now loaded in order of when they are declared, recursively tracing
+from tiles declared in a project down to the tiles declared within tiles.
+
+Suppose your project declares tiles `T1` and `T2` and the `T1` tile declares tile `T3`.  Earlier versions will load
+these in the order `T1`, `T2`, and then `T3`.  Using the notation used earlier on this page, this results in the Maven
+project ancestry of `X` - `T3` - `T2` - `T1` - `P`.  Later versions will load them in the order `T1`, `T3`, and then
+`T2`.  This results in the Maven project ancestry of `X` - `T2` - `T3` - `T1` - `P`.
+
+In some cases, your project and tile hierarchy will include duplicate declaration of one tile.  In these cases, the
+tile is only included once.  The latest declaration is used, resulting it showing up in the Maven project
+ancestry as the one closest to the parent `P`.  This guarantees it will be an ancestor to all tiles that included it.
 
 == Mojos
 

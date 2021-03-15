@@ -694,25 +694,33 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	protected void loadAllDiscoveredTiles(MavenSession mavenSession, MavenProject project) throws MavenExecutionException {
 
 		List<TileModel> mergeSourceTiles = []
-		while (unprocessedTiles.size() > 0) {
-			String unresolvedTile = unprocessedTiles.keySet().iterator().next()
+		Map<String, Artifact> rootTiles = [:]
+		rootTiles.putAll(unprocessedTiles)
+		unprocessedTiles.clear()
 
-			Artifact resolvedTile = resolveTile(mavenSession, project, unprocessedTiles.remove(unresolvedTile))
+		for (String rootTile : rootTiles.keySet()) {
+			unprocessedTiles.put(rootTile, rootTiles.get(rootTile))
 
-			TileModel tileModel = loadModel(resolvedTile)
+			while (unprocessedTiles.size() > 0) {
+				String unresolvedTile = unprocessedTiles.keySet().iterator().next()
 
-			// ensure we have resolved the tile (it could come from a non-tile model)
-			if (tileModel) {
-				if (hasProperty(tileModel, 'tile-merge-source')) {
-					// hold and merge into target later
-					mergeSourceTiles.add(tileModel)
-				} else {
-					if (hasProperty(tileModel, 'tile-merge-target')) {
-						registerTargetTile(tileModel)
+				Artifact resolvedTile = resolveTile(mavenSession, project, unprocessedTiles.remove(unresolvedTile))
+
+				TileModel tileModel = loadModel(resolvedTile)
+
+				// ensure we have resolved the tile (it could come from a non-tile model)
+				if (tileModel) {
+					if (hasProperty(tileModel, 'tile-merge-source')) {
+						// hold and merge into target later
+						mergeSourceTiles.add(tileModel)
+					} else {
+						if (hasProperty(tileModel, 'tile-merge-target')) {
+							registerTargetTile(tileModel)
+						}
+						String tileName = artifactName(resolvedTile)
+						processedTiles.put(tileName, new ArtifactModel(resolvedTile, tileModel))
+						parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 					}
-					String tileName = artifactName(resolvedTile)
-					processedTiles.put(tileName, new ArtifactModel(resolvedTile, tileModel))
-					parseForExtendedSyntax(tileModel, resolvedTile.getFile())
 				}
 			}
 		}
@@ -852,6 +860,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			if (unprocessedTiles.containsKey(depName)) {
 				logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
 					modelGav(model), artifactGav(unprocessedTile)))
+				
+				// move the entry to the end of the map
+				unprocessedTiles.put(depName, unprocessedTiles.remove(depName))
 			} else {
 				logger.debug("Adding tile ${artifactGav(unprocessedTile)}")
 
@@ -861,6 +872,9 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		} else {
 			logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
 				modelGav(model), artifactGav(unprocessedTile)))
+
+			// move the entry to the end of the map
+			processedTiles.put(depName, processedTiles.remove(depName))
 		}
 	}
 

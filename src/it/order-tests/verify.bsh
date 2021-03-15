@@ -49,28 +49,19 @@ if (content.contains("[INFO] Tile D (E2)"))
   throw new Exception("The tileD E2 execution should have been shadowed");
 
 List indexes = new LinkedList();
-indexes.add(content.indexOf("[INFO] Tile A (E1)"));
-indexes.add(content.indexOf("[INFO] Tile B (E2)"));
-indexes.add(content.indexOf("[INFO] Tile A"));
-indexes.add(content.indexOf("[INFO] Tile D (E1)"));
-indexes.add(content.indexOf("[INFO] Tile D"));
-indexes.add(content.indexOf("[INFO] Tile C (E1)"));
-indexes.add(content.indexOf("[INFO] Tile C"));
-indexes.add(content.indexOf("[INFO] Tile B (E1)"));
-indexes.add(content.indexOf("[INFO] Tile B"));
-
-// how I think it should happen
-//indexes.add(content.indexOf("[INFO] Tile D (E1)"));
-//indexes.add(content.indexOf("[INFO] Tile D"));
-//indexes.add(content.indexOf("[INFO] Tile A (E1)"));
-//indexes.add(content.indexOf("[INFO] Tile B (E2)"));
-//indexes.add(content.indexOf("[INFO] Tile A"));
-//indexes.add(content.indexOf("[INFO] Tile C (E1)"));
-//indexes.add(content.indexOf("[INFO] Tile C"));
-//indexes.add(content.indexOf("[INFO] Tile B (E1)"));
-//indexes.add(content.indexOf("[INFO] Tile B"));
+indexes.add(content.indexOf("[INFO] Tile D (E1)\n"));
+indexes.add(content.indexOf("[INFO] Tile B (E2)\n"));
+indexes.add(content.indexOf("[INFO] Tile D\n"));
+indexes.add(content.indexOf("[INFO] Tile A (E1)\n"));
+indexes.add(content.indexOf("[INFO] Tile A\n"));
+indexes.add(content.indexOf("[INFO] Tile C (E1)\n"));
+indexes.add(content.indexOf("[INFO] Tile C\n"));
+indexes.add(content.indexOf("[INFO] Tile B (E1)\n"));
+indexes.add(content.indexOf("[INFO] Tile B\n"));
 
 Integer lastindex = -1;
-for (Integer index : indexes)
+for (Integer index : indexes) {
   if (lastindex > index)
     throw new Exception("The tile execution order is not in the proper order, starting with the " + index + " output");
+  lastindex = index;
+}

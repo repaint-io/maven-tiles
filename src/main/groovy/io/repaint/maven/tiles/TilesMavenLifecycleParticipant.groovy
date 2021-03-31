@@ -338,19 +338,64 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 */
 	void discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(MavenProject project) {
 		DistributionManagement distributionManagement = project.model.distributionManagement
+		Properties properties = project.properties;
 
 		if (distributionManagement) {
 			if (distributionManagement.repository) {
 				project.setReleaseArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
-					distributionManagement.repository.id, distributionManagement.repository.url,
+					distributionManagement.repository.id, getReleaseDistributionManagementRepositoryUrl(project),
 					repositoryLayouts.get( distributionManagement.repository.layout ?: 'default' ), true ))
 			}
 			if (distributionManagement.snapshotRepository) {
 				project.setSnapshotArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
-					distributionManagement.snapshotRepository.id, distributionManagement.snapshotRepository.url,
+					distributionManagement.snapshotRepository.id, getSnapshotDistributionManagementRepositoryUrl(project),
 					repositoryLayouts.get( distributionManagement.snapshotRepository.layout ?: 'default' ), true ))
 			}
 		}
+	}
+
+	/**
+	 * Distribution management repositories don't have to define the URL.  They may delegate to the to
+	 * 'altReleaseDeploymentRepository' or 'altDeploymentRepository' property.  According to Maven documentation
+	 * at https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html, 'altReleaseDeploymentRepository' if
+	 * defined is used first, then 'altDeploymentRepository', and then whatever is specified in the distribution
+	 * management section.
+	 *
+	 * @param project
+	 *
+	 * @return the correct URL to use for the release distribution or NULL if no URL is specified
+	 */
+	private static String getReleaseDistributionManagementRepositoryUrl(MavenProject project) {
+		DistributionManagement distributionManagement = project.model.distributionManagement
+		Properties properties = project.properties;
+
+		String url = distributionManagement.repository.url
+		String altReleaseUrl = properties.getProperty("altReleaseDeploymentRepository");
+		String altUrl = properties.getProperty("altDeploymentRepository");
+
+		return altReleaseUrl != null ? altReleaseUrl : (altUrl != null ? altUrl : (url != null ? url : null));
+	}
+
+	/**
+	 * Distribution management repositories don't have to define the URL.  They may delegate to the to
+	 * 'altSnapshotDeploymentRepository' or 'altDeploymentRepository' property.  According to Maven documentation
+	 * at https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html, 'altSnapshotDeploymentRepository' if
+	 * defined is used first, then 'altDeploymentRepository', and then whatever is specified in the distribution
+	 * management section.
+	 *
+	 * @param project
+	 *
+	 * @return the correct URL to use for the snapshot distribution or NULL if no URL is specified
+	 */
+	private static String getSnapshotDistributionManagementRepositoryUrl(MavenProject project) {
+		DistributionManagement distributionManagement = project.model.distributionManagement
+		Properties properties = project.properties;
+
+		String url = distributionManagement.repository.url
+		String altSnapshotUrl = properties.getProperty("altSnapshotDeploymentRepository");
+		String altUrl = properties.getProperty("altDeploymentRepository");
+
+		return altSnapshotUrl != null ? altSnapshotUrl : (altUrl != null ? altUrl : (url != null ? altUrl : url));
 	}
 
 	/**

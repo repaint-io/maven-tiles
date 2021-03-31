@@ -1,4 +1,4 @@
-name: Java CI
+name: Integration Tests on Java 8
 
 on: [push]
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.21
+
+- Updated Groovy to 3.0.8
+- Updated gmavenplus-plugin
+- Updated mockito to 3.8.0
+- Switch to github actions for CI builds
+
+
+== 2.20
+
+- #118 - Fixes tile ordering for embedded/nested <tiles>
+- #116 - Copy distribution management URLs if possible.
+
+
 == 2.19
 
 Security update for Groovy 3.0.7.

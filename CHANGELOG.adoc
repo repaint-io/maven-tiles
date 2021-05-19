@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.22
+
+- Updated github actions to also run on pull requests
+- Fixed possible NullPointerException on SNAPSHOT DistributionManagement Url
+- Updated README for Kotlin usage
+
 == 2.21
 
 - Updated Groovy to 3.0.8

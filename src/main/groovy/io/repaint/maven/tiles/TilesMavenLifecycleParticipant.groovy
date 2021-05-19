@@ -373,7 +373,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		String altReleaseUrl = properties.getProperty("altReleaseDeploymentRepository");
 		String altUrl = properties.getProperty("altDeploymentRepository");
 
-		return altReleaseUrl != null ? altReleaseUrl : (altUrl != null ? altUrl : (url != null ? url : null));
+		return altReleaseUrl != null ? altReleaseUrl : (altUrl != null ? altUrl : url);
 	}
 
 	/**
@@ -395,7 +395,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		String altSnapshotUrl = properties.getProperty("altSnapshotDeploymentRepository");
 		String altUrl = properties.getProperty("altDeploymentRepository");
 
-		return altSnapshotUrl != null ? altSnapshotUrl : (altUrl != null ? altUrl : (url != null ? altUrl : url));
+		return altSnapshotUrl != null ? altSnapshotUrl : (altUrl != null ? altUrl : url);
 	}
 
 	/**

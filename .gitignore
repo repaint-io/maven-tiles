@@ -9,3 +9,6 @@ target
 !.gitignore
 !.gitattributes
 !.gitkeep
+
+# and iDEA
+*.iml

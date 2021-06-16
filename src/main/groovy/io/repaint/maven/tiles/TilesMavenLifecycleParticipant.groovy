@@ -391,7 +391,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 		DistributionManagement distributionManagement = project.model.distributionManagement
 		Properties properties = project.properties;
 
-		String url = distributionManagement.repository.url
+		String url = distributionManagement.snapshotRepository.url
 		String altSnapshotUrl = properties.getProperty("altSnapshotDeploymentRepository");
 		String altUrl = properties.getProperty("altDeploymentRepository");
 

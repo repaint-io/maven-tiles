@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.23
+
+- Fixed snapshot URL resolving.
+
 == 2.22
 
 - Updated github actions to also run on pull requests
@@ -15,12 +19,10 @@ All notable changes to this project will be documented in this file.
 - Updated mockito to 3.8.0
 - Switch to github actions for CI builds
 
-
 == 2.20
 
 - #118 - Fixes tile ordering for embedded/nested <tiles>
 - #116 - Copy distribution management URLs if possible.
-
 
 == 2.19
 

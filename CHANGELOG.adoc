@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.24
+
+- Updated Groovy to 3.0.9
+- Other minor depenency updates
+
 == 2.23
 
 - Fixed snapshot URL resolving.

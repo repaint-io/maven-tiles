@@ -605,10 +605,6 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 
 			@Override
 			ModelSource2 resolveModel(Parent parent) throws UnresolvableModelException {
-//				if (parent.version == null)
-//					parent.version = "MAIN-SNAPSHOT";	
-//					
-//	
 					
 				return resolveModel(parent.groupId, parent.artifactId, parent.version)
 			}

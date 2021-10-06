@@ -22,7 +22,7 @@
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.24</version>
+        <version>@project.version@</version>
         <configuration>
           <tiles>
             <tile>com.test:civersion-tiletest-workspace-tile1:1</tile>

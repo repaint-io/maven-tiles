@@ -1,0 +1,6 @@
+*             text=auto
+.*            text eol=lf
+*.sh          eol=lf
+*.ksh         eol=lf
+*.list        eol=lf
+mvnw          eol=lf

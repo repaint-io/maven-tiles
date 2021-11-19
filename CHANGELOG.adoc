@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.25
+
+- Fixed NPE in CI friendly builds #128
+
 == 2.24
 
 - Updated Groovy to 3.0.9

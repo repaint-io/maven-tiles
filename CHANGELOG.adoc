@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.26
+
+- Upgraded Groovy to Apache Groovy 4.0.0
+- Use maven version 3.8.4
+- Updated internal build dependendencies
+
+
 == 2.25
 
 - Fixed NPE in CI friendly builds #128

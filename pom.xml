@@ -49,7 +49,7 @@
 
   <properties>
     <mavenVersion>3.8.4</mavenVersion>
-    <groovyVersion>4.0.0</groovyVersion>
+    <groovyVersion>4.0.1</groovyVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.28
+
+- Upgraded Groovy to Apache Groovy 4.0.3
+- Upgraded Mockito, surefire, and compiler plugins
+
+
 == 2.27
 
 - Upgraded Groovy to Apache Groovy 4.0.1

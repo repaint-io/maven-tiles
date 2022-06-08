@@ -49,7 +49,7 @@
 
   <properties>
     <mavenVersion>3.8.4</mavenVersion>
-    <groovyVersion>4.0.1</groovyVersion>
+    <groovyVersion>4.0.3</groovyVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 
@@ -134,7 +134,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.4.0</version>
+      <version>4.6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -262,7 +262,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.10.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -310,7 +310,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M5</version>
+        <version>3.0.0-M7</version>
       </plugin>
 
       <!-- not supporting mixed java/groovy compilation -->

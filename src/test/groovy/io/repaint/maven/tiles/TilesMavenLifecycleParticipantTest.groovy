@@ -35,7 +35,6 @@ import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter
-import org.apache.maven.shared.filtering.DefaultMavenReaderFilter
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
 import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
@@ -54,7 +53,6 @@ import static io.repaint.maven.tiles.GavUtil.artifactName
 import static org.junit.Assert.assertEquals
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
-
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
  * (No such file or directory)) when running the test from your IDE, make sure you configure the Working
@@ -220,15 +218,8 @@ public class TilesMavenLifecycleParticipantTest {
 	public void testFiltering() {
 		final def context = new DefaultBuildContext()
 
-		participant.mavenFileFilter = new DefaultMavenFileFilter()
-		participant.mavenFileFilter.enableLogging(participant.logger)
-		participant.mavenFileFilter.buildContext = context
-		participant.mavenFileFilter.readerFilter = new DefaultMavenReaderFilter()
-
-		participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering()
-		participant.mavenResourcesFiltering.enableLogging(participant.logger)
-		participant.mavenResourcesFiltering.buildContext = context
-		participant.mavenResourcesFiltering.mavenFileFilter = participant.mavenFileFilter
+		participant.mavenFileFilter = new DefaultMavenFileFilter(context)
+		participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering(participant.mavenFileFilter, context)
 
 		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 

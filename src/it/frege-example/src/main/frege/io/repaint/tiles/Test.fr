@@ -1,3 +1,0 @@
-module io.repaint.tiles.Test where
-
-main _ = println "Printed from Frege"

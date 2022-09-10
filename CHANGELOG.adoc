@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.30
+
+- Updated Groovy to 4.0.5
+- Updated Mockito to 4.8.0
+- Updated maven-release-plugin to 3.0.0-M6
+
 == 2.29
 
 - Updated Groovy to 4.0.4

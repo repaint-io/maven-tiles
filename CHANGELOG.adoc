@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.31
+
+- Updated Groovy to 4.0.6
+- Updated gmavenplus-plugin to 2.0.0
+
 == 2.30
 
 - Updated Groovy to 4.0.5
@@ -13,7 +18,6 @@ All notable changes to this project will be documented in this file.
 - Updated Groovy to 4.0.4
 - Updated maven-filtering from 3.2.0 to 3.3.0
 - Updated maven-invoker-plugin to 3.3.0
--
 
 == 2.28
 

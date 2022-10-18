@@ -10,5 +10,7 @@ target
 !.gitattributes
 !.gitkeep
 
+!.github
+
 # and iDEA
 *.iml

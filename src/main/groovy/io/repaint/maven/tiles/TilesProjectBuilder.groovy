@@ -1,5 +1,6 @@
 package io.repaint.maven.tiles
 
+import com.google.inject.Singleton
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
@@ -14,20 +15,22 @@ import org.apache.maven.project.ProjectBuilder
 import org.apache.maven.project.ProjectBuildingException
 import org.apache.maven.project.ProjectBuildingRequest
 import org.apache.maven.project.ProjectBuildingResult
-import org.codehaus.plexus.component.annotations.Component
-import org.codehaus.plexus.component.annotations.Requirement
+
+import javax.inject.Inject
+import javax.inject.Named
 
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 
 @CompileStatic
-@Component(role = ProjectBuilder.class, hint = "TilesProjectBuilder")
+@Singleton
+@Named("TilesProjectBuilder")
 class TilesProjectBuilder implements ProjectBuilder {
 
-	@Requirement( hint = "default" )
-	private ProjectBuilder delegate;
+    @Inject
+    private ProjectBuilder delegate;
 
-	@Override
+    @Override
 	ProjectBuildingResult build(File pomFile, ProjectBuildingRequest request) throws ProjectBuildingException {
 		return injectTileDependecies(delegate.build(pomFile, request))
 	}

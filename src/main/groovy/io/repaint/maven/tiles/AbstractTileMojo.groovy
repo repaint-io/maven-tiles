@@ -8,7 +8,8 @@ import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
 import org.apache.maven.shared.filtering.MavenFileFilter
 import org.apache.maven.shared.filtering.MavenResourcesFiltering
-import org.codehaus.plexus.logging.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  *
@@ -36,9 +37,6 @@ abstract class AbstractTileMojo extends AbstractMojo {
 	@Parameter(required = true, defaultValue = '${project.build.directory}/generated-sources')
 	File generatedSourcesDirectory
 
-	@Component
-	Logger logger
-
 	@Parameter( defaultValue = "\${session}", readonly = true )
 	MavenSession mavenSession
 
@@ -47,6 +45,8 @@ abstract class AbstractTileMojo extends AbstractMojo {
 
 	@Component
 	MavenResourcesFiltering mavenResourcesFiltering
+
+	Logger logger = LoggerFactory.getLogger(getClass())
 
 	File getTile() {
 		return FilteringHelper.getTile(project, filtering, generatedSourcesDirectory, mavenSession, mavenFileFilter, mavenResourcesFiltering)

@@ -17,6 +17,7 @@
  **********************************************************************************************************************/
 package io.repaint.maven.tiles
 
+import com.google.inject.Singleton
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.AbstractMavenLifecycleParticipant
@@ -51,7 +52,6 @@ import org.apache.maven.model.building.ModelBuildingListener
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.building.ModelBuildingResult
 import org.apache.maven.model.building.ModelProcessor
-import org.apache.maven.model.building.ModelSource
 import org.apache.maven.model.building.ModelSource2
 import org.apache.maven.model.io.ModelParseException
 import org.apache.maven.model.resolution.InvalidRepositoryException
@@ -66,14 +66,16 @@ import org.apache.maven.project.ProjectBuilder
 import org.apache.maven.project.ProjectBuildingHelper
 import org.apache.maven.shared.filtering.MavenFileFilter
 import org.apache.maven.shared.filtering.MavenResourcesFiltering
-import org.codehaus.plexus.component.annotations.Component
-import org.codehaus.plexus.component.annotations.Requirement
-import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException
 import org.eclipse.aether.impl.VersionRangeResolver
 import org.eclipse.aether.resolution.VersionRangeRequest
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.xml.sax.SAXParseException
+
+import javax.inject.Inject
+import javax.inject.Named
 
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
@@ -94,45 +96,45 @@ import static io.repaint.maven.tiles.GavUtil.parentGav
  *
  */
 @CompileStatic
-@Component(role = AbstractMavenLifecycleParticipant, hint = "TilesMavenLifecycleParticipant")
-public class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
+@Singleton
+@Named("TilesMavenLifecycleParticipant")
+class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 	public static final String TILEPLUGIN_KEY = "${TILEPLUGIN_GROUP}:${TILEPLUGIN_ARTIFACT}"
 
-	@Requirement
-	Logger logger
+	Logger logger = LoggerFactory.getLogger(getClass())
 
-	@Requirement
+	@Inject
 	ArtifactResolver resolver
 
-	@Requirement
+	@Inject
 	ResolutionErrorHandler resolutionErrorHandler
 
-	@Requirement
+	@Inject
 	ProjectBuilder projectBuilder
 
-	@Requirement
+	@Inject
 	ModelBuilder modelBuilder
 
-	@Requirement
+	@Inject
 	ModelProcessor modelProcessor
 
-	@Requirement
+	@Inject
 	ProjectBuildingHelper projectBuildingHelper
 
-	@Requirement
+	@Inject
 	ArtifactRepositoryFactory repositoryFactory
 
-	@Requirement( role = ArtifactRepositoryLayout.class )
+	@Inject
 	Map<String, ArtifactRepositoryLayout> repositoryLayouts
 
-	@Requirement
+	@Inject
 	VersionRangeResolver versionRangeResolver
 
-	@Requirement
+	@Inject
 	MavenFileFilter mavenFileFilter
 
-	@Requirement
+	@Inject
 	MavenResourcesFiltering mavenResourcesFiltering
 
 	NotDefaultModelCache modelCache
@@ -287,7 +289,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 	 * This callback is intended to allow extensions to manipulate MavenProjects
 	 * before they are sorted and actual build execution starts.
 	 */
-	public void afterProjectsRead(MavenSession mavenSession)
+	void afterProjectsRead(MavenSession mavenSession)
 		throws MavenExecutionException {
 
 		this.mavenSession = mavenSession
@@ -609,7 +611,7 @@ public class TilesMavenLifecycleParticipant extends AbstractMavenLifecyclePartic
 			}
 
 			// this exists in later versions of maven
-			ModelSource resolveModel(Dependency dependency) throws UnresolvableModelException {
+			ModelSource2 resolveModel(Dependency dependency) throws UnresolvableModelException {
 				return resolveModel(dependency.groupId, dependency.artifactId, dependency.version)
 			}
 

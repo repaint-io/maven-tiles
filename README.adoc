@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 2.31
+= Tiles Maven Plugin - Version 2.32
 
 image:https://travis-ci.org/repaint-io/maven-tiles.svg[caption="Travis Build Status"] image:https://badges.gitter.im/repaint-io/maven-tiles.svg[link="https://gitter.im/repaint-io/maven-tiles?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
@@ -63,7 +63,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.31</version>
+        <version>2.32</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>
@@ -309,7 +309,7 @@ be applied (in this case before `P`) resulting in the desired structure:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.31</version>
+      <version>2.32</version>
       <configuration>
         <applyBefore>group:P</applyBefore>
         <tiles>

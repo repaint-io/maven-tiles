@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.32
+
+- Adds support for Maven 4 (Tamás Cservenák <tamas@cservenak.net>)
+- Removed a lot of legacy dependencies / cleanup  (Tamás Cservenák <tamas@cservenak.net>)
+
 == 2.31
 
 - Updated Groovy to 4.0.6

@@ -36,7 +36,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
-import org.codehaus.plexus.logging.Logger
 import org.codehaus.plexus.util.xml.Xpp3Dom
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder
 import org.eclipse.aether.impl.VersionRangeResolver
@@ -44,6 +43,7 @@ import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.slf4j.Logger
 import org.sonatype.plexus.build.incremental.DefaultBuildContext
 
 import static groovy.test.GroovyAssert.shouldFail

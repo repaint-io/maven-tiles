@@ -3,7 +3,7 @@ package io.repaint.maven.tiles
 import groovy.transform.CompileStatic
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.model.Model
-import org.codehaus.plexus.logging.Logger
+import org.slf4j.Logger
 
 /**
  *
@@ -23,7 +23,7 @@ class TileValidator {
 	                                           SMELL_PLUGINREPOSITORIES, SMELL_PLUGINMANAGEMENT,
 	                                           SMELL_REPOSITORIES]
 
-	public Model loadModel(Logger log, File tilePom, String buildSmells) {
+	Model loadModel(Logger log, File tilePom, String buildSmells) {
 		TileModel modelLoader = new TileModel()
 		Model validatedModel = null
 

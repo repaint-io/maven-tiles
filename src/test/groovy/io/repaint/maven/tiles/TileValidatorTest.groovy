@@ -1,9 +1,9 @@
 package io.repaint.maven.tiles
 
 import io.repaint.maven.tiles.TileValidator
-import org.codehaus.plexus.logging.Logger
 import org.junit.Before
 import org.junit.Test
+import org.slf4j.Logger
 
 /**
  *

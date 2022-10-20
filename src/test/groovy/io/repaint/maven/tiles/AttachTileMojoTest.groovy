@@ -4,8 +4,8 @@ import io.repaint.maven.tiles.AttachTileMojo
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.MavenProjectHelper
-import org.codehaus.plexus.logging.Logger
 import org.junit.Test
+import org.slf4j.Logger
 
 /**
  *

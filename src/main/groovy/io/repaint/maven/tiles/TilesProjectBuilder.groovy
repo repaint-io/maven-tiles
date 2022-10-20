@@ -9,44 +9,47 @@ import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.model.Dependency
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.building.ModelSource
-import org.apache.maven.project.DefaultProjectBuilder
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuilder
 import org.apache.maven.project.ProjectBuildingException
 import org.apache.maven.project.ProjectBuildingRequest
 import org.apache.maven.project.ProjectBuildingResult
 import org.codehaus.plexus.component.annotations.Component
+import org.codehaus.plexus.component.annotations.Requirement
 
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 
 @CompileStatic
 @Component(role = ProjectBuilder.class, hint = "TilesProjectBuilder")
-class TilesProjectBuilder extends DefaultProjectBuilder {
+class TilesProjectBuilder implements ProjectBuilder {
+
+	@Requirement( hint = "default" )
+	private ProjectBuilder delegate;
 
 	@Override
 	ProjectBuildingResult build(File pomFile, ProjectBuildingRequest request) throws ProjectBuildingException {
-		return injectTileDependecies(super.build(pomFile, request))
+		return injectTileDependecies(delegate.build(pomFile, request))
 	}
 
 	@Override
 	ProjectBuildingResult build(ModelSource modelSource, ProjectBuildingRequest request) throws ProjectBuildingException {
-		return injectTileDependecies(super.build(modelSource, request))
+		return injectTileDependecies(delegate.build(modelSource, request))
 	}
 
 	@Override
 	ProjectBuildingResult build(Artifact artifact, ProjectBuildingRequest request) throws ProjectBuildingException {
-		return injectTileDependecies(super.build(artifact, request))
+		return injectTileDependecies(delegate.build(artifact, request))
 	}
 
 	@Override
 	ProjectBuildingResult build(Artifact artifact, boolean allowStubModel, ProjectBuildingRequest request) throws ProjectBuildingException {
-		return injectTileDependecies(super.build(artifact, allowStubModel, request))
+		return injectTileDependecies(delegate.build(artifact, allowStubModel, request))
 	}
 
 	@Override
 	List<ProjectBuildingResult> build(List<File> pomFiles, boolean recursive, ProjectBuildingRequest request) throws ProjectBuildingException {
-		return injectTileDependecies(super.build(pomFiles, recursive, request))
+		return injectTileDependecies(delegate.build(pomFiles, recursive, request))
 	}
 
 	@CompileStatic(TypeCheckingMode.SKIP)

@@ -27,10 +27,10 @@ import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 @Named("TilesProjectBuilder")
 class TilesProjectBuilder implements ProjectBuilder {
 
-    @Inject
-    private ProjectBuilder delegate;
+	@Inject
+	private ProjectBuilder delegate;
 
-    @Override
+	@Override
 	ProjectBuildingResult build(File pomFile, ProjectBuildingRequest request) throws ProjectBuildingException {
 		return injectTileDependecies(delegate.build(pomFile, request))
 	}

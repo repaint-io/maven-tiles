@@ -17,7 +17,6 @@
  **********************************************************************************************************************/
 package io.repaint.maven.tiles
 
-import com.google.inject.Singleton
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.AbstractMavenLifecycleParticipant
@@ -76,6 +75,7 @@ import org.xml.sax.SAXParseException
 
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
@@ -532,13 +532,13 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 		}
 
-		((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
+		DefaultModelBuilder mb = ((DefaultModelBuilder)modelBuilder).setModelProcessor(delegateModelProcessor)
 		try {
-			ModelBuildingResult interimBuild = modelBuilder.build(request)
+			ModelBuildingResult interimBuild = mb.build(request)
 
 			// this will revert the tile dependencies inserted by TilesProjectBuilder, which is fine since by now they
 			// served their purpose of correctly ordering projects, so we can now do without them
-			ModelBuildingResult finalModel = modelBuilder.build(request, interimBuild)
+			ModelBuildingResult finalModel = mb.build(request, interimBuild)
 			if (!tilesInjected && applyBeforeParent) {
 				throw new MavenExecutionException("Cannot apply tiles, the expected parent ${applyBeforeParent} is not found.",
 					project.file)

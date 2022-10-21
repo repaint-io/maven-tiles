@@ -1,6 +1,5 @@
 package io.repaint.maven.tiles
 
-import com.google.inject.Singleton
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.apache.maven.MavenExecutionException
@@ -18,6 +17,7 @@ import org.apache.maven.project.ProjectBuildingResult
 
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP

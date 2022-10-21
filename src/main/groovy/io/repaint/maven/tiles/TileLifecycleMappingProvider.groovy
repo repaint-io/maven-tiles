@@ -1,6 +1,5 @@
 package io.repaint.maven.tiles
 
-import com.google.inject.Singleton
 import org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
 import org.apache.maven.lifecycle.mapping.Lifecycle
 import org.apache.maven.lifecycle.mapping.LifecycleMapping
@@ -9,6 +8,7 @@ import org.apache.maven.lifecycle.mapping.LifecyclePhase
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 
 @Singleton
 @Named("tile")

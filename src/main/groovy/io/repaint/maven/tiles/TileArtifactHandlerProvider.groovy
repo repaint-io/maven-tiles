@@ -1,32 +1,28 @@
 package io.repaint.maven.tiles
 
-import com.google.inject.Singleton
-import groovy.transform.CompileStatic
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
 
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 
-@CompileStatic
 @Singleton
 @Named("tile")
 final class TileArtifactHandlerProvider
 		implements Provider<ArtifactHandler>
 {
-	private final ArtifactHandler artifactHandler;
+	private final DefaultArtifactHandler artifactHandler;
 
 	@Inject
 	TileArtifactHandlerProvider()
 	{
-		this.artifactHandler = new DefaultArtifactHandler(
-				type: "tile",
-				extension: "xml",
-				packaging: "tile",
-				language: "xml",
-				addedToClasspath: false
-		);
+		this.artifactHandler = new DefaultArtifactHandler("tile")
+		this.artifactHandler.extension = "xml"
+		this.artifactHandler.packaging = "tile" // Groovy magic again
+		this.artifactHandler.language = "xml"
+		this.artifactHandler.addedToClasspath = false
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-name: Integration Tests on Java 8 and Maven 4.0.0-alpha-2
+name: Integration Tests on Java 8 and Maven 4.0.0-alpha-3
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           java-version: 8
       - name: Switch To Maven 4
         run: |
-          echo "distributionUrl=https://repository.apache.org/service/local/repositories/maven-1811/content/org/apache/maven/apache-maven/4.0.0-alpha-2/apache-maven-4.0.0-alpha-2-bin.zip" > .mvn/wrapper/maven-wrapper.properties
+          echo "distributionUrl=https://repository.apache.org/content/repositories/maven-1835/org/apache/maven/apache-maven/4.0.0-alpha-3/apache-maven-4.0.0-alpha-3-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its

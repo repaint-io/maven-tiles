@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 == 2.33
 
 - Updated gmavenplus-plugin to 2.1.0
+- Updated groovy to 4.0.7
+- Updated slf4j to 2.0.6
+- Updated maven-plugin-annotations to 3.7.0
 
 == 2.32
 

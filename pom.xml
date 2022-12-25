@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mavenVersion>3.8.4</mavenVersion>
-    <groovyVersion>4.0.6</groovyVersion>
+    <groovyVersion>4.0.7</groovyVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 
@@ -81,12 +81,12 @@
       <version>${groovyVersion}</version>
     </dependency>
     <dependency>
-    <groupId>org.apache.groovy</groupId>
+      <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-xml</artifactId>
       <version>${groovyVersion}</version>
     </dependency>
     <dependency>
-    <groupId>org.apache.groovy</groupId>
+      <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-test</artifactId>
       <version>${groovyVersion}</version>
       <scope>test</scope>

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.34
+
+- Improve logging with relativePath is used in parent declarations
+
 == 2.33
 
 - Updated gmavenplus-plugin to 2.1.0

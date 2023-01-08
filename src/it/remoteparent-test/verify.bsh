@@ -14,6 +14,6 @@ if (!content.contains("[INFO] Mixed 'null:remoteparent-child:1.0.0-SNAPSHOT' wit
 if (!content.contains("[INFO] Explicitly set groupId to 'com.test' from original parent 'com.test:remoteparent-parent:1.0.0-SNAPSHOT'.")) {
   throw new Exception("Tile not injected");
 }
-if (!content.contains("[INFO] Mixed 'net.stickycode.tile:sticky-tile-library:1.2' with original parent 'com.test:remoteparent-parent:1.0.0-SNAPSHOT' as its new top level parent.")) {
+if (!content.contains("[INFO] Mixed 'net.stickycode.tile:sticky-tile-library:1.2' with original parent 'com.test:remoteparent-parent:1.0.0-SNAPSHOT' via ../remoteparent-parent/pom.xml as its new top level parent.")) {
   throw new Exception("Tile not injected");
 }

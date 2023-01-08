@@ -471,24 +471,24 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			@Override
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
-				
-					 
-				
+
+
+
 				use(GavUtil) {
-		
+
 					// when we reference a submodule of a CI Friendly module in a pom (i.e. a workspace pom in Eclipse)
 					// we have no version in the submodule.
 					// I.E. module A1 has parent A. Both use CI Friendly version ${revision}. A has a property "revision" with value "MAIN-SNAPSHOT".
-					// we have a pom for our Eclipse workspace that includes A1. 
-					// If the workspace pom includes only A1 it works. But if it contains B and B has a dependency to A1 it 
+					// we have a pom for our Eclipse workspace that includes A1.
+					// If the workspace pom includes only A1 it works. But if it contains B and B has a dependency to A1 it
 					// fails with NPE.
 					// Here we have to ask the project for its version
-					// 
+					//
 					if (model.version == null && '${revision}'.equals(model.realVersion)) {
 						model.parent.version = project.version;
 					}
-			
-					
+
+
 					// evaluate the model version to deal with CI friendly build versions.
 					// "0-SNAPSHOT" indicates an undefined property.
 					if (model.artifactId == project.artifactId && model.realGroupId == project.groupId
@@ -698,8 +698,14 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		}
 
 		lastPom.parent = originalParent
-		logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
-		logger.info("")
+		if (originalParent) {
+			if (originalParent.relativePath != null && !originalParent.relativePath.isBlank()) {
+				logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' via ${originalParent.relativePath} as its new top level parent.")
+			} else {
+				logger.info("Mixed '${evaluateString(modelGav(lastPom))}' with original parent '${parentGav(originalParent)}' as its new top level parent.")
+			}
+			logger.info("")
+		}
 
 		if (pomModel != lastPom) {
 			putModelInCache(lastPom, request, lastPomFile)
@@ -924,7 +930,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			if (unprocessedTiles.containsKey(depName)) {
 				logger.warn(String.format("tiles-maven-plugin in project %s requested for same tile dependency %s",
 					modelGav(model), artifactGav(unprocessedTile)))
-				
+
 				// move the entry to the end of the map
 				unprocessedTiles.put(depName, unprocessedTiles.remove(depName))
 			} else {

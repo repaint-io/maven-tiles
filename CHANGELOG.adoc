@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 == 2.34
 
 - Improve logging with relativePath is used in parent declarations
+- Updated groovy to 4.0.8
 
 == 2.33
 

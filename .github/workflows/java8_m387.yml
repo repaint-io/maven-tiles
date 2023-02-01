@@ -19,7 +19,7 @@ jobs:
           java-version: 8
       - name: Switch To Maven 4
         run: |
-          echo "distributionUrl=https://repository.apache.org/content/repositories/maven-1839/org/apache/maven/apache-maven/3.8.7/apache-maven-3.8.7-bin.zip" > .mvn/wrapper/maven-wrapper.properties
+          echo "distributionUrl=https://dlcdn.apache.org/maven/maven-3/3.8.7/binaries/apache-maven-3.8.7-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its

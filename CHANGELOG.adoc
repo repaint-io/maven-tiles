@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.35
+
+- Updated maven-plugin-annotations to 3.8.2
+- Updated maven-filtering to 3.3.1
+- Updated mockito-core to 4.11.0
+- Updated maven-gpg-plugin to 3.1.0
+- Updated maven-invoker-plugin to 3.5.1
+- Updated maven-scm-plugin to 2.0.0
+- Updated maven-enforcer-plugin to 3.3.0
+- Updated maven-release-plugin to 3.0.0
+- Updated maven-compiler-plugin to 3.11.0
+- Updated sisu-maven-plugin to 0.9.0.M2
+- Updated maven-plugin-plugin to 3.8.2
+- Updated maven-surefire-plugin to 3.1.0
+- Updated groovy to 4.0.12 and fixed minor static analysis bug
+
 == 2.34
 
 - Improve logging with relativePath is used in parent declarations

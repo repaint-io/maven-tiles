@@ -239,7 +239,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.3.0</version>
         <!-- Invocation is defined by the release plugin goal set hence no executions -->
         <configuration>
           <rules>

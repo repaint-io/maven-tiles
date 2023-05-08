@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mavenVersion>3.8.4</mavenVersion>
-    <groovyVersion>4.0.11</groovyVersion>
+    <groovyVersion>4.0.12</groovyVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 

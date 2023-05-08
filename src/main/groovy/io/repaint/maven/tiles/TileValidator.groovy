@@ -34,7 +34,7 @@ class TileValidator {
 			// this is Mark's fault.
 			Collection<String> okSmells = smells.collect({ it.toLowerCase() }).intersect(TileValidator.SMELLS)
 
-			Collection<String> stinkySmells = new ArrayList(smells).minus(okSmells)
+			Collection<String> stinkySmells = new ArrayList<>(smells).minus(okSmells)
 
 			if (stinkySmells) {
 				throw new MavenExecutionException("Discovered bad smell configuration ${stinkySmells} from <buildSmells>${buildSmells}</buildSmells>.", tilePom)

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.36
+
+- Recompiled/released under Java 8 to resolve String.isBlack issue
+
 == 2.35
 
 - Updated maven-plugin-annotations to 3.8.2

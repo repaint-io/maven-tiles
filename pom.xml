@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mavenVersion>3.8.4</mavenVersion>
-    <groovyVersion>4.0.12</groovyVersion>
+    <groovyVersion>4.0.14</groovyVersion>
     <repaint.release>dev</repaint.release>
   </properties>
 
@@ -118,7 +118,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.8.2</version>
+      <version>3.9.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

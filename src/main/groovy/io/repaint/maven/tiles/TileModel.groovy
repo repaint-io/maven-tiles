@@ -63,6 +63,7 @@ class TileModel {
 		// this is in the artifact but isn't actually in the file, we need it
 		// so we can pass it through the parent structure in the TilesModelResolverImpl
 
+		model.modelVersion = "4.0.0"
 		model.version = artifact.version
 		model.groupId = artifact.groupId
 		model.artifactId = artifact.artifactId

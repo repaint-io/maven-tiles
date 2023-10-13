@@ -25,12 +25,13 @@ import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
-import org.apache.maven.artifact.repository.ArtifactRepositoryFactory
+import org.apache.maven.artifact.repository.ArtifactRepository
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
+import org.apache.maven.artifact.repository.MavenArtifactRepository
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
-import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.resolver.ResolutionErrorHandler
 import org.apache.maven.artifact.versioning.VersionRange
 import org.apache.maven.execution.MavenSession
@@ -43,6 +44,7 @@ import org.apache.maven.model.Plugin
 import org.apache.maven.model.PluginExecution
 import org.apache.maven.model.PluginManagement
 import org.apache.maven.model.Repository
+import org.apache.maven.model.RepositoryPolicy
 import org.apache.maven.model.building.DefaultModelBuilder
 import org.apache.maven.model.building.DefaultModelBuildingRequest
 import org.apache.maven.model.building.FileModelSource
@@ -63,6 +65,8 @@ import org.apache.maven.project.DefaultModelBuildingListener
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.ProjectBuilder
 import org.apache.maven.project.ProjectBuildingHelper
+import org.apache.maven.project.ProjectBuildingRequest
+import org.apache.maven.repository.RepositorySystem
 import org.apache.maven.shared.filtering.MavenFileFilter
 import org.apache.maven.shared.filtering.MavenResourcesFiltering
 import org.codehaus.plexus.util.xml.Xpp3Dom
@@ -105,9 +109,6 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	Logger logger = LoggerFactory.getLogger(getClass())
 
 	@Inject
-	ArtifactResolver resolver
-
-	@Inject
 	ResolutionErrorHandler resolutionErrorHandler
 
 	@Inject
@@ -123,7 +124,10 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	ProjectBuildingHelper projectBuildingHelper
 
 	@Inject
-	ArtifactRepositoryFactory repositoryFactory
+	MavenArtifactRepository repositoryFactory
+
+	@Inject
+	RepositorySystem repository;
 
 	@Inject
 	Map<String, ArtifactRepositoryLayout> repositoryLayouts
@@ -200,7 +204,9 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 				.setArtifact(tileArtifact)
 				.setRemoteRepositories(project?.remoteArtifactRepositories)
 				.setLocalRepository(mavenSession?.localRepository)
-			resolutionErrorHandler.throwErrors(tileReq, resolver.resolve(tileReq))
+
+			def tilesResult = repository.resolve(tileReq);
+			resolutionErrorHandler.throwErrors(tileReq, tilesResult)
 
 			// Resolve the .pom file for the tile
 			Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact)
@@ -208,7 +214,9 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 				.setArtifact(pomArtifact)
 				.setRemoteRepositories(project?.remoteArtifactRepositories)
 				.setLocalRepository(mavenSession?.localRepository)
-			resolutionErrorHandler.throwErrors(pomReq, resolver.resolve(pomReq))
+
+			def pomResult = repository.resolve(pomReq)
+			resolutionErrorHandler.throwErrors(pomReq, pomResult)
 
 			// When resolving from workspace (e.g. m2e, intellij) we might receive the path to pom.xml instead of the attached tile
 			if (tileArtifact.file && tileArtifact.file.name == "pom.xml") {
@@ -217,7 +225,9 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 					throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.",
 						tileFile as File)
 				}
-				MavenProject tileProject = projectBuilder.build(pomArtifact.file, mavenSession.request.projectBuildingRequest).getProject()
+
+				ProjectBuildingRequest pbr = mavenSession.request.projectBuildingRequest
+				MavenProject tileProject = projectBuilder.build(pomResult.originatingArtifact, pbr).getProject()
 				tileArtifact.file = FilteringHelper.getTile(tileProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
 			}
 
@@ -332,6 +342,11 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		}
 	}
 
+	ArtifactRepositoryPolicy getArtifactRepositoryPolicy(RepositoryPolicy policy) {
+		return new ArtifactRepositoryPolicy(Boolean.valueOf(policy.enabled),
+				policy.updatePolicy, policy.checksumPolicy)
+	}
+
 	/**
 	 * If we get here, we have a Tiles project that might have a distribution management section but it is playing
 	 * dicky-birds and hasn't set up the distribution management repositories.
@@ -340,18 +355,29 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	 */
 	void discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(MavenProject project) {
 		DistributionManagement distributionManagement = project.model.distributionManagement
-		Properties properties = project.properties;
 
 		if (distributionManagement) {
 			if (distributionManagement.repository) {
-				project.setReleaseArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
-					distributionManagement.repository.id, getReleaseDistributionManagementRepositoryUrl(project),
-					repositoryLayouts.get( distributionManagement.repository.layout ?: 'default' ), true ))
+
+				ArtifactRepository repo = new MavenArtifactRepository(
+						distributionManagement.repository.id,
+						getReleaseDistributionManagementRepositoryUrl(project),
+						repositoryFactory.layout,
+						getArtifactRepositoryPolicy(distributionManagement.repository.snapshots),
+						getArtifactRepositoryPolicy(distributionManagement.repository.releases))
+				project.setReleaseArtifactRepository(repo)
+
 			}
 			if (distributionManagement.snapshotRepository) {
-				project.setSnapshotArtifactRepository(repositoryFactory.createDeploymentArtifactRepository(
-					distributionManagement.snapshotRepository.id, getSnapshotDistributionManagementRepositoryUrl(project),
-					repositoryLayouts.get( distributionManagement.snapshotRepository.layout ?: 'default' ), true ))
+
+				ArtifactRepository repo = new MavenArtifactRepository(
+						distributionManagement.repository.id,
+						getSnapshotDistributionManagementRepositoryUrl(project),
+						repositoryFactory.layout,
+						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),
+						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.releases))
+				project.setReleaseArtifactRepository(repo)
+
 			}
 		}
 	}
@@ -600,7 +626,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 					.setArtifact(artifact)
 					.setRemoteRepositories(project?.remoteArtifactRepositories)
 					.setLocalRepository(mavenSession?.localRepository)
-				resolutionErrorHandler.throwErrors(req, resolver.resolve(req))
+
+				repository.resolve(req)
 
 				return createModelSource(artifact.file)
 			}

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.37
+
+- Drop maven-compat and update dependendies
+- Switched to using Maven 3.9.5
+- Updated groovy to 4.0.15
+- Updated gmavenplus-plugin to 3.0.2
+- Updated maven-enforcer-plugin to 3.4.1
+- Updated maven-invoker-plugin to 3.6.0
+- Updated maven-plugin-plugin to 3.9.0
+- Updated maven-release-plugin to 3.0.1
+- Updated maven-scm-plugin to 2.0.1
+- Updated maven-source-plugin to 3.3.0
+- Updated maven-surefire-plugin to 3.1.2
+- Enablerd Reproducible Builds (Hervé Boutemy <hboutemy@apache.org>)
+- Add missing model version (Guillaume Nodet <gnodet@gmail.com>)
+
 == 2.36
 
 - Recompiled/released under Java 8 to resolve String.isBlack issue

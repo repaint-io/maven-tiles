@@ -21,7 +21,6 @@ import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult
-import org.apache.maven.artifact.resolver.ArtifactResolver
 import org.apache.maven.artifact.resolver.DefaultResolutionErrorHandler
 import org.apache.maven.execution.MavenExecutionRequest
 import org.apache.maven.execution.MavenExecutionResult
@@ -34,6 +33,7 @@ import org.apache.maven.model.PluginExecution
 import org.apache.maven.model.building.ModelBuildingRequest
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.project.MavenProject
+import org.apache.maven.repository.RepositorySystem
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering
 import org.codehaus.plexus.util.xml.Xpp3Dom
@@ -53,6 +53,7 @@ import static io.repaint.maven.tiles.GavUtil.artifactName
 import static org.junit.Assert.assertEquals
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
+
 /**
  * If testMergeTile fails with java.io.FileNotFoundException: src/test/resources/licenses-tiles-pom.xml
  * (No such file or directory)) when running the test from your IDE, make sure you configure the Working
@@ -101,17 +102,18 @@ public class TilesMavenLifecycleParticipantTest {
 	void stuffParticipant() {
 		participant.logger = logger
 		participant.mavenSession = mockMavenSession
-		participant.resolver = [
-			resolve: { ArtifactResolutionRequest request ->
-				return new ArtifactResolutionResult()
+		participant.repository = [
+			resolve: { ArtifactResolutionRequest req ->
+				new ArtifactResolutionResult()
 			}
-		] as ArtifactResolver
+		] as RepositorySystem
 		participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
 		participant.versionRangeResolver = [
 			resolveVersionRange: { session, request ->
 				return null
 			}
 		] as VersionRangeResolver
+
 	}
 
 	public Artifact getTileTestCoordinates() {
@@ -131,20 +133,20 @@ public class TilesMavenLifecycleParticipantTest {
 	public void ensureBadArtifactsFail() {
 		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad", "bad")
 
-		participant.resolver = [
+		participant.repository = [
 			resolve: { ArtifactResolutionRequest request ->
 				new ArtifactResolutionResult().addErrorArtifactException(new ArtifactResolutionException("failed", badbadbad))
 			}
-		] as ArtifactResolver
+		] as RepositorySystem
 
 		shouldFail(MavenExecutionException) {
 			participant.resolveTile(null, null, badbadbad)
 		}
-		participant.resolver = [
+		participant.repository = [
 			resolve: { ArtifactResolutionRequest request ->
 				new ArtifactResolutionResult().addMissingArtifact(badbadbad)
 			}
-		] as ArtifactResolver
+		] as RepositorySystem
 
 		shouldFail(MavenExecutionException) {
 			participant.resolveTile(null, null, badbadbad)

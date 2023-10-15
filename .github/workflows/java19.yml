@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
       - name: Switch To Maven 3
         run: |
-          echo "distributionUrl=https://dlcdn.apache.org/maven/maven-3/3.9.1/binaries/apache-maven-3.9.1-bin.zip" > .mvn/wrapper/maven-wrapper.properties
+          echo "distributionUrl=https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its

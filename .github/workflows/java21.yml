@@ -24,6 +24,7 @@ jobs:
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its
       - uses: actions/upload-artifact@v3
+        if: failure()
         with:
           name: it-build-logs
           path: target/it

@@ -2,7 +2,9 @@ name: Integration Tests on Java 8 and Maven 4.0.0-alpha-7
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - 'feature/**'
   pull_request:
     branches: [ master ]
 

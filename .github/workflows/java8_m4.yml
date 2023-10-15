@@ -23,3 +23,8 @@ jobs:
           echo "wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: it-build-logs
+          path: target/it

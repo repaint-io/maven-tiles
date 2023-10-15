@@ -2,7 +2,9 @@ name: Integration Tests on Java 21
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - 'feature/**'
   pull_request:
     branches: [ master ]
 
@@ -24,7 +26,7 @@ jobs:
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its
       - uses: actions/upload-artifact@v3
-        if: failure()
+        if: ${{ failure() }}
         with:
           name: it-build-logs
           path: target/it

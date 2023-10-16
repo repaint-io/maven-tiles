@@ -15,9 +15,9 @@ export default defineConfig({
 				{
 					label: 'Maven Tiles',
 					items: [
-						{ label: "About", link: '/introduction/about/'},
-						{ label: "Using", link: '/introduction/using/'},
-						{ label: "Writing", link: '/introduction/writing/'}
+						{ label: "About", link: '/maven-tiles/introduction/about/'},
+						{ label: "Using", link: '/maven-tiles//introduction/using/'},
+						{ label: "Writing", link: '/maven-tiles/introduction/writing/'}
 					]
 				},
 				// {

@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://repaint-io.github.io',
-  // base: '/maven-tiles',
+  base: '/maven-tiles',
 	integrations: [
 		starlight({
 			title: 'Tiles - Mixins For Apache Maven',

@@ -89,7 +89,8 @@ import static io.repaint.maven.tiles.GavUtil.artifactName
 import static io.repaint.maven.tiles.GavUtil.modelGav
 import static io.repaint.maven.tiles.GavUtil.modelRealGa
 import static io.repaint.maven.tiles.GavUtil.parentGav
-
+import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
+import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS
 /**
  * Fetches all dependencies defined in the POM `configuration`.
  *
@@ -343,8 +344,12 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	}
 
 	ArtifactRepositoryPolicy getArtifactRepositoryPolicy(RepositoryPolicy policy) {
-		return new ArtifactRepositoryPolicy(Boolean.valueOf(policy.enabled),
-				policy.updatePolicy, policy.checksumPolicy)
+		if (policy != null) {
+			return new ArtifactRepositoryPolicy(policy.isEnabled(), policy.updatePolicy, policy.checksumPolicy)
+		} else {
+			return new ArtifactRepositoryPolicy(true, UPDATE_POLICY_ALWAYS, CHECKSUM_POLICY_WARN)
+		}
+
 	}
 
 	/**

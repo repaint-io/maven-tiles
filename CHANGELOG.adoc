@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.38
+
+- Fix NPE in Repository Policy retreival
+- Fix distribution management snapshot repository load (Ricardo Caldeira <rikycaldeira@outlook.com>)
+
 == 2.37
 
 - Drop maven-compat and update dependendies

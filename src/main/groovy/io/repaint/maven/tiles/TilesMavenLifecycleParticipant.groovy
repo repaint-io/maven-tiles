@@ -371,7 +371,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			if (distributionManagement.snapshotRepository) {
 
 				ArtifactRepository repo = new MavenArtifactRepository(
-						distributionManagement.repository.id,
+						distributionManagement.snapshotRepository.id,
 						getSnapshotDistributionManagementRepositoryUrl(project),
 						repositoryFactory.layout,
 						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),

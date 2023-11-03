@@ -1,0 +1,13 @@
+import java.io.*;
+import java.util.*;
+
+File file = new File(basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+// tileX should win
+if (!content.contains("oss.sonatype.org Staging Repository"))
+  throw new Exception("oss.sonatype.org Staging Repository expected to be in effective pom");

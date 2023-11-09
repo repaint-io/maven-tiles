@@ -22,9 +22,9 @@ In the current single parent hierarchy, this is all duplicated.
 
 The following are Repaint project definitions:
 
-* **define: reactor build** - `pom.xml`` that contains only modules, no plugins,
+* **define: reactor build** - `pom.xml` that contains only modules, no plugins,
   no dependencies, no dependency management, no plugin management. These are used as shortcuts to get your full project installed or tested.
-* **define: multi-module build** - `pom.xml`` that contains plugins and/or dependencies, dependency management, plugin management.
+* **define: multi-module build** - `pom.xml` that contains plugins and/or dependencies, dependency management, plugin management.
 
 With those defined:
 

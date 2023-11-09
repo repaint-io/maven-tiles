@@ -9,5 +9,7 @@ if ( !file.isFile() ) {
 String content = new Scanner(file).useDelimiter("\\Z").next();
 
 // tileX should win
-if (!content.contains("oss.sonatype.org Staging Repository"))
-  throw new Exception("oss.sonatype.org Staging Repository expected to be in effective pom");
+if (!content.contains("<id>repaint-tile-staging</id>"))
+  throw new Exception("<id>repaint-tile-staging</id> expected to be in effective pom");
+if (!content.contains("io.repaint Staging Repository"))
+  throw new Exception("io.repaint Staging Repository expected to be in effective pom");

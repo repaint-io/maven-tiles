@@ -9,6 +9,19 @@
 
     <name>Maven Tiles Distribution Management Test - TileA</name>
 
+    <distributionManagement>
+        <repository>
+            <id>repaint-staging</id>
+            <name>io.repaint Staging Repository</name>
+            <url>file:///tmp/maven-tiles/staging/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repaint-snapshots</id>
+            <name>io.repaint Snapshot Repository</name>
+            <url>file:///tmp/maven-tiles/snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>

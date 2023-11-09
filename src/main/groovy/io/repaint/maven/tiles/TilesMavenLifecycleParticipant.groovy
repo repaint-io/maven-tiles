@@ -374,14 +374,14 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			}
 			if (distributionManagement.snapshotRepository) {
 
-				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.repository.layout);
+				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.snapshotRepository.layout);
 				MavenArtifactRepository repo = new MavenArtifactRepository(
 						distributionManagement.snapshotRepository.id,
 						getSnapshotDistributionManagementRepositoryUrl(project),
 						layout,
 						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),
 						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.releases))
-				project.setReleaseArtifactRepository(repo)
+				project.setSnapshotArtifactRepository(repo)
 
 			}
 		}

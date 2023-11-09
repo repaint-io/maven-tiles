@@ -4,14 +4,14 @@
 
     <distributionManagement>
         <repository>
-            <id>sonatype-staging</id>
-            <name>oss.sonatype.org Staging Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>repaint-tile-staging</id>
+            <name>io.repaint Staging Repository</name>
+            <url>file:///tmp/maven-tiles/staging/</url>
         </repository>
         <snapshotRepository>
-            <id>sonatype-snapshots</id>
-            <name>oss.sonatype.org Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>repaint-tile-snapshots</id>
+            <name>io.repaint Snapshot Repository</name>
+            <url>file:///tmp/maven-tiles/snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
 

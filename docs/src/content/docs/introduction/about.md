@@ -144,7 +144,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.15</version>
+      <version>2.39</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories</buildSmells>
         <tiles>
@@ -185,7 +185,7 @@ be applied (in this case before `P`) resulting in the desired structure:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.37</version>
+      <version>2.39</version>
       <configuration>
         <applyBefore>group:P</applyBefore>
         <tiles>

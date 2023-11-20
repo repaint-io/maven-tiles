@@ -1,0 +1,28 @@
+project:
+  name: tiles-maven-plugin
+  description: Tiles Maven Plugin
+  longDescription: Project Mixins for Apache Maven
+  version: "2.39"
+  links:
+    homepage: https://github.com/repaint-io/maven-tiles
+  authors:
+    - Mark Derricutt
+    - Richard Vowles
+  license: APACHE-2.0
+  inceptionYear: "2014"
+  stereotype: NONE
+  java:
+    version: "8"
+    groupId: io.repaint.maven
+    artifactId: tiles-maven-plugin
+
+release:
+  github:
+    overwrite: true
+    tagName: tiles-maven-plugin-{{projectVersion}}
+    changelog:
+      skipMergeCommits: true
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'

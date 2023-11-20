@@ -25,7 +25,6 @@ import org.apache.maven.RepositoryUtils
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
-import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
 import org.apache.maven.artifact.repository.MavenArtifactRepository
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
@@ -309,7 +308,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 		// disabled explicit lookup as these seem to be injected just fine. Are these required for eclipse m2e>
 		//repositoryFactory = mavenSession.container.lookup(ArtifactRepositoryFactory)
-		//repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
+		repositoryLayouts = mavenSession.lookupMap(ArtifactRepositoryLayout.class.getName()) as Map<String, ArtifactRepositoryLayout>
 
 		List<MavenProject> allProjects = mavenSession.getProjects()
 		if (allProjects != null) {
@@ -349,7 +348,6 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		} else {
 			return new ArtifactRepositoryPolicy(true, UPDATE_POLICY_ALWAYS, CHECKSUM_POLICY_WARN)
 		}
-
 	}
 
 	/**
@@ -364,10 +362,11 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		if (distributionManagement) {
 			if (distributionManagement.repository) {
 
-				ArtifactRepository repo = new MavenArtifactRepository(
+				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.repository.layout);
+				MavenArtifactRepository repo = new MavenArtifactRepository(
 						distributionManagement.repository.id,
 						getReleaseDistributionManagementRepositoryUrl(project),
-						repositoryFactory.layout,
+						layout,
 						getArtifactRepositoryPolicy(distributionManagement.repository.snapshots),
 						getArtifactRepositoryPolicy(distributionManagement.repository.releases))
 				project.setReleaseArtifactRepository(repo)
@@ -375,13 +374,14 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			}
 			if (distributionManagement.snapshotRepository) {
 
-				ArtifactRepository repo = new MavenArtifactRepository(
+				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.snapshotRepository.layout);
+				MavenArtifactRepository repo = new MavenArtifactRepository(
 						distributionManagement.snapshotRepository.id,
 						getSnapshotDistributionManagementRepositoryUrl(project),
-						repositoryFactory.layout,
+						layout,
 						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),
 						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.releases))
-				project.setReleaseArtifactRepository(repo)
+				project.setSnapshotArtifactRepository(repo)
 
 			}
 		}
@@ -502,8 +502,6 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			@Override
 			Model read(InputStream input, Map<String, ?> options) throws IOException, ModelParseException {
 				Model model = modelProcessor.read(input, options)
-
-
 
 				use(GavUtil) {
 

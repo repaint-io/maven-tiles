@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <distributionManagement>
+        <repository>
+            <id>repaint-tile-staging</id>
+            <name>io.repaint Staging Repository</name>
+            <url>file:///tmp/maven-tiles/staging/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repaint-tile-snapshots</id>
+            <name>io.repaint Snapshot Repository</name>
+            <url>file:///tmp/maven-tiles/snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

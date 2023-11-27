@@ -361,28 +361,35 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 		if (distributionManagement) {
 			if (distributionManagement.repository) {
-
-				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.repository.layout);
-				MavenArtifactRepository repo = new MavenArtifactRepository(
-						distributionManagement.repository.id,
-						getReleaseDistributionManagementRepositoryUrl(project),
-						layout,
-						getArtifactRepositoryPolicy(distributionManagement.repository.snapshots),
-						getArtifactRepositoryPolicy(distributionManagement.repository.releases))
-				project.setReleaseArtifactRepository(repo)
+				var candidate = project.getRemoteArtifactRepositories().find {	it.id == distributionManagement.repository.id }
+				if( candidate !=null && candidate instanceof MavenArtifactRepository) {
+					project.setReleaseArtifactRepository(candidate)
+				} else {
+					ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.repository.layout);
+					MavenArtifactRepository repo = new MavenArtifactRepository(
+							distributionManagement.repository.id,
+							getReleaseDistributionManagementRepositoryUrl(project),
+							layout,
+							getArtifactRepositoryPolicy(distributionManagement.repository.snapshots),
+							getArtifactRepositoryPolicy(distributionManagement.repository.releases))
+					project.setReleaseArtifactRepository(repo)
+				}
 
 			}
 			if (distributionManagement.snapshotRepository) {
-
-				ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.snapshotRepository.layout);
-				MavenArtifactRepository repo = new MavenArtifactRepository(
-						distributionManagement.snapshotRepository.id,
-						getSnapshotDistributionManagementRepositoryUrl(project),
-						layout,
-						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),
-						getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.releases))
-				project.setSnapshotArtifactRepository(repo)
-
+				var candidate = project.getRemoteArtifactRepositories().find {	it.id == distributionManagement.snapshotRepository.id }
+				if( candidate !=null && candidate instanceof MavenArtifactRepository) {
+					project.setSnapshotArtifactRepository(candidate)
+				} else {
+					ArtifactRepositoryLayout layout = repositoryLayouts.get(distributionManagement.snapshotRepository.layout);
+					MavenArtifactRepository repo = new MavenArtifactRepository(
+							distributionManagement.snapshotRepository.id,
+							getSnapshotDistributionManagementRepositoryUrl(project),
+							layout,
+							getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.snapshots),
+							getArtifactRepositoryPolicy(distributionManagement.snapshotRepository.releases))
+					project.setSnapshotArtifactRepository(repo)
+				}
 			}
 		}
 	}

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+== 2.40
+
+- Fixed issue with distribution management repositories losing authentication settings (Riesen, Stefan <stefan.riesen@glencore.com>)
+- Explicitely define m-jar-p version (Hervé Boutemy <hboutemy@apache.org>)
+
 == 2.39
 
 - Added Astro based documentation (WIP)

@@ -2,7 +2,7 @@ project:
   name: tiles-maven-plugin
   description: Tiles Maven Plugin
   longDescription: Project Mixins for Apache Maven
-  version: "2.39"
+  version: "2.40"
   links:
     homepage: https://github.com/repaint-io/maven-tiles
   authors:

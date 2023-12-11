@@ -560,8 +560,16 @@ public class TilesMavenLifecycleParticipantTest {
 		def participant = new TilesMavenLifecycleParticipant()
 		participant.discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(project);
 
-		assert project.releaseArtifactRepository.authentication!=null;
-		assert project.snapshotArtifactRepository.authentication!=null;
+
+		def releaseAuthentication = project.releaseArtifactRepository.authentication
+		assert releaseAuthentication !=null;
+		assert releaseAuthentication.username == "username"
+		assert releaseAuthentication.password == "secret"
+
+		def snapshotAuthentication = project.snapshotArtifactRepository.authentication
+		assert snapshotAuthentication !=null;
+		assert snapshotAuthentication.username == "username"
+		assert snapshotAuthentication.password == "secret"
 	}
 
 	protected static Model createBasicModel() {

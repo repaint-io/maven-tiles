@@ -280,7 +280,7 @@
           <mavenExecutorId>forked-path</mavenExecutorId>
           <arguments>-Drepaint.release=release</arguments>
           <preparationGoals>clean enforcer:enforce verify</preparationGoals>
-          <goals>enforcer:enforce deploy jreleaser:release</goals>
+          <goals>enforcer:enforce deploy</goals>
           <tagBase>release/${project.groupId}/</tagBase>
           <pushChanges>false</pushChanges>
           <localCheckout>true</localCheckout>

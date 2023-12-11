@@ -18,6 +18,12 @@ package io.repaint.maven.tiles
 
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
+import org.apache.maven.artifact.repository.ArtifactRepository
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
+import org.apache.maven.artifact.repository.Authentication
+import org.apache.maven.artifact.repository.MavenArtifactRepository
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout2
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult
@@ -26,6 +32,8 @@ import org.apache.maven.execution.MavenExecutionRequest
 import org.apache.maven.execution.MavenExecutionResult
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.Build
+import org.apache.maven.model.DeploymentRepository
+import org.apache.maven.model.DistributionManagement
 import org.apache.maven.model.Model
 import org.apache.maven.model.Parent
 import org.apache.maven.model.Plugin
@@ -50,6 +58,9 @@ import static groovy.test.GroovyAssert.shouldFail
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static io.repaint.maven.tiles.GavUtil.artifactName
+import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
+import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS
+import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY
 import static org.junit.Assert.assertEquals
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -100,15 +111,15 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	void stuffParticipant() {
-		participant.logger = logger
-		participant.mavenSession = mockMavenSession
-		participant.repository = [
+		this.participant.logger = logger
+		this.participant.mavenSession = mockMavenSession
+		this.participant.repository = [
 			resolve: { ArtifactResolutionRequest req ->
 				new ArtifactResolutionResult()
 			}
 		] as RepositorySystem
-		participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
-		participant.versionRangeResolver = [
+		this.participant.resolutionErrorHandler = new DefaultResolutionErrorHandler()
+		this.participant.versionRangeResolver = [
 			resolveVersionRange: { session, request ->
 				return null
 			}
@@ -117,7 +128,7 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	public Artifact getTileTestCoordinates() {
-		return participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "xml", "", "0.8-SNAPSHOT")
+		return this.participant.getArtifactFromCoordinates("it.session.maven.tiles", "session-license-tile", "xml", "", "0.8-SNAPSHOT")
 	}
 
 	@Test
@@ -125,31 +136,31 @@ public class TilesMavenLifecycleParticipantTest {
 		Artifact snapshot = getTileTestCoordinates()
 		System.setProperty(PERFORM_RELEASE, "true")
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, null, snapshot)
+			this.participant.resolveTile(null, null, snapshot)
 		}
 	}
 
 	@Test
 	public void ensureBadArtifactsFail() {
-		Artifact badbadbad = participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad", "bad")
+		Artifact badbadbad = this.participant.getArtifactFromCoordinates("bad", "bad", "bad", "bad", "bad")
 
-		participant.repository = [
+		this.participant.repository = [
 			resolve: { ArtifactResolutionRequest request ->
 				new ArtifactResolutionResult().addErrorArtifactException(new ArtifactResolutionException("failed", badbadbad))
 			}
 		] as RepositorySystem
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, null, badbadbad)
+			this.participant.resolveTile(null, null, badbadbad)
 		}
-		participant.repository = [
+		this.participant.repository = [
 			resolve: { ArtifactResolutionRequest request ->
 				new ArtifactResolutionResult().addMissingArtifact(badbadbad)
 			}
 		] as RepositorySystem
 
 		shouldFail(MavenExecutionException) {
-			participant.resolveTile(null, null, badbadbad)
+			this.participant.resolveTile(null, null, badbadbad)
 		}
 	}
 
@@ -178,10 +189,10 @@ public class TilesMavenLifecycleParticipantTest {
 		addUnprocessedTile('test-merge-tile/kapt-javalin-tile.xml', 'kapt-javalin-tile')
 
 		// act
-		participant.loadAllDiscoveredTiles(session, project)
+		this.participant.loadAllDiscoveredTiles(session, project)
 
 
-		Model tileModel = participant.processedTiles['io.repaint.tiles:kapt-tile'].tileModel.model
+		Model tileModel = this.participant.processedTiles['io.repaint.tiles:kapt-tile'].tileModel.model
 		PluginExecution pluginExecution = tileModel.build.plugins[0].executions[0]
 		assert pluginExecution.id == 'kapt'
 
@@ -211,19 +222,19 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	def addUnprocessedTile(String testResourceName, String tileName) {
-		Artifact kaptTile = participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:$tileName:1.1", null)
+		Artifact kaptTile = this.participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:$tileName:1.1", null)
 		kaptTile.file = new File("src/test/resources/$testResourceName")
-		participant.unprocessedTiles.put(artifactName(kaptTile), kaptTile)
+		this.participant.unprocessedTiles.put(artifactName(kaptTile), kaptTile)
 	}
 
 	@Test
 	public void testFiltering() {
 		final def context = new DefaultBuildContext()
 
-		participant.mavenFileFilter = new DefaultMavenFileFilter(context)
-		participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering(participant.mavenFileFilter, context)
+		this.participant.mavenFileFilter = new DefaultMavenFileFilter(context)
+		this.participant.mavenResourcesFiltering = new DefaultMavenResourcesFiltering(this.participant.mavenFileFilter, context)
 
-		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
+		Artifact filteredTile = this.participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 
 		Model model = new Model()
 		model.setGroupId("io.repaint.tiles")
@@ -248,7 +259,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
 
-		Artifact tile = participant.resolveTile(session, project, filteredTile)
+		Artifact tile = this.participant.resolveTile(session, project, filteredTile)
 		assert tile.file == new File("target/filtering/generated-tiles/tiles/tile.xml")
 
 		TileModel tileModel = new TileModel(tile.file, tile)
@@ -258,7 +269,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testNoFiltering() {
-		Artifact filteredTile = participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
+		Artifact filteredTile = this.participant.getArtifactFromCoordinates("io.repaint.tiles", "filtering-tile", "xml", "", "1.1-SNAPSHOT")
 
 		Model model = new Model()
 		model.setGroupId("io.repaint.tiles")
@@ -282,7 +293,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		MavenSession session = new MavenSession(null, req, mock(MavenExecutionResult.class), Arrays.asList(project))
 
-		Artifact tile = participant.resolveTile(session, project, filteredTile)
+		Artifact tile = this.participant.resolveTile(session, project, filteredTile)
 
 		assert tile.file == new File("src/test/resources/filtering/tile.xml")
 
@@ -293,7 +304,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testGetArtifactFromCoordinates() {
-		Artifact artifact = participant.getArtifactFromCoordinates("dummy", "dummy", "xml", "classy", "1")
+		Artifact artifact = this.participant.getArtifactFromCoordinates("dummy", "dummy", "xml", "classy", "1")
 
 		assert artifact != null
 
@@ -308,7 +319,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 	@Test
 	public void testGavFromString() {
-		Artifact dummy = participant.turnPropertyIntoUnprocessedTile("my:long:feet", null)
+		Artifact dummy = this.participant.turnPropertyIntoUnprocessedTile("my:long:feet", null)
 
 		assert dummy.version == 'feet'
 		assert dummy.artifactId == 'long'
@@ -316,7 +327,7 @@ public class TilesMavenLifecycleParticipantTest {
 		assert dummy.classifier == ''
 		assert dummy.type == 'xml'
 
-		Artifact dummy2 = participant.turnPropertyIntoUnprocessedTile("my:long:sore:smelly:feet", null)
+		Artifact dummy2 = this.participant.turnPropertyIntoUnprocessedTile("my:long:sore:smelly:feet", null)
 
 		assert dummy2.version == 'feet'
 		assert dummy2.artifactId == 'long'
@@ -326,38 +337,38 @@ public class TilesMavenLifecycleParticipantTest {
 
 		// too short
 		shouldFail(MavenExecutionException) {
-			participant.turnPropertyIntoUnprocessedTile("my:long", null)
+			this.participant.turnPropertyIntoUnprocessedTile("my:long", null)
 		}
 
 		// too long
 		shouldFail(MavenExecutionException) {
-			participant.turnPropertyIntoUnprocessedTile("my:long:feet:and:smelly:shoes", null)
+			this.participant.turnPropertyIntoUnprocessedTile("my:long:feet:and:smelly:shoes", null)
 		}
 	}
 
 	@Test
 	public void canLoadExtendedTiles() {
-		Artifact artifact = participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:extended-syntax:1.1", null)
+		Artifact artifact = this.participant.turnPropertyIntoUnprocessedTile("io.repaint.tiles:extended-syntax:1.1", null)
 		artifact.file = new File("src/test/resources/extended-syntax-tile.xml")
-		assert participant.loadModel(artifact)
+		assert this.participant.loadModel(artifact)
 		artifact.file = new File("src/test/resources/session-license-tile.xml")
-		assert participant.loadModel(artifact)
+		assert this.participant.loadModel(artifact)
 		artifact.file = new File("src/test/resources/bad-smelly-tile.xml")
-		assert participant.loadModel(artifact)
+		assert this.participant.loadModel(artifact)
 
 		shouldFail(MavenExecutionException) {
 			artifact.file = new File("src/test/resources/extended-syntax-tile1.xml")
-			participant.loadModel(artifact)
+			this.participant.loadModel(artifact)
 		}
 
 		shouldFail(MavenExecutionException) {
 			artifact.file = new File("src/test/resources/invalid-tile.xml")
-			participant.loadModel(artifact)
+			this.participant.loadModel(artifact)
 		}
 
 		shouldFail(MavenExecutionException) {
 			artifact.file = new File("src/test/resources/not-a-file-file.xml")
-			participant.loadModel(artifact)
+			this.participant.loadModel(artifact)
 		}
 	}
 
@@ -365,7 +376,7 @@ public class TilesMavenLifecycleParticipantTest {
 	public void canUseModelResolver() {
 		File licensePom = new File('src/test/resources/session-license-pom.xml')
 
-		participant = new TilesMavenLifecycleParticipant() {
+		this.participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
 				tileArtifact.file = licensePom
@@ -374,7 +385,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		stuffParticipant()
 
-		def resolver = participant.createModelResolver(null)
+		def resolver = this.participant.createModelResolver(null)
 		def model = resolver.resolveModel('my', 'left', 'foot')
 
 		assert model.inputStream.text == licensePom.text
@@ -397,13 +408,13 @@ public class TilesMavenLifecycleParticipantTest {
 	@Test
 	public void injectModelLayerTiles() {
 		TileModel sessionLicenseTile = new TileModel(new File('src/test/resources/session-license-tile.xml'),
-			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:session-license:1', null))
+				this.participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:session-license:1', null))
 
 		TileModel extendedSyntaxTile = new TileModel(new File('src/test/resources/extended-syntax-tile.xml'),
-			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:extended-syntax:1', null))
+				this.participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:extended-syntax:1', null))
 
 		TileModel antrunTile = new TileModel(new File('src/test/resources/antrun1-tile.xml'),
-			participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:antrun1:1', null))
+				this.participant.turnPropertyIntoUnprocessedTile('io.repaint.tiles:antrun1:1', null))
 
 		List<TileModel> tiles = [
 			sessionLicenseTile,
@@ -414,7 +425,7 @@ public class TilesMavenLifecycleParticipantTest {
 		File pomFile = new File('src/test/resources/empty-pom.xml')
 		Model pomModel = readModel(pomFile)
 
-		participant = new TilesMavenLifecycleParticipant() {
+		this.participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			protected void putModelInCache(Model model, ModelBuildingRequest request, File pFile) {
 			}
@@ -424,7 +435,7 @@ public class TilesMavenLifecycleParticipantTest {
 		when(mockMavenSession.getUserProperties()).thenReturn(new Properties())
 		when(mockMavenSession.getSystemProperties()).thenReturn(new Properties())
 
-		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+		this.participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 
 		assert pomModel.parent.artifactId == 'session-license'
 		assert sessionLicenseTile.model.parent.artifactId == 'extended-syntax'
@@ -433,13 +444,13 @@ public class TilesMavenLifecycleParticipantTest {
 
 		pomModel.parent = new Parent(groupId: 'io.repaint.tiles', artifactId: 'fake-parent', version: '1')
 
-		participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
+		this.participant.injectTilesIntoParentStructure(tiles, pomModel, [getPomFile: { return pomFile }] as ModelBuildingRequest)
 		assert antrunTile.model.parent.artifactId == 'fake-parent'
 	}
 
 	@Test
 	public void testNoTiles() throws MavenExecutionException {
-		participant = new TilesMavenLifecycleParticipant() {
+		this.participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
 				return new TileModel(model:new Model())
@@ -448,7 +459,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		stuffParticipant()
 
-		participant.orchestrateMerge(null, new MavenProject())
+		this.participant.orchestrateMerge(null, new MavenProject())
 	}
 
 	@Test
@@ -456,13 +467,13 @@ public class TilesMavenLifecycleParticipantTest {
 		Model model = createBasicModel()
 		addTileAndPlugin(model, "groupid:artifactid")
 
-		participant = new TilesMavenLifecycleParticipant()
+		this.participant = new TilesMavenLifecycleParticipant()
 		stuffParticipant()
 
 		MavenProject project = new MavenProject(model)
 
 		Throwable failure = shouldFail {
-			participant.orchestrateMerge(null, project)
+			this.participant.orchestrateMerge(null, project)
 		}
 
 		assert failure.message == "groupid:artifactid does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range"
@@ -481,7 +492,7 @@ public class TilesMavenLifecycleParticipantTest {
 	}
 
 	protected resetParticipantToLoadTilesFromDisk() {
-		participant = new TilesMavenLifecycleParticipant() {
+		this.participant = new TilesMavenLifecycleParticipant() {
 			@Override
 			protected void thunkModelBuilder(MavenProject project1) {
 			}
@@ -511,9 +522,9 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(null, project)
+		this.participant.orchestrateMerge(null, project)
 
-		assert participant.processedTiles.size() == 4
+		assert this.participant.processedTiles.size() == 4
 	}
 
 	@Test
@@ -522,8 +533,35 @@ public class TilesMavenLifecycleParticipantTest {
 
 		resetParticipantToLoadTilesFromDisk()
 
-		participant.orchestrateMerge(null, project)
-		assert participant.processedTiles.size() == 4
+		this.participant.orchestrateMerge(null, project)
+		assert this.participant.processedTiles.size() == 4
+	}
+
+	@Test
+	public void testAuthenticationSettingsArePresent() {
+		Model model = createBasicModel()
+		MavenProject project = new MavenProject(model)
+
+		def repository = new MavenArtifactRepository("central", "uri://nowhere/", new DefaultRepositoryLayout(), new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN), new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN))
+		repository.setAuthentication(new Authentication("username", "secret"))
+		project.setRemoteArtifactRepositories([
+				repository
+		])
+
+		project.model.distributionManagement = new DistributionManagement()
+
+		project.model.distributionManagement.repository = new DeploymentRepository()
+		project.model.distributionManagement.repository.setId("central");
+
+		project.model.distributionManagement.snapshotRepository = new DeploymentRepository()
+		project.model.distributionManagement.snapshotRepository.setId("central");
+
+
+		def participant = new TilesMavenLifecycleParticipant()
+		participant.discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(project);
+
+		assert project.releaseArtifactRepository.authentication!=null;
+		assert project.snapshotArtifactRepository.authentication!=null;
 	}
 
 	protected static Model createBasicModel() {

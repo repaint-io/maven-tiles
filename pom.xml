@@ -49,8 +49,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mavenVersion>3.9.5</mavenVersion>
-    <groovyVersion>4.0.15</groovyVersion>
+    <mavenVersion>3.9.6</mavenVersion>
+    <groovyVersion>4.0.18</groovyVersion>
     <repaint.release>dev</repaint.release>
     <project.build.outputTimestamp>2023-12-11T22:10:54Z</project.build.outputTimestamp>
   </properties>

@@ -372,6 +372,6 @@ create your own versions and always lock down versions of third party tiles, jus
 == Read More
 
 - https://github.com/maoo/maven-tiles[The Original Tiles Maven plugin] - although the essential start point is the same, the code is significantly different.
-- http://jira.codehaus.org/browse/MNG-5102[Mixin POM fragments]
+- https://issues.apache.org/jira/browse/MNG-5102[Mixin POM fragments]
 - http://stackoverflow.com/questions/11749375/import-maven-plugin-configuration-by-composition-rather-than-inheritance-can-it[Stack Overflow]
 - http://maven.40175.n5.nabble.com/Moving-forward-with-mixins-tc4421069.html[Maven Discussion]

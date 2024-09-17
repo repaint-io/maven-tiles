@@ -1,0 +1,850 @@
+[INFO]  JReleaser 1.9.0
+------------------------------------------------------------
+jreleaser 1.9.0
+------------------------------------------------------------
+Build time:   2023-11-01 08:20:44Z
+Revision:     383c727cc2ef91f8f54d4d5f2c9bc52c7e3bfa21
+JVM:          1.8.0_392 (Temurin 25.392-b08)
+------------------------------------------------------------
+[INFO]  Configuring with jreleaser.yml
+[INFO]    - basedir set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles
+[INFO]    - outputdir set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser
+[INFO]  Reading configuration
+[DEBUG]   - basedir set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles
+[DEBUG]   - baseOutputDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out
+[DEBUG]   - outputDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser
+[DEBUG]   - checksumDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/checksums
+[DEBUG]   - catalogsDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/catalogs
+[DEBUG]   - signaturesDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/signatures
+[DEBUG]   - prepareDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/prepare
+[DEBUG]   - packageDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/package
+[DEBUG]   - downloadDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/download
+[DEBUG]   - assembleDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/assemble
+[DEBUG]   - artifactsDirectory set to /Users/amrk/IdeaProjects/upstream/repaintio/maven-tiles/out/jreleaser/artifacts
+[INFO]  git-root-search set to false
+[INFO]  Loading variables from /Users/amrk/.jreleaser/config.properties
+[DEBUG] The following variables are defined in config.properties:
+[DEBUG]   JRELEASER_GITHUB_TOKEN
+[DEBUG]   JRELEASER_MAIL_PASSWORD
+[DEBUG] The following variables are defined in the current environment:
+[DEBUG]   JRELEASER_HOME
+[INFO]  Validating configuration
+[INFO]  Strict mode set to false
+[DEBUG] adjusting distributions with assemblies
+[DEBUG]   [validation] --== ASSEMBLE ==--
+[DEBUG]   [validation] hooks
+[DEBUG]   [validation] hooks.command
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] hooks.script
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] project
+[DEBUG]   [validation] download
+[DEBUG]   [validation] assemble
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] signing
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] release
+[DEBUG]   [validation] release.github
+[DEBUG]   [validation] checksum
+[DEBUG]   [validation] deploy
+[DEBUG]   [validation] deploy.maven
+[DEBUG]   [validation] upload
+[DEBUG]   [validation] catalog
+[DEBUG]   [validation] catalog.sbom
+[DEBUG]   [validation] catalog.sbom.cyclonedx
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] catalog.sbom.syft
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] catalog.slsa
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce
+[DEBUG]   [validation] - disabled
+[DEBUG]   [postvalidation] project
+[DEBUG]   [postvalidation] assemble
+[DEBUG]   [postvalidation] assemble.jpackage
+[DEBUG]   [resolution] assemble
+[DEBUG]   [validation] --== FULL ==--
+[DEBUG]   [validation] hooks
+[DEBUG]   [validation] hooks.command
+[DEBUG]   [validation] hooks.script
+[DEBUG]   [validation] project
+[DEBUG]   [validation] download
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] assemble
+[DEBUG]   [validation] signing
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] release
+[DEBUG]   [validation] release.github
+[DEBUG]   [validation] checksum
+[DEBUG]   [validation] deploy
+[DEBUG]   [validation] deploy.maven
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] upload
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] packagers
+[DEBUG]   [validation] files
+[DEBUG]   [validation] catalog
+[DEBUG]   [validation] catalog.sbom
+[DEBUG]   [validation] catalog.sbom.cyclonedx
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] catalog.sbom.syft
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] catalog.slsa
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce
+[DEBUG]   [validation] announce.article
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.bluesky
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.discussions
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.discord
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.discourse
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.gitter
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.googleChat
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.linkedin
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.http
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.smtp
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.mastodon
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.mattermost
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.openCollective
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.sdkman
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.slack
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.teams
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.telegram
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.twitter
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.webhooks
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] announce.zulip
+[DEBUG]   [validation] - disabled
+[DEBUG]   [validation] - disabled
+[DEBUG]   [postvalidation] project
+[DEBUG]   [postvalidation] assemble
+[DEBUG]   [postvalidation] assemble.jpackage
+[DEBUG]   [postvalidation] distributions
+environment:
+ 
+hooks:
+    enabled: false
+    active: NEVER
+    command:
+        enabled: false
+        active: NEVER
+    script:
+        enabled: false
+        active: NEVER
+ 
+project:
+    name: tiles-maven-plugin
+    version: 2.40
+    versionPattern: SEMVER
+    snapshot:
+        enabled: false
+        pattern: .*-SNAPSHOT
+        label: early-access
+        fullChangelog: false
+    description: Tiles Maven Plugin
+    longDescription: Project Mixins for Apache Maven
+    license: APACHE-2.0
+    inceptionYear: 2014
+    authors:
+        Mark Derricutt
+        Richard Vowles
+    stereotype: NONE
+    links:
+        homepage: https://github.com/repaint-io/maven-tiles
+        documentation: https://github.com/repaint-io/maven-tiles
+        bugTracker: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/issues
+        vcsBrowser: https://{{repoHost}}/{{repoOwner}}/{{repoName}}
+    extraProperties:
+        versionMajor: 2
+        versionMinor: 40
+        versionNumber: 2.40
+        versionWithUnderscores: 2_40
+        versionWithDashes: 2-40
+        versionNumberWithUnderscores: 2_40
+        versionNumberWithDashes: 2-40
+        effectiveVersionWithUnderscores: 2_40
+        effectiveVersionWithDashes: 2-40
+ 
+platform:
+ 
+release:
+    github:
+        enabled: true
+        host: github.com
+        owner: repaint-io
+        name: maven-tiles
+        username: repaint-io
+        token: ************
+        artifacts: true
+        files: true
+        checksums: true
+        catalogs: true
+        signatures: true
+        repoUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}
+        repoCloneUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}.git
+        commitUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/commits
+        srcUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/blob/{{repoBranch}}
+        downloadUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/releases/download/{{tagName}}/{{artifactFile}}
+        releaseNotesUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/releases/tag/{{tagName}}
+        latestReleaseUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/releases/latest
+        issueTrackerUrl: https://{{repoHost}}/{{repoOwner}}/{{repoName}}/issues
+        tagName: tiles-maven-plugin-{{projectVersion}}
+        releaseName: Release {{tagName}}
+        branch: master
+        branchPush: master
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        sign: false
+        skipTag: false
+        skipRelease: false
+        overwrite: true
+        update:
+            enabled: false
+        apiEndpoint: https://api.github.com
+        connectTimeout: 20
+        readTimeout: 60
+        changelog:
+            enabled: true
+            append:
+                enabled: false
+            links: false
+            skipMergeCommits: true
+            sort: DESC
+            formatted: ALWAYS
+            preset: conventional-commits
+            format: - {{commitShortHash}} {{#commitIsConventional}}{{#conventionalCommitIsBreakingChange}}🚨 {{/conventionalCommitIsBreakingChange}}{{#conventionalCommitScope}}**{{conventionalCommitScope}}**: {{/conventionalCommitScope}}{{conventionalCommitDescription}}{{#conventionalCommitBreakingChangeContent}} - *{{conventionalCommitBreakingChangeContent}}*{{/conventionalCommitBreakingChangeContent}}{{/commitIsConventional}}{{^commitIsConventional}}{{commitTitle}}{{/commitIsConventional}}{{#commitHasIssues}}, closes{{#commitIssues}} {{issue}}{{/commitIssues}}{{/commitHasIssues}}
+            categoryTitleFormat: ## {{categoryTitle}}
+            contributorsTitleFormat: ## Contributors
+            content: 
+## Changelog
+
+{{changelogChanges}}
+    {{changelogContributors}}
+            hide:
+            contributors:
+                enabled: true
+                format: - {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}
+            categories:
+                category 0:
+                    key: merge
+                    title: 🔀 Merge
+                    labels:
+                        merge
+                    order: 0
+                category 1:
+                    key: features
+                    title: 🚀 Features
+                    labels:
+                        feat
+                    order: 10
+                category 2:
+                    key: fixes
+                    title: 🐛 Fixes
+                    labels:
+                        fix
+                    order: 20
+                category 3:
+                    key: changes
+                    title: 🔄️ Changes
+                    labels:
+                        revert
+                        style
+                        perf
+                        refactor
+                    order: 30
+                category 4:
+                    key: tasks
+                    title: 🧰 Tasks
+                    labels:
+                        chore
+                    order: 40
+                category 5:
+                    key: build
+                    title: 🛠  Build
+                    labels:
+                        test
+                        build
+                        ci
+                    order: 50
+                category 6:
+                    key: docs
+                    title: 📝 Documentation
+                    labels:
+                        docs
+                    order: 60
+            labelers:
+                labeler 0:
+                    label: merge
+                    title: Merge pull
+                    order: 0
+                labeler 1:
+                    label: merge
+                    title: Merge branch
+                    order: 5
+                labeler 2:
+                    label: build
+                    title: regex:^(?:build(?:\(.*\))?!?):\s.*
+                    order: 10
+                labeler 3:
+                    label: chore
+                    title: regex:^(?:chore(?:\(.*\))?!?):\s.*
+                    order: 20
+                labeler 4:
+                    label: ci
+                    title: regex:^(?:ci(?:\(.*\))?!?):\s.*
+                    order: 30
+                labeler 5:
+                    label: docs
+                    title: regex:^(?:docs(?:\(.*\))?!?):\s.*
+                    order: 40
+                labeler 6:
+                    label: feat
+                    title: regex:^(?:feat(?:\(.*\))?!?):\s.*
+                    order: 50
+                labeler 7:
+                    label: fix
+                    title: regex:^(?:fix(?:\(.*\))?!?):\s.*
+                    order: 60
+                labeler 8:
+                    label: perf
+                    title: regex:^(?:perf(?:\(.*\))?!?):\s.*
+                    order: 70
+                labeler 9:
+                    label: refactor
+                    title: regex:^(?:refactor(?:\(.*\))?!?):\s.*
+                    order: 80
+                labeler 10:
+                    label: revert
+                    title: regex:^(?:revert(?:\(.*\))?!?):\s.*
+                    order: 90
+                labeler 11:
+                    label: style
+                    title: regex:^(?:style(?:\(.*\))?!?):\s.*
+                    order: 100
+                labeler 12:
+                    label: test
+                    title: regex:^(?:test(?:\(.*\))?!?):\s.*
+                    order: 110
+        milestone:
+            name: {{tagName}}
+            close: true
+        issues:
+            enabled: false
+            comment: ð This issue has been resolved in `{{tagName}}` ([Release Notes]({{releaseNotesUrl}}))
+            label:
+                name: released
+                color: #FF0000
+                description: Issue has been released
+        prerelease:
+            enabled: false
+        draft: false
+        releaseNotes:
+            enabled: false
+ 
+checksum:
+    name: checksums.txt
+    individual: false
+    algorithms:
+        SHA_256
+    artifacts: true
+    files: true
+ 
+signing:
+    enabled: false
+    active: NEVER
+    armored: false
+    verify: true
+    artifacts: true
+    files: true
+    checksums: true
+    catalogs: true
+    passphrase: **unset**
+    publicKey: **unset**
+    secretKey: **unset**
+ 
+announce:
+    enabled: false
+    active: NEVER
+    article:
+        enabled: false
+        active: NEVER
+        commitAuthor:
+        repository:
+            enabled: false
+            name: article
+            token: **unset**
+    bluesky:
+        enabled: false
+        active: NEVER
+        handle: **unset**
+        password: **unset**
+    discord:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+    discourse:
+        enabled: false
+        active: NEVER
+        apiKey: **unset**
+        username: **unset**
+    discussions:
+        enabled: false
+        active: NEVER
+    gitter:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+    googlechat:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+    linkedin:
+        enabled: false
+        active: NEVER
+        owner: **unset**
+        accessToken: **unset**
+    smtp:
+        enabled: false
+        active: NEVER
+        auth: false
+        password: **unset**
+    mastodon:
+        enabled: false
+        active: NEVER
+        accessToken: **unset**
+    mattermost:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+        structuredMessage: true
+    opencollective:
+        enabled: false
+        active: NEVER
+        token: **unset**
+    sdkman:
+        enabled: false
+        consumerKey: **unset**
+        consumerToken: **unset**
+    slack:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+        token: **unset**
+    teams:
+        enabled: false
+        active: NEVER
+        webhook: **unset**
+    telegram:
+        enabled: false
+        active: NEVER
+        token: **unset**
+        chatId: **unset**
+    twitter:
+        enabled: false
+        active: NEVER
+        consumerKey: **unset**
+        consumerSecret: **unset**
+        accessToken: **unset**
+        accessTokenSecret: **unset**
+    zulip:
+        enabled: false
+        active: NEVER
+        apiKey: **unset**
+ 
+packagers:
+    appimage:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        developerName: Mark Derricutt, Richard Vowles
+        requiresTerminal: false
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: appimage
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    asdf:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: asdf
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    brew:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        multiPlatform: false
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: homebrew-tap
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+        cask:
+            enabled: false
+    chocolatey:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        apiKey: **unset**
+        remoteBuild: false
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: chocolatey-bucket
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    docker:
+        enabled: false
+        active: NEVER
+        useLocalArtifact: true
+        buildx:
+            enabled: false
+            createBuilder: true
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: docker
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+            versionedSubfolders: false
+        continueOnError: false
+    flatpak:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        developerName: Mark Derricutt, Richard Vowles
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: flatpak
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    gofish:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: repaint-io-fish-food
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    jbang:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: jbang-catalog
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    jib:
+        enabled: false
+        active: NEVER
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: jib
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+            versionedSubfolders: false
+        continueOnError: false
+    macports:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: macports
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    scoop:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: scoop-repaint-io
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    sdkman:
+        enabled: false
+        continueOnError: false
+        connectTimeout: 20
+        readTimeout: 60
+        consumerKey: **unset**
+        consumerToken: **unset**
+    snap:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        base: core20
+        grade: stable
+        confinement: strict
+        remoteBuild: false
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: snap
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    spec:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: repaint-io-spec
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+    winget:
+        enabled: false
+        active: NEVER
+        continueOnError: false
+        commitAuthor:
+            name: jreleaserbot
+            email: jreleaser@kordamp.org
+        package:
+        publisher:
+        installer:
+            type: WIX
+            scope: MACHINE
+            upgradeBehavior: INSTALL
+        repository:
+            enabled: false
+            owner: repaint-io
+            name: winget
+            tagName: tiles-maven-plugin-{{projectVersion}}
+            branch: HEAD
+            branchPush: HEAD
+            username: repaint-io
+            token: ************
+ 
+download:
+    enabled: false
+    active: NEVER
+ 
+assemble:
+    enabled: false
+    active: NEVER
+ 
+deploy:
+    enabled: false
+    active: NEVER
+    maven:
+        enabled: false
+        active: NEVER
+        pomchecker:
+            version: 1.9.0
+            failOnWarning: true
+            failOnError: true
+ 
+upload:
+    enabled: false
+    active: NEVER
+ 
+catalog:
+    enabled: false
+    active: NEVER
+    sbom:
+        enabled: false
+        active: NEVER
+        cyclonedx:
+            enabled: false
+            active: NEVER
+            distributions: false
+            files: false
+            pack:
+                enabled: false
+        syft:
+            enabled: false
+            active: NEVER
+            distributions: false
+            files: false
+            pack:
+                enabled: false
+    slsa:
+        enabled: false
+        active: NEVER
+        artifacts: true
+        files: true
+        deployables: true
+ 
+[INFO]  Project version set to 2.40
+[INFO]  Release is not snapshot
+[INFO]  Timestamp is 2023-12-12T11:15:31.088+13:00
+[INFO]  HEAD is at 92eedcf
+[INFO]  Platform is osx-x86_64
+[DEBUG] loading extension default-jreleaser-mustache:org.jreleaser.extensions.internal.mustache.DefaultMustacheExtension
+[DEBUG] adding org.jreleaser.extensions.internal.mustache.DefaultMustacheExtensionPoint from default-jreleaser-mustache extension
+[INFO]  dry-run set to false
+[INFO]  Generating changelog
+[DEBUG] resolving commits
+[DEBUG] looking for tag that matches 'tiles-maven-plugin-2.40'
+[DEBUG] looking for a tag before 'tiles-maven-plugin-2.40' that matches 'tiles-maven-plugin-.*'
+[DEBUG] found tag tiles-maven-plugin-2.39
+[DEBUG] sorting commits DESC
+[DEBUG] looking up user for Hervé Boutemy <hboutemy@apache.org>
+[DEBUG] looking up user for Mark Derricutt <mark@talios.com>
+[DEBUG] looking up user for Riesen, Stefan <stefan.riesen@glencore.com>
+[DEBUG] looking up user for dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+[INFO]  Storing changelog: out/jreleaser/release/CHANGELOG.md
+[DEBUG] ## Changelog
+
+## 🛠  Build
+- b570011 Drop jrelease:release from release (for now)
+
+## 📝 Documentation
+- 4f48a81 Updated README/CHANGELOG
+
+---
+- f3cf8b9 [maven-release-plugin] prepare release tiles-maven-plugin-2.40
+- 2860198 Added jrelease maven plugin
+- 7380278 Fixing an issue with distribution management repositories losing authentication settings.
+- 804efcf Fixing an issue with distribution management repositories losing authentication settings.
+- e5bedd5 Fixing an issue with distribution management repositories losing authentication settings.
+- 66f6450 Bump vite from 4.4.11 to 4.5.1 in /docs (#151), closes #151
+- 0c28d93 explicitely define m-jar-p version (#150), closes #150
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+- GitHub
+- Hervé Boutemy ([@hboutemy](https://github.com/hboutemy))
+- Mark Derricutt ([@talios](https://github.com/talios))
+- Riesen, Stefan
+- dependabot[bot] ([@dependabot[bot]](https://github.com/apps/dependabot))
+[INFO]  Calculating checksums for distributions and files
+[INFO]    [checksum] No files configured for checksum. Skipping
+[INFO]  Cataloging artifacts
+[INFO]    Cataloging is not enabled. Skipping
+[INFO]  Signing distributions and files
+[INFO]    [sign] Signing is not enabled. Skipping
+[INFO]  Deploying Maven artifacts
+[INFO]    [maven] Deploying is not enabled. Skipping
+[INFO]  Uploading distributions and files
+[INFO]    [upload] Uploading is not enabled. Skipping
+[INFO]  Releasing to https://github.com/repaint-io/maven-tiles@master
+[DEBUG] fetching all branches on repaint-io/maven-tiles
+[DEBUG] looking up release with tag tiles-maven-plugin-2.40 at repository repaint-io/maven-tiles
+[DEBUG] fetching release on repaint-io/maven-tiles with tag tiles-maven-plugin-2.40
+[DEBUG] release tiles-maven-plugin-2.40 does not exist
+[DEBUG] creating release tiles-maven-plugin-2.40
+[DEBUG] tagging local repository with tiles-maven-plugin-2.40
+[DEBUG] creating release on repaint-io/maven-tiles with tag tiles-maven-plugin-2.40
+[DEBUG] lookup open milestone 'tiles-maven-plugin-2.40' on repaint-io/maven-tiles
+[DEBUG] fetching all milestones on repaint-io/maven-tiles with status open
+[DEBUG] checking if release repaint-io/maven-tiles@tiles-maven-plugin-2.40 was left as draft
+[DEBUG] fetching release on repaint-io/maven-tiles with id 133486312
+[INFO]  Writing output properties to out/jreleaser/output.properties
+[INFO]  JReleaser succeeded after 4.832 s

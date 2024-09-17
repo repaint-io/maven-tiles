@@ -2,8 +2,16 @@
 .*
 **/.*
 
+# Ignore backups
+*.versionsBackup
+
 # Ignore target directory
 target
+out
+docs/node_modules
+
+.jj
+
 
 # Don't ignore git special files
 !.gitignore

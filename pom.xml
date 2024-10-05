@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -12,7 +12,11 @@
   See the License for the specific language governing permissions and
   limitations under the License. See accompanying LICENSE file.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.repaint.maven</groupId>
   <artifactId>tiles-maven-plugin</artifactId>
@@ -20,7 +24,8 @@
   <version>2.41-SNAPSHOT</version>
   <name>Tiles Maven Plugin</name>
 
-  <description>Provides composition support for Maven composition support for Maven</description>
+  <description
+    >Provides composition support for Maven composition support for Maven</description>
   <url>http://repaint.io</url>
 
   <licenses>
@@ -50,14 +55,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mavenVersion>3.9.9</mavenVersion>
-    <groovyVersion>4.0.22</groovyVersion>
+    <groovyVersion>4.0.27</groovyVersion>
     <repaint.release>dev</repaint.release>
-    <project.build.outputTimestamp>2023-12-11T22:10:54Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp
+        >2023-12-11T22:10:54Z</project.build.outputTimestamp>
   </properties>
 
   <scm>
     <connection>scm:git:git@github.com:repaint-io/maven-tiles</connection>
-    <developerConnection>scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
+    <developerConnection
+        >scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
     <url>https://github.com/repaint-io/maven-tiles</url>
     <tag>HEAD</tag>
   </scm>
@@ -101,13 +108,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.9</version>
+      <version>2.0.17</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.9</version>
+      <version>2.0.17</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -119,7 +126,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.11.0</version>
+      <version>3.15.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -130,7 +137,7 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-filtering</artifactId>
-      <version>3.3.1</version>
+      <version>3.4.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.maven</groupId>
@@ -194,7 +201,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.6.0</version>
+            <version>3.6.1</version>
             <configuration>
               <projectsDirectory>src/it</projectsDirectory>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
@@ -204,7 +211,8 @@
               </pomIncludes>
               <!-- <preBuildHookScript>setup</preBuildHookScript> -->
               <postBuildHookScript>verify</postBuildHookScript>
-              <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+              <localRepositoryPath
+                            >${project.build.directory}/local-repo</localRepositoryPath>
               <settingsFile>src/it/settings.xml</settingsFile>
               <debug>true</debug>
               <!--               <goals>
@@ -233,7 +241,7 @@
       <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
-        <version>1.9.0</version>
+        <version>1.18.0</version>
         <inherited>false</inherited>
         <configuration>
           <configFile>jreleaser.yml</configFile>
@@ -242,21 +250,21 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-plugin</artifactId>
-        <version>2.0.1</version>
+        <version>2.1.0</version>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <!-- Invocation is defined by the release plugin goal set hence no executions -->
         <configuration>
           <rules>
             <requireMavenVersion>
-              <version>[3.9.6,)</version>
+              <version>[3.9.9,)</version>
             </requireMavenVersion>
             <requireReleaseDeps>
-              <!--  Don't allow releases with snapshop deps or parents -->
+              <!--  Don't allow releases with snapshot deps or parents -->
               <message>No Snapshots Allowed!</message>
               <failWhenParentIsSnapshot>true</failWhenParentIsSnapshot>
               <searchTransitive>true</searchTransitive>
@@ -274,7 +282,7 @@
 
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.1</version>
         <configuration>
           <mavenExecutorId>forked-path</mavenExecutorId>
           <arguments>-Drepaint.release=release</arguments>
@@ -290,7 +298,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.13.0</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -314,7 +322,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.13.1</version>
         <configuration>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
@@ -339,7 +347,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.5.0</version>
       </plugin>
 
       <!-- not supporting mixed java/groovy compilation -->
@@ -362,13 +370,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.2</version>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>

@@ -22,3 +22,7 @@ docs/node_modules
 
 # and iDEA
 *.iml
+
+# Others
+out
+ 

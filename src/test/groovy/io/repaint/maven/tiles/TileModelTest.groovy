@@ -1,6 +1,6 @@
 package io.repaint.maven.tiles
 
-import io.repaint.maven.tiles.TileModel
+
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.DefaultArtifactHandler

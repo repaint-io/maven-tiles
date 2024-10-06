@@ -1,6 +1,5 @@
 package io.repaint.maven.tiles
 
-import io.repaint.maven.tiles.AttachTileMojo
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.project.MavenProject
 import org.apache.maven.project.MavenProjectHelper
@@ -40,15 +39,6 @@ class AttachTileMojoTest {
 					foundTile = tile
 				}
 		] as MavenProjectHelper
-
-		attach.logger = [
-				info: { String msg -> println msg },
-				error: { String msg, Throwable t = null ->
-					println msg
-					if (t) { t.printStackTrace() }
-				},
-				warn: { String msg -> println msg }
-		] as Logger
 
 		attach.execute()
 

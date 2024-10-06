@@ -18,11 +18,9 @@ package io.repaint.maven.tiles
 
 import org.apache.maven.MavenExecutionException
 import org.apache.maven.artifact.Artifact
-import org.apache.maven.artifact.repository.ArtifactRepository
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
 import org.apache.maven.artifact.repository.Authentication
 import org.apache.maven.artifact.repository.MavenArtifactRepository
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout2
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
 import org.apache.maven.artifact.resolver.ArtifactResolutionException
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest
@@ -58,9 +56,6 @@ import static groovy.test.GroovyAssert.shouldFail
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_ARTIFACT
 import static io.repaint.maven.tiles.Constants.TILEPLUGIN_GROUP
 import static io.repaint.maven.tiles.GavUtil.artifactName
-import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
-import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS
-import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY
 import static org.junit.Assert.assertEquals
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -212,8 +207,7 @@ public class TilesMavenLifecycleParticipantTest {
     <groupId>io.dinject</groupId>
     <artifactId>dinject-generator</artifactId>
     <version>${dinject-generator.version}</version>
-  </annotationProcessorPath>
-</annotationProcessorPaths>
+  </annotationProcessorPath></annotationProcessorPaths>
 '''.trim()
 
 		// assert the annotationProcessorPaths have been appended
@@ -356,17 +350,17 @@ public class TilesMavenLifecycleParticipantTest {
 		artifact.file = new File("src/test/resources/bad-smelly-tile.xml")
 		assert this.participant.loadModel(artifact)
 
-		shouldFail(MavenExecutionException) {
+		shouldFail(TileExecutionException) {
 			artifact.file = new File("src/test/resources/extended-syntax-tile1.xml")
 			this.participant.loadModel(artifact)
 		}
 
-		shouldFail(MavenExecutionException) {
+		shouldFail(TileExecutionException) {
 			artifact.file = new File("src/test/resources/invalid-tile.xml")
 			this.participant.loadModel(artifact)
 		}
 
-		shouldFail(MavenExecutionException) {
+		shouldFail(TileExecutionException) {
 			artifact.file = new File("src/test/resources/not-a-file-file.xml")
 			this.participant.loadModel(artifact)
 		}

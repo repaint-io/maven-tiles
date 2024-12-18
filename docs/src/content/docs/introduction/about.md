@@ -126,7 +126,7 @@ been a bad idea. Get rid of it as soon as possible.
 better idea here. Just don’t use this section anywhere other than your actual artifact or composite poms.
 
 Almost made a build smell:
-- pluginmanagement - plugin management is used in parents to define all of the necessary options for a plugin but
+- **pluginmanagement** - plugin management is used in parents to define all of the necessary options for a plugin but
 not have that plugin actually run during the release of the parent artifact, and also give the child the option of
 running it. The reason this is bad is that it is mostly not necessary. You should split your plugins up into tiles
 so that they be pulled into a build as a standalone set of functionality that will always run and be properly configured.

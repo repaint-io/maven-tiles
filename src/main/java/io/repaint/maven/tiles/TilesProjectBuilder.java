@@ -54,6 +54,12 @@ public class TilesProjectBuilder implements ProjectBuilder {
   }
 
   @Override
+  public ProjectBuildingResult build(org.apache.maven.api.services.ModelSource modelSource, ProjectBuildingRequest request)
+      throws ProjectBuildingException {
+    return injectTileDependencies(delegate.build(modelSource, request));
+  }
+
+  @Override
   public List<ProjectBuildingResult> build(List<File> pomFiles, boolean recursive, ProjectBuildingRequest request)
       throws ProjectBuildingException {
     return injectTileDependencies(delegate.build(pomFiles, recursive, request));

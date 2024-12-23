@@ -32,6 +32,17 @@ public class NotDefaultModelCache implements ModelCache {
     cache.put(session, new Key(groupId, artifactId, version, tag), data);
   }
 
+  @Override
+  public <T> T computeIfAbsent(String groupId, String artifactId, String version, String tag, Supplier<T> data) {
+    return (T) cache.computeIfAbsent(session, new Key(groupId, artifactId, version, tag), () -> data.get());
+  }
+
+  @Override
+  public <T> T computeIfAbsent(Source path, String tag, Supplier<T> data) {
+    //		return (T) cache.computeIfAbsent(session, new Key(groupId, artifactId, version, tag), () -> data.get());
+    return null;
+  }
+
   public static class Key {
     private final String groupId;
     private final String artifactId;

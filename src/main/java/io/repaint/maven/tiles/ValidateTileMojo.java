@@ -5,6 +5,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 
 /**
@@ -21,7 +22,7 @@ public class ValidateTileMojo extends AbstractTileMojo {
     } else {
       try {
         new TileValidator().loadModel(logger, getTile(), buildSmells);
-      } catch (MavenExecutionException | MavenFilteringException e) {
+      } catch (MavenExecutionException | MavenFilteringException | ProjectBuildingException e) {
         throw new MojoExecutionException(e);
       }
     }

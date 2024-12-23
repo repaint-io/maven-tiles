@@ -1,10 +1,12 @@
 package io.repaint.maven.tiles;
 
+import org.apache.maven.api.services.ProjectBuilder;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
@@ -16,6 +18,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public abstract class AbstractTileMojo extends AbstractMojo {
+  @Parameter(property = "projectBuilder", readonly = true, required = true)
+  protected ProjectBuilder projectBuilder;
+
   @Parameter(property = "project", readonly = true, required = true)
   protected MavenProject project;
 
@@ -45,7 +50,7 @@ public abstract class AbstractTileMojo extends AbstractMojo {
 
   protected Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected File getTile() throws MavenFilteringException {
+  protected File getTile() throws MavenFilteringException, ProjectBuildingException {
     return FilteringHelper.getTile(
         project, filtering, generatedSourcesDirectory, mavenSession, mavenFileFilter, mavenResourcesFiltering);
   }

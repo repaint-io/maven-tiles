@@ -20,51 +20,35 @@ package io.repaint.maven.tiles;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.MavenArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.internal.impl.resolver.type.DefaultType;
 import org.apache.maven.model.*;
-import org.apache.maven.model.building.DefaultModelBuilder;
-import org.apache.maven.model.building.DefaultModelBuildingRequest;
-import org.apache.maven.model.building.FileModelSource;
-import org.apache.maven.model.building.ModelBuilder;
-import org.apache.maven.model.building.ModelBuildingException;
-import org.apache.maven.model.building.ModelBuildingListener;
-import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.ModelBuildingResult;
-import org.apache.maven.model.building.ModelProcessor;
-import org.apache.maven.model.building.ModelSource2;
+import org.apache.maven.model.building.*;
 import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.model.resolution.UnresolvableModelException;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
-import org.apache.maven.project.DefaultModelBuildingListener;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingHelper;
 import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.RepositorySystemSession.CloseableSession;
+import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.impl.VersionRangeResolver;
-import org.eclipse.aether.resolution.VersionRangeRequest;
-import org.eclipse.aether.resolution.VersionRangeResolutionException;
-import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,11 +60,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -99,6 +81,8 @@ import static io.repaint.maven.tiles.GavUtil.modelGav;
 import static io.repaint.maven.tiles.GavUtil.modelRealGa;
 import static io.repaint.maven.tiles.GavUtil.parentGav;
 
+import static org.apache.maven.api.Language.NONE;
+import static org.apache.maven.api.PathType.UNRESOLVED;
 import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN;
 import static org.apache.maven.artifact.repository.ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS;
 
@@ -121,8 +105,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
   Logger logger = LoggerFactory.getLogger(getClass());
 
-  @Inject
-  ResolutionErrorHandler resolutionErrorHandler;
+  //	@Inject
+  //	ResolutionErrorHandler resolutionErrorHandler;
 
   @Inject
   ProjectBuilder projectBuilder;
@@ -137,7 +121,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
   ProjectBuildingHelper projectBuildingHelper;
 
   @Inject
-  MavenArtifactRepository repositoryFactory;
+  RepositorySystemSession repositorySystemSession;
 
   @Inject
   RepositorySystem repository;
@@ -180,23 +164,16 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
    * This specifically goes and asks the repository for the "tile" attachment for this pom, not the
    * pom itself (because we don't care about that).
    */
-  protected static Artifact getArtifactFromCoordinates(
-      String groupId, String artifactId, String type, String classifier, String version) {
-    return new DefaultArtifact(
-        groupId,
-        artifactId,
-        VersionRange.createFromVersion(version),
-        "compile",
-        type,
-        classifier,
-        new DefaultArtifactHandler(type));
+  protected static Artifact getArtifactFromCoordinates(String groupId, String artifactId, String classifier, String version) {
+    //		return new org.apache.maven.artifact.DefaultArtifact(groupId, artifactId, version, "compile", "xml", classifier, null);
+    return new org.eclipse.aether.artifact.DefaultArtifact(groupId, artifactId, classifier, "xml", version);
   }
 
   /**
    * Return the given Artifact's .pom artifact
    */
-  protected static Artifact getPomArtifactForArtifact(Artifact artifact) {
-    return getArtifactFromCoordinates(artifact.getGroupId(), artifact.getArtifactId(), "pom", "", artifact.getVersion());
+  protected Artifact getPomArtifactForArtifact(Artifact artifact) {
+    return getArtifactFromCoordinates(artifact.getGroupId(), artifact.getArtifactId(), "pom", artifact.getVersion());
   }
 
   protected Artifact resolveTile(MavenSession mavenSession, MavenProject project, Artifact tileArtifact)
@@ -209,46 +186,59 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
           if (currentProject.getGroupId().equals(tileArtifact.getGroupId()) &&
               currentProject.getArtifactId().equals(tileArtifact.getArtifactId()) &&
               currentProject.getVersion().equals(tileArtifact.getVersion())) {
-            tileArtifact.setFile(FilteringHelper.getTile(currentProject, mavenSession, mavenFileFilter, mavenResourcesFiltering));
-            return tileArtifact;
+            //						tileArtifact.setPath(FilteringHelper.getTile(currentProject, mavenSession, mavenFileFilter, mavenResourcesFiltering).toPath());
+
+            return new org.eclipse.aether.artifact.DefaultArtifact(
+                tileArtifact.getGroupId(),
+                tileArtifact.getArtifactId(),
+                tileArtifact.getClassifier(),
+                "xml",
+                tileArtifact.getVersion(),
+                null);
+            //						return new DefaultArtifact(tileArtifact.getGroupId(), tileArtifact.getArtifactId(), tileArtifact.getVersion(), "compile", "xml", tileArtifact.getClassifier(), null);
+
+            //						return tileArtifact;
           }
         }
       }
     }
 
+    //		try (CloseableSession session = repository.createSessionBuilder().build()) {
+    resolveVersionRange(project, tileArtifact);
+
+    //			LocalRepository localRepository = session.getLocalRepository();
+
+    // Resolve the .xml file for the tile
+    //			repository.resolveArtifact()
+    ArtifactRequest tileReq = new ArtifactRequest().setArtifact(tileArtifact);
+
+    //			ArtifactRequest req = new ArtifactRequest()
+    //					.setArtifact(tileArtifact)
+    //					.setRepositories(remoteRepositories);
+
     try {
-      resolveVersionRange(project, tileArtifact);
-      List<ArtifactRepository> remoteRepositories = project == null ? null : project.getRemoteArtifactRepositories();
-      ArtifactRepository localRepository = mavenSession == null ? null : mavenSession.getLocalRepository();
-
-      // Resolve the .xml file for the tile
-      ArtifactResolutionRequest tileReq = new ArtifactResolutionRequest()
-                                              .setArtifact(tileArtifact)
-                                              .setRemoteRepositories(remoteRepositories)
-                                              .setLocalRepository(localRepository);
-
-      ArtifactResolutionResult tilesResult = repository.resolve(tileReq);
-      resolutionErrorHandler.throwErrors(tileReq, tilesResult);
+      ArtifactResult tilesResult = repository.resolveArtifact(repositorySystemSession, tileReq);
+      //			resolutionErrorHandler.throwErrors(tileReq, tilesResult);
 
       // Resolve the .pom file for the tile
       Artifact pomArtifact = getPomArtifactForArtifact(tileArtifact);
-      ArtifactResolutionRequest pomReq = new ArtifactResolutionRequest()
-                                             .setArtifact(pomArtifact)
-                                             .setRemoteRepositories(remoteRepositories)
-                                             .setLocalRepository(localRepository);
+      //			ArtifactRequest pomReq = new ArtifactRequest()
+      //					.setArtifact(pomArtifact)
+      //					.setRemoteRepositories(remoteRepositories)
+      //					.setLocalRepository(localRepository);
 
-      ArtifactResolutionResult pomResult = repository.resolve(pomReq);
-      resolutionErrorHandler.throwErrors(pomReq, pomResult);
+      //			ArtifactResult pomResult = repository.resolveArtifact(repositorySystemSession, pomReq);
+      //			resolutionErrorHandler.throwErrors(pomReq, pomResult);
 
       // When resolving from workspace (e.g. m2e, intellij) we might receive the path to pom.xml instead of the attached tile
-      if (tileArtifact.getFile() != null && tileArtifact.getFile().getName() == "pom.xml") {
+      if (tileArtifact.getFile() != null && tileArtifact.getFile().getName().equals("pom.xml")) {
         File tileFile = new File(tileArtifact.getFile().getParent(), TILE_POM);
         if (!tileFile.exists()) {
           throw new MavenExecutionException("Tile ${artifactGav(tileArtifact)} cannot be resolved.", tileFile);
         }
 
         ProjectBuildingRequest pbr = mavenSession.getRequest().getProjectBuildingRequest();
-        MavenProject tileProject = projectBuilder.build(pomResult.getOriginatingArtifact(), pbr).getProject();
+        MavenProject tileProject = projectBuilder.build(tileArtifact.getFile(), pbr).getProject();
         tileArtifact.setFile(FilteringHelper.getTile(tileProject, mavenSession, mavenFileFilter, mavenResourcesFiltering));
       }
 
@@ -259,7 +249,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
         }
       }
 
-    } catch (ProjectBuildingException | ArtifactResolutionException e) {
+    } catch (ProjectBuildingException | org.eclipse.aether.resolution.ArtifactResolutionException e) {
       throw new MavenExecutionException(e.getMessage(), e);
     }
 
@@ -269,29 +259,19 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
   protected static Artifact turnPropertyIntoUnprocessedTile(String artifactGav, File pomFile) throws MavenExecutionException {
     String[] gav = artifactGav.split(":");
 
-    if (gav.length != 3 && gav.length != 5) {
-      throw new MavenExecutionException(
-          "${artifactGav} does not have the form group:artifact:version-range or group:artifact:extension:classifier:version-range",
-          pomFile);
+    if (gav.length != 3) {
+      throw new MavenExecutionException("${artifactGav} does not have the form group:artifact:version-range", pomFile);
     }
 
     String groupId = gav[0];
     String artifactId = gav[1];
-    String version;
-    String type = "xml";
+    String version = gav[2];
     String classifier = "";
-    if (gav.length == 3) {
-      version = gav[2];
-    } else {
-      type = gav[2];
-      classifier = gav[3];
-      version = gav[4];
-    }
 
-    return getArtifactFromCoordinates(groupId, artifactId, type, classifier, version);
+    return getArtifactFromCoordinates(groupId, artifactId, classifier, version);
   }
 
-  protected TileModel loadModel(Artifact artifact) throws MavenExecutionException {
+  protected TileModel loadModel(Artifact artifact) {
     try {
       TileModel modelLoader = new TileModel(artifact.getFile(), artifact);
 
@@ -370,46 +350,41 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
   void discoverAndSetDistributionManagementArtifactoryRepositoriesIfTheyExist(MavenProject project) {
     DistributionManagement distributionManagement = project.getModel().getDistributionManagement();
 
-    if (distributionManagement != null) {
-      if (distributionManagement.getRepository() != null) {
-        ArtifactRepository candidate = project.getRemoteArtifactRepositories()
-                                           .stream()
-                                           .filter(it -> it.getId().equals(distributionManagement.getRepository().getId()))
-                                           .findFirst()
-                                           .orElse(null);
-
-        if (candidate != null && candidate instanceof MavenArtifactRepository) {
-          project.setReleaseArtifactRepository(candidate);
-        } else {
-          ArtifactRepository repo = repository.createArtifactRepository(
-              distributionManagement.getRepository().getId(),
-              getReleaseDistributionManagementRepositoryUrl(project),
-              new DefaultRepositoryLayout(),
-              getArtifactRepositoryPolicy(distributionManagement.getRepository().getSnapshots()),
-              getArtifactRepositoryPolicy(distributionManagement.getRepository().getReleases()));
-          project.setReleaseArtifactRepository(repo);
-        }
-      }
-
-      if (distributionManagement.getSnapshotRepository() != null) {
-        ArtifactRepository candidate = project.getRemoteArtifactRepositories()
-                                           .stream()
-                                           .filter(it -> it.getId() == distributionManagement.getSnapshotRepository().getId())
-                                           .findFirst()
-                                           .orElse(null);
-        if (candidate != null && candidate instanceof MavenArtifactRepository) {
-          project.setSnapshotArtifactRepository(candidate);
-        } else {
-          ArtifactRepository repo = repository.createArtifactRepository(
-              distributionManagement.getSnapshotRepository().getId(),
-              getSnapshotDistributionManagementRepositoryUrl(project),
-              new DefaultRepositoryLayout(),
-              getArtifactRepositoryPolicy(distributionManagement.getSnapshotRepository().getSnapshots()),
-              getArtifactRepositoryPolicy(distributionManagement.getSnapshotRepository().getReleases()));
-          project.setSnapshotArtifactRepository(repo);
-        }
-      }
-    }
+    //		if (distributionManagement != null) {
+    //			if (distributionManagement.getRepository() != null ) {
+    //				ArtifactRepository candidate = project.getRemoteArtifactRepositories().stream()
+    //						.filter(it -> it.getId().equals(distributionManagement.getRepository().getId()))
+    //						.findFirst()
+    //						.orElse(null);
+    //
+    //				if(candidate instanceof MavenArtifactRepository) {
+    //					project.setReleaseArtifactRepository(candidate);
+    //				} else {
+    //					ArtifactRepository repo = repository.createArtifactRepository(
+    //							distributionManagement.getRepository().getId(),
+    //							getReleaseDistributionManagementRepositoryUrl(project),
+    //							new DefaultRepositoryLayout(),
+    //							getArtifactRepositoryPolicy(distributionManagement.getRepository().getSnapshots()),
+    //							getArtifactRepositoryPolicy(distributionManagement.getRepository().getReleases()));
+    //					project.setReleaseArtifactRepository(repo);
+    //				}
+    //			}
+    //
+    //			if (distributionManagement.getSnapshotRepository() != null) {
+    //				ArtifactRepository candidate = project.getRemoteArtifactRepositories().stream().filter(it -> it.getId() == distributionManagement.getSnapshotRepository().getId()).findFirst().orElse(null);
+    //				if( candidate != null && candidate instanceof MavenArtifactRepository) {
+    //					project.setSnapshotArtifactRepository(candidate);
+    //				} else {
+    //					ArtifactRepository repo = repository.createArtifactRepository(
+    //							distributionManagement.getSnapshotRepository().getId(),
+    //							getSnapshotDistributionManagementRepositoryUrl(project),
+    //							new DefaultRepositoryLayout(),
+    //							getArtifactRepositoryPolicy(distributionManagement.getSnapshotRepository().getSnapshots()),
+    //							getArtifactRepositoryPolicy(distributionManagement.getSnapshotRepository().getReleases()));
+    //					project.setSnapshotArtifactRepository(repo);
+    //				}
+    //			}
+    //		}
   }
 
   /**
@@ -487,16 +462,12 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
       throws MavenExecutionException, ModelBuildingException, FileNotFoundException {
     List<TileModel> tiles = processedTiles.values().stream().map(a -> a.tileModel).collect(toList());
 
-    if (tiles == null) {
-      return;
-    }
-
     if (mavenSession.getRequest() == null) {
       return;
     }
 
-    ModelBuildingListener modelBuildingListener =
-        new DefaultModelBuildingListener(project, projectBuildingHelper, mavenSession.getRequest().getProjectBuildingRequest());
+    //		ModelBuildingListener modelBuildingListener = new DefaultModelBuildingListener(project,
+    //			projectBuildingHelper, mavenSession.getRequest().getProjectBuildingRequest());
 
     // new org.apache.maven.project.PublicDefaultModelBuildingListener( project,
     //projectBuildingHelper, mavenSession.request.projectBuildingRequest )
@@ -514,7 +485,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
         mavenSession.getRequest().getProjectBuildingRequest().getProfiles()); // TODO should this just be request.getProfiles?
     request.setActiveProfileIds(mavenSession.getRequest().getProjectBuildingRequest().getActiveProfileIds());
     request.setInactiveProfileIds(mavenSession.getRequest().getProjectBuildingRequest().getInactiveProfileIds());
-    request.setModelBuildingListener(modelBuildingListener);
+    //		request.setModelBuildingListener(modelBuildingListener);
     request.setLocationTracking(true);
     request.setTwoPhaseBuilding(true);
     request.setProcessPlugins(true);
@@ -522,12 +493,29 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
     final boolean[] tilesInjected = {false};
     ModelProcessor delegateModelProcessor = new ModelProcessor() {
       @Override
+      public Path locateExistingPom(Path project) {
+        return modelProcessor.locateExistingPom(project);
+      }
+
+      @Override
+      @Deprecated
       public File locatePom(File projectDirectory) {
         return modelProcessor.locatePom(projectDirectory);
       }
 
       @Override
+      public Path locatePom(Path projectDirectory) {
+        return modelProcessor.locatePom(projectDirectory);
+      }
+
+      @Override
+      @Deprecated
       public Model read(File input, Map<String, ?> options) throws IOException {
+        return modelProcessor.read(input, options);
+      }
+
+      @Override
+      public Model read(Path input, Map<String, ?> options) throws IOException {
         return modelProcessor.read(input, options);
       }
 
@@ -574,8 +562,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
             TileModel oneOfUs = tiles.stream()
                                     .filter(tm -> {
                                       Model tileModel = tm.getModel();
-                                      return finalModel.getArtifactId() == tileModel.getArtifactId() &&
-                                          getRealGroupId(finalModel) == getRealGroupId(tileModel) &&
+                                      return Objects.equals(finalModel.getArtifactId(), tileModel.getArtifactId()) &&
+                                          Objects.equals(getRealGroupId(finalModel), getRealGroupId(tileModel)) &&
                                           getRealVersion(finalModel).equals(getRealVersion(tileModel));
                                     })
                                     .findFirst()
@@ -595,7 +583,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
         // when actually loading that parent.
         if (parseBoolean(applyBeforeParent) && !tilesInjected[0] && model.getParent() != null) {
           // remove the parent from the cache which causes it to be reloaded through our ModelProcessor
-          request.getModelCache().put(
+          request.getModelCache().computeIfAbsent(
               model.getParent().getGroupId(), model.getParent().getArtifactId(), model.getParent().getVersion(), "raw", null);
         }
 
@@ -664,29 +652,21 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
     return new ModelResolver() {
       @Override
       public ModelSource2 resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
-        Artifact artifact = new DefaultArtifact(
-            groupId,
-            artifactId,
-            VersionRange.createFromVersion(version),
-            "compile",
-            "pom",
-            null,
-            new DefaultArtifactHandler("pom"));
+        DefaultType type = new DefaultType("tile", NONE, "xml", "pom", false, UNRESOLVED);
+
+        Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(groupId, artifactId, "pom", "xml", version, type);
 
         resolveVersionRange(project, artifact);
 
-        List<ArtifactRepository> remoteRepositories = project == null ? null : project.getRemoteArtifactRepositories();
-        ArtifactRepository localRepository = mavenSession.getLocalRepository();
+        List<RemoteRepository> remoteRepositories = project == null ? null : project.getRemoteProjectRepositories();
 
-        ArtifactResolutionRequest req = new ArtifactResolutionRequest()
-                                            .setArtifact(artifact)
-                                            .setRemoteRepositories(remoteRepositories)
-                                            .setLocalRepository(localRepository);
-
-        repository.resolve(req);
+        ArtifactRequest req = new ArtifactRequest().setArtifact(artifact).setRepositories(remoteRepositories);
 
         try {
+          repository.resolveArtifact(repositorySystemSession, req);
           return createModelSource(artifact.getFile());
+        } catch (ArtifactResolutionException e) {
+          throw new RuntimeException(e);
         } catch (FileNotFoundException e) {
           throw new UncheckedIOException(e);
         }
@@ -731,7 +711,13 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
     org.apache.maven.model.building.@Jailbreak ModelData modelData = new org.apache.maven.model.building.@Jailbreak ModelData(
         new FileModelSource(pomFile), model, model.getGroupId(), model.getArtifactId(), model.getVersion());
 
-    request.getModelCache().put(model.getGroupId(), model.getArtifactId(), evaluateString(model.getVersion()), "raw", modelData);
+    //		request.getModelCache().computeIfAbsent(model.getGroupId(), model.getArtifactId(), evaluateString(model.getVersion()),
+    //			"raw", new Supplier<org.apache.maven.model.building. @Jailbreak ModelData>() {
+    //                    @Override
+    //                    public org.apache.maven.model.building. @Jailbreak ModelData get() {
+    //                        return modelData;
+    //                    }
+    //                });
   }
 
   /**
@@ -756,11 +742,11 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
     if (tiles != null && !tiles.isEmpty()) {
       // evaluate the model version to deal with CI friendly build versions
       logger.info(
-          "--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for " +
-          "${evaluateString(modelRealGa(pomModel))}...");
+          "--- tiles-maven-plugin: Injecting ${tiles.size()} tiles as intermediary parent artifacts for "
+          + "${evaluateString(modelRealGa(pomModel))}...");
       logger.info(
-          "Mixed '${evaluateString(modelGav(pomModel))}' with tile '${evaluateString(modelGav(tiles.get(0).getModel()))}' as its " +
-          "new parent.");
+          "Mixed '${evaluateString(modelGav(pomModel))}' with tile '${evaluateString(modelGav(tiles.get(0).getModel()))}' as its "
+          + "new parent.");
 
       // if there is a parent make sure the inherited groupId / version is correct
       if (pomModel.getGroupId() == null) {
@@ -786,8 +772,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
       if (pomModel != lastPom[0]) {
         putModelInCache(lastPom[0], request, lastPomFile[0]);
         logger.info(
-            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with tile '${evaluateString(parentGav(modelParent))}' as its new " +
-            "parent.");
+            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with tile '${evaluateString(parentGav(modelParent))}' as its new "
+            + "parent.");
       }
 
       lastPom[0] = model;
@@ -799,12 +785,12 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
     if (originalParent != null) {
       if (originalParent.getRelativePath() != null && !originalParent.getRelativePath().isEmpty()) {
         logger.info(
-            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with original parent '${parentGav(originalParent)}' via " +
-            "${originalParent.getRelativePath()} as its new top level parent.");
+            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with original parent '${parentGav(originalParent)}' via "
+            + "${originalParent.getRelativePath()} as its new top level parent.");
       } else {
         logger.info(
-            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with original parent '${parentGav(originalParent)}' as its new top " +
-            "level parent.");
+            "Mixed '${evaluateString(modelGav(lastPom[0]))}' with original parent '${parentGav(originalParent)}' as its new top "
+            + "level parent.");
       }
       logger.info("");
     }
@@ -873,14 +859,13 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
   protected void loadAllDiscoveredTiles(MavenSession mavenSession, MavenProject project)
       throws MavenExecutionException, MavenFilteringException {
     List<TileModel> mergeSourceTiles = new ArrayList<>();
-    Map<String, Artifact> rootTiles = new HashMap<>();
-    rootTiles.putAll(unprocessedTiles);
+    Map<String, Artifact> rootTiles = new HashMap<>(unprocessedTiles);
     unprocessedTiles.clear();
 
     for (String rootTile : rootTiles.keySet()) {
       unprocessedTiles.put(rootTile, rootTiles.get(rootTile));
 
-      while (unprocessedTiles.size() > 0) {
+      while (!unprocessedTiles.isEmpty()) {
         String unresolvedTile = unprocessedTiles.keySet().iterator().next();
 
         Artifact resolvedTile = resolveTile(mavenSession, project, unprocessedTiles.remove(unresolvedTile));
@@ -951,8 +936,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
                   (Throwable) null);
             } else {
               throw new TileExecutionException(
-                  "Error with tile ${fragmentId} - Missing target tile required with plugin:${eid}. Please check the " +
-                  "documentation for this tile.",
+                  "Error with tile ${fragmentId} - Missing target tile required with plugin:${eid}. Please check the "
+                      + "documentation for this tile.",
                   (Throwable) null);
             }
           }
@@ -1020,11 +1005,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
       List<Plugin> plugins = model.getBuild().getPlugins();
       Xpp3Dom configuration = plugins.stream()
                                   .filter(TilesMavenLifecycleParticipant::idTilesPlugin)
-                                  .flatMap(plugin -> {
-                                    // TODO Use Stream.ofNullable if we limit JDK >9
-                                    Xpp3Dom config = (Xpp3Dom) plugin.getConfiguration();
-                                    return config == null ? Stream.empty() : Stream.of(config);
-                                  })
+                                  .flatMap(plugin -> Stream.ofNullable((Xpp3Dom) plugin.getConfiguration()))
                                   .findFirst()
                                   .orElse(null);
 
@@ -1102,8 +1083,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
   void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
     List<ArtifactRepository> repositories = project == null ? null : project.getRemoteArtifactRepositories();
-    VersionRangeRequest versionRangeRequest =
-        new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact), RepositoryUtils.toRepos(repositories), null);
+    VersionRangeRequest versionRangeRequest = new VersionRangeRequest(tileArtifact, RepositoryUtils.toRepos(repositories), null);
 
     VersionRangeResult versionRangeResult = null;
     try {

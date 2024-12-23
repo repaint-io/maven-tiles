@@ -7,6 +7,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,8 +20,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  *
- * @author: Richard Vowles - https://plus.google.com/+RichardVowles
- * @author: Mark Derricutt - https://plus.google.com/+MarkDerricutt
+ * @author Richard Vowles
+ * @author Mark Derricutt
  */
 public class TileValidator {
   public static final String SMELL_DEPENDENCYMANAGEMENT = "dependencymanagement";

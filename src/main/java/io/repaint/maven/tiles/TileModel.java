@@ -1,12 +1,12 @@
 package io.repaint.maven.tiles;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.artifact.Artifact;
 
 import java.io.File;
 import java.io.IOException;

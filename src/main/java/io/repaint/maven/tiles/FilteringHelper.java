@@ -1,9 +1,11 @@
 package io.repaint.maven.tiles;
 
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Resource;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.*;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFileFilterRequest;
 import org.apache.maven.shared.filtering.MavenFilteringException;
@@ -11,6 +13,8 @@ import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 
@@ -24,7 +28,7 @@ public class FilteringHelper {
       MavenProject project,
       MavenSession mavenSession,
       MavenFileFilter mavenFileFilter,
-      MavenResourcesFiltering mavenResourcesFiltering) throws MavenFilteringException {
+      MavenResourcesFiltering mavenResourcesFiltering) throws MavenFilteringException, ProjectBuildingException {
     // determine whether filtering is enabled
     Plugin configuration =
         project.getBuild()
@@ -53,7 +57,7 @@ public class FilteringHelper {
       File generatedSourcesDirectory,
       MavenSession mavenSession,
       MavenFileFilter mavenFileFilter,
-      MavenResourcesFiltering mavenResourcesFiltering) throws MavenFilteringException {
+      MavenResourcesFiltering mavenResourcesFiltering) throws MavenFilteringException, ProjectBuildingException {
     File baseTile = new File(project.getBasedir(), TILE_POM);
     if (filtering) {
       File processedTileDirectory = new File(generatedSourcesDirectory, "tiles");
@@ -61,25 +65,29 @@ public class FilteringHelper {
       File processedTile = new File(processedTileDirectory, TILE_POM);
 
       Resource tileResource = new Resource();
-      tileResource.setDirectory(project.getBasedir().getAbsolutePath());
+      tileResource.setDirectory(project.getBasedir().toString());
       tileResource.getIncludes().add(TILE_POM);
       tileResource.setFiltering(true);
 
-      MavenFileFilterRequest req =
-          new MavenFileFilterRequest(baseTile, processedTile, true, project, null, true, "UTF-8", mavenSession, new Properties());
-      req.setDelimiters(new LinkedHashSet<>(java.util.Arrays.asList("@")));
+      //            MavenFileFilterRequest req = new MavenFileFilterRequest(baseTile.toPath(),
+      //                    processedTile.toPath(),
+      //                    true,
+      //                    project,
+      //                    Collections.emptyList(),
+      //                    true,
+      //                    "UTF-8",
+      //                    mavenSession,
+      //                    new Properties());
+      //            req.setDelimiters(new LinkedHashSet<>(java.util.Arrays.asList("@")));
+      //
+      //            MavenResourcesExecution execution = new MavenResourcesExecution(
+      //                    java.util.Collections.singletonList(tileResource), processedTileDirectory, "UTF-8",
+      //                    mavenFileFilter.getDefaultFilterWrappers(req),
+      //                    project.getBasedir(), mavenResourcesFiltering.getDefaultNonFilteredFileExtensions());
+      //
+      //            mavenResourcesFiltering.filterResources(execution);
 
-      MavenResourcesExecution execution = new MavenResourcesExecution(
-          java.util.Collections.singletonList(tileResource),
-          processedTileDirectory,
-          "UTF-8",
-          mavenFileFilter.getDefaultFilterWrappers(req),
-          project.getBasedir(),
-          mavenResourcesFiltering.getDefaultNonFilteredFileExtensions());
-
-      mavenResourcesFiltering.filterResources(execution);
-
-      return new File(processedTileDirectory, TILE_POM);
+          return new File(processedTileDirectory, TILE_POM);
     } else {
       return baseTile;
     }

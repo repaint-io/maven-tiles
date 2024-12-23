@@ -8,6 +8,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class AttachTileMojo extends AbstractTileMojo {
       } else {
         throw new MojoFailureException("Unable to validate tile ${tile.getPath()}!");
       }
-    } catch (MavenExecutionException | MavenFilteringException e) {
+    } catch (MavenExecutionException | MavenFilteringException | ProjectBuildingException e) {
       throw new MojoFailureException(e);
     }
   }

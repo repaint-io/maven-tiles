@@ -1,20 +1,24 @@
 package io.repaint.maven.tiles;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
+import org.eclipse.aether.artifact.Artifact;
 
 public class GavUtil {
   public static String artifactName(Artifact artifact) {
     return String.format("%s:%s", artifact.getGroupId(), artifact.getArtifactId());
   }
 
+  public static String artifactName(org.apache.maven.artifact.Artifact artifact) {
+    return String.format("%s:%s", artifact.getGroupId(), artifact.getArtifactId());
+  }
+
   public static String artifactGav(Artifact artifact) {
-    return String.format(
-        "%s:%s:%s",
-        artifact.getGroupId(),
-        artifact.getArtifactId(),
-        artifact.getVersionRange() != null ? artifact.getVersionRange() : artifact.getVersion());
+    return String.format("%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+  }
+
+  public static String artifactGav(org.apache.maven.artifact.Artifact artifact) {
+    return String.format("%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
   }
 
   public static String modelGav(Model model) {

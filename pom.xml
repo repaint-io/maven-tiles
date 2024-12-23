@@ -49,7 +49,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mavenVersion>3.9.9</mavenVersion>
+    <mavenVersion>4.0.0-rc-2</mavenVersion>
     <groovyVersion>4.0.23</groovyVersion>
     <repaint.release>dev</repaint.release>
     <project.build.outputTimestamp>2023-12-11T22:10:54Z</project.build.outputTimestamp>
@@ -106,13 +106,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.36</version>
+      <version>2.1.0-alpha1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.36</version>
+      <version>2.1.0-alpha1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.12.0</version>
+      <version>4.0.0-beta-1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -135,7 +135,7 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-filtering</artifactId>
-      <version>3.3.2</version>
+      <version>4.0.0-beta-1</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.maven</groupId>
@@ -302,7 +302,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <release>8</release>
+          <release>17</release>
           <compilerArgs>
             <arg>-Xplugin:Manifold</arg>
 <!--            <arg>&#45;&#45;enable-preview</arg>-->
@@ -312,12 +312,12 @@
             <path>
               <groupId>systems.manifold</groupId>
               <artifactId>manifold-ext</artifactId>
-              <version>2024.1.37</version>
+              <version>2024.1.44</version>
             </path>
             <path>
               <groupId>systems.manifold</groupId>
               <artifactId>manifold-strings</artifactId>
-              <version>2024.1.37</version>
+              <version>2024.1.44</version>
             </path>
           </annotationProcessorPaths>
         </configuration>

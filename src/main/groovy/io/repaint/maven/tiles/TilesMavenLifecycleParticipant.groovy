@@ -227,7 +227,13 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 				}
 
 				ProjectBuildingRequest pbr = mavenSession.request.projectBuildingRequest
-				MavenProject tileProject = projectBuilder.build(pomResult.originatingArtifact, pbr).getProject()
+				MavenProject tileProject
+				if (isReactorModelComplete(mavenSession) || pomResult.originatingArtifact != null) {
+					tileProject = projectBuilder.build(pomResult.originatingArtifact, pbr).getProject()
+				} else {
+					// Fallback in case reactor model is not complete, like for IDE sync
+					tileProject = projectBuilder.build(pomArtifact.file, pbr).getProject()
+				}
 				tileArtifact.file = FilteringHelper.getTile(tileProject, mavenSession, mavenFileFilter, mavenResourcesFiltering)
 			}
 
@@ -1010,6 +1016,17 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		if (versionRangeResult?.versions) {
 			tileArtifact.version = versionRangeResult.highestVersion
 		}
+	}
+
+	/**
+	 * Checks if the reactor model has been built fully. The strongest indicator is the existence of
+	 * the project dependency graph in the Maven session.
+	 * <p>
+	 * If the reactor model is not fully built, it probably means the session was not created by Maven
+	 * and merging tiles might also fail.
+	 */
+	static boolean isReactorModelComplete(MavenSession session) {
+		return session?.projectDependencyGraph
 	}
 
 }

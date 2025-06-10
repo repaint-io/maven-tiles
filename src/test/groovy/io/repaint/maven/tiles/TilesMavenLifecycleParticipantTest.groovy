@@ -218,7 +218,7 @@ public class TilesMavenLifecycleParticipantTest {
 
 		// assert the annotationProcessorPaths have been appended
 		Xpp3Dom paths = ((Xpp3Dom)pluginExecution.configuration).getChild('annotationProcessorPaths')
-		assertEquals(paths.toString().trim(), expectedAnnotationProcessorPaths)
+		assertEquals(paths.toString().trim().replace(System.lineSeparator(), '\n'), expectedAnnotationProcessorPaths)
 	}
 
 	def addUnprocessedTile(String testResourceName, String tileName) {

@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-== 2.40
+ == 2.41
+
+ - Updated groovy to 4.0.27 to support building under Java 24
+ - Updated slf4j to 2.0.17
+ - Updated plugin versions
+ - Added fallback handling for an incomplete reactor model during IDE sync (Marc Rozanc <marc@rozanc.fr>)
+ 
+ == 2.40
 
 - Fixed issue with distribution management repositories losing authentication settings (Riesen, Stefan <stefan.riesen@glencore.com>)
 - Explicitely define m-jar-p version (Hervé Boutemy <hboutemy@apache.org>)

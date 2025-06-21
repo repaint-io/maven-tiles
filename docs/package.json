@@ -1,4 +1,4 @@
- {
+{
   "name": "maven-tiles",
   "type": "module",
   "version": "0.0.1",
@@ -10,8 +10,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.11.1",
-    "astro": "^4.16.18",
+    "@astrojs/starlight": "^0.34.4",
+    "astro": "^5.10.0",
     "sharp": "^0.32.6"
   },
   "pnpm": {

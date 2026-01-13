@@ -17,7 +17,7 @@
   <groupId>io.repaint.maven</groupId>
   <artifactId>tiles-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>2.43</version>
+  <version>2.44-SNAPSHOT</version>
   <name>Tiles Maven Plugin</name>
 
   <description>Provides composition support for Maven composition support for Maven</description>
@@ -52,14 +52,14 @@
     <mavenVersion>3.9.12</mavenVersion>
     <groovyVersion>4.0.29</groovyVersion>
     <repaint.release>dev</repaint.release>
-    <project.build.outputTimestamp>2026-01-13T04:18:49Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-01-13T04:18:54Z</project.build.outputTimestamp>
   </properties>
 
   <scm>
     <connection>scm:git:git@github.com:repaint-io/maven-tiles</connection>
     <developerConnection>scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
     <url>https://github.com/repaint-io/maven-tiles</url>
-    <tag>tiles-maven-plugin-2.43</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>

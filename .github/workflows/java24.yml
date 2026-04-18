@@ -17,9 +17,9 @@ jobs:
         with:
           java-version: 24
           distribution: "temurin"
-      - name: Switch To Maven 3.9.10
+      - name: Switch To Maven 3.9.15
         run: |
-          echo "distributionUrl=https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.zip" > .mvn/wrapper/maven-wrapper.properties
+          echo "distributionUrl=https://dlcdn.apache.org/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperVersion=3.3.2" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its

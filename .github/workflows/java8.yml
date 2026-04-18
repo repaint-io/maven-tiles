@@ -1,4 +1,4 @@
-name: Integration Tests on Java 8 and Maven 3.9.10
+name: Integration Tests on Java 8 and Maven 3.9.15
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           java-version: 8
       - name: Switch To Maven 3
         run: |
-          echo "distributionUrl=https://archive.apache.org/dist/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.zip" > .mvn/wrapper/maven-wrapper.properties
+          echo "distributionUrl=https://archive.apache.org/dist/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperVersion=3.3.2" >> .mvn/wrapper/maven-wrapper.properties
       - name: Build with Maven
         run: ./mvnw --batch-mode --update-snapshots install -Prun-its

@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 2.43
+= Tiles Maven Plugin - Version 2.44
 
 == Overview
 
@@ -238,7 +238,7 @@ If you need to use them, add them to your configuration section:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.43</version>
+      <version>VERSION</version>
       <configuration>
         <buildSmells>dependencymanagement, dependencies, repositories, pluginrepositories, pluginmanagement</buildSmells>
         <tiles>
@@ -310,7 +310,7 @@ be applied (in this case before `P`) resulting in the desired structure:
     <plugin>
       <groupId>io.repaint.maven</groupId>
       <artifactId>tiles-maven-plugin</artifactId>
-      <version>2.37</version>
+      <version>VERSION</version>
       <configuration>
         <applyBefore>group:P</applyBefore>
         <tiles>

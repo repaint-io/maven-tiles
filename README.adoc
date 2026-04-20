@@ -63,7 +63,7 @@ you specify a configuration.
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.43</version>
+        <version>VERSION</version>
         <extensions>true</extensions>
         <configuration>
           <filtering>false</filtering>

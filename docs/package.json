@@ -10,13 +10,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.34.4",
-    "astro": "^5.16.11",
-    "sharp": "^0.32.6"
+    "@astrojs/starlight": "^0.38.3",
+    "astro": "^6.1.8",
+    "sharp": "^0.34.5"
   },
   "pnpm": {
     "overrides": {
       "zod@<=3.22.2": ">=3.22.3"
-    }
+    },
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
   }
 }

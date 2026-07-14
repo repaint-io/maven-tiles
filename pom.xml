@@ -49,7 +49,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mavenVersion>3.9.15</mavenVersion>
+    <mavenVersion>3.9.16</mavenVersion>
     <groovyVersion>4.0.31</groovyVersion>
     <repaint.release>dev</repaint.release>
     <project.build.outputTimestamp>2026-04-20T22:19:50Z</project.build.outputTimestamp>

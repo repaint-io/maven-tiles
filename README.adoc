@@ -1,4 +1,4 @@
-= Tiles Maven Plugin - Version 2.44
+= Tiles Maven Plugin - Version 2.45
 
 == Overview
 

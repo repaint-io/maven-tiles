@@ -2,14 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
- == 2.41
+ == 2.45
 
- - Updated groovy to 4.0.27 to support building under Java 24
- - Updated slf4j to 2.0.17
- - Updated plugin versions
- - Added fallback handling for an incomplete reactor model during IDE sync (Marc Rozanc <marc@rozanc.fr>)
+ Bumped dependency and build plugin versions:
+
+ - `slf4j-api` / `slf4j-simple` 2.0.17 → 2.0.18
+ - `maven-filtering` 3.5.0 → 3.5.1
+ - `maven-gpg-plugin` 3.2.6 → 3.2.8
+ - `maven-invoker-plugin` 3.6.1 → 3.10.1
+ - `jreleaser-maven-plugin` 1.18.0 → 1.25.0
+ - `maven-scm-plugin` 2.1.0 → 2.2.1
+ - `maven-enforcer-plugin` 3.5.0 → 3.6.3
+ - `central-publishing-maven-plugin` 0.10.0 → 0.11.0
+ - `maven-release-plugin` 3.1.1 → 3.3.1
+ - `sisu-maven-plugin` 0.9.0.M2 → 1.0.1
+ - `maven-plugin-plugin` 3.13.1 → 3.15.2
+ - `maven-surefire-plugin` 3.5.0 → 3.6.0-M1
+ - `gmavenplus-plugin` 3.0.2 → 5.1.0
+ - `maven-jar-plugin` 3.4.2 → 3.5.0
+ - `maven-javadoc-plugin` 3.11.2 → 3.12.0
+ - `maven-source-plugin` 3.3.1 → 3.4.0
+
+== 2.41
+
+- Updated groovy to 4.0.27 to support building under Java 24
+- Updated slf4j to 2.0.17
+- Updated plugin versions
+- Added fallback handling for an incomplete reactor model during IDE sync (Marc Rozanc <marc@rozanc.fr>)
  
- == 2.40
+== 2.40
 
 - Fixed issue with distribution management repositories losing authentication settings (Riesen, Stefan <stefan.riesen@glencore.com>)
 - Explicitely define m-jar-p version (Hervé Boutemy <hboutemy@apache.org>)

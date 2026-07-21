@@ -779,12 +779,26 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		projectModel.reporting = newModel.reporting
 
 
-		// update model (test) source directory, which is the first entry and might have been set through a tile
+		// update model (test) source directory, which is the first entry and might have been set through a tile.
+		// Use the add/remove methods rather than mutating the list returned by the getter directly, as Maven 4.0.0
+		// returns a copy from those getters (mutating it is a no-op and logs a warning).
 		if (projectModel.build.sourceDirectory) {
-			project.compileSourceRoots[0] = projectModel.build.sourceDirectory;
+			String existingSourceRoot = project.compileSourceRoots ? project.compileSourceRoots[0] : null
+			if (existingSourceRoot != projectModel.build.sourceDirectory) {
+				if (existingSourceRoot != null) {
+					project.removeCompileSourceRoot(existingSourceRoot)
+				}
+				project.addCompileSourceRoot(projectModel.build.sourceDirectory)
+			}
 		}
 		if (projectModel.build.testSourceDirectory) {
-			project.testCompileSourceRoots[0] = projectModel.build.testSourceDirectory;
+			String existingTestSourceRoot = project.testCompileSourceRoots ? project.testCompileSourceRoots[0] : null
+			if (existingTestSourceRoot != projectModel.build.testSourceDirectory) {
+				if (existingTestSourceRoot != null) {
+					project.removeTestCompileSourceRoot(existingTestSourceRoot)
+				}
+				project.addTestCompileSourceRoot(projectModel.build.testSourceDirectory)
+			}
 		}
 
 		// for tile provided LifecycleMapping in m2e we need to modifiy the original model

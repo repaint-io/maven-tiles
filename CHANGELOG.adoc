@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
  - `maven-jar-plugin` 3.4.2 → 3.5.0
  - `maven-javadoc-plugin` 3.11.2 → 3.12.0
  - `maven-source-plugin` 3.3.1 → 3.4.0
+ - Fixed WARNING on source root modification.
 
 == 2.41
 

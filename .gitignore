@@ -1,5 +1,6 @@
 # Ignore hidden files
 .*
+!.mvn
 **/.*
 
 # Ignore backups

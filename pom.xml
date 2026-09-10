@@ -19,10 +19,8 @@
   <packaging>maven-plugin</packaging>
   <version>${nisse.jgit.dynamicVersion}</version>
   <name>Tiles Maven Plugin</name>
-
   <description>Provides composition support for Maven composition support for Maven</description>
   <url>http://repaint.io</url>
-
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -30,8 +28,6 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-
   <developers>
     <!-- reviewer -->
     <developer>
@@ -46,7 +42,6 @@
       <name>Richard Vowles</name>
     </developer>
   </developers>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mavenVersion>3.9.16</mavenVersion>
@@ -56,14 +51,12 @@
     <repaint.release>dev</repaint.release>
     <project.build.outputTimestamp>2026-07-30T00:11:33Z</project.build.outputTimestamp>
   </properties>
-
   <scm>
     <connection>scm:git:git@github.com:repaint-io/maven-tiles</connection>
     <developerConnection>scm:git:git@github.com:repaint-io/maven-tiles</developerConnection>
     <url>https://github.com/repaint-io/maven-tiles</url>
     <tag>HEAD</tag>
   </scm>
-
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -151,7 +144,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <profiles>
     <profile>
       <id>run-its</id>
@@ -193,40 +185,38 @@
       </build>
     </profile>
   </profiles>
-
   <build>
-      <extensions>
-        <extension>
-          <groupId>eu.maveniverse.maven.njord</groupId>
-          <artifactId>extension3</artifactId>
-          <version>${version.njord}</version>
-        </extension>
-     </extensions>
+    <extensions>
+      <extension>
+        <groupId>eu.maveniverse.maven.njord</groupId>
+        <artifactId>extension3</artifactId>
+        <version>${version.njord}</version>
+      </extension>
+    </extensions>
     <pluginManagement>
-   <plugins>
-     <plugin>
-       <groupId>eu.maveniverse.maven.plugins</groupId>
-       <artifactId>njord</artifactId>
-       <version>${version.njord}</version>
-     </plugin>
-   </plugins>
- </pluginManagement>
-
- <plugins>
-     <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-gpg-plugin</artifactId>
-         <version>3.2.8</version>
-         <executions>
-             <execution>
-                 <id>sign-artifacts</id>
-                 <phase>verify</phase>
-                 <goals>
-                     <goal>sign</goal>
-                 </goals>
-             </execution>
-         </executions>
-     </plugin>
+      <plugins>
+        <plugin>
+          <groupId>eu.maveniverse.maven.plugins</groupId>
+          <artifactId>njord</artifactId>
+          <version>${version.njord}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.8</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
@@ -241,7 +231,6 @@
         <artifactId>maven-scm-plugin</artifactId>
         <version>2.2.1</version>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -256,7 +245,6 @@
             </goals>
           </execution>
         </executions>
-
         <configuration>
           <rules>
             <requireMavenVersion>
@@ -278,7 +266,6 @@
           <fail>true</fail>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
@@ -290,14 +277,12 @@
           <waitUntil>published</waitUntil>
         </configuration>
       </plugin>
-
       <!-- allow us to be used by Java 6, even though really, I mean -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.16.0</version>
       </plugin>
-
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
@@ -311,7 +296,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -335,14 +319,12 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- cloudbees is failing for some reasons with 2.10 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.6.0</version>
       </plugin>
-
       <!-- not supporting mixed java/groovy compilation -->
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
@@ -359,13 +341,11 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.5.1</version>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -395,7 +375,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 </project>

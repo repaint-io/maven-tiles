@@ -17,7 +17,7 @@
   <groupId>io.repaint.maven</groupId>
   <artifactId>tiles-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>2.46-SNAPSHOT</version>
+  <version>${nisse.jgit.dynamicVersion}</version>
   <name>Tiles Maven Plugin</name>
 
   <description>Provides composition support for Maven composition support for Maven</description>
@@ -52,6 +52,7 @@
     <mavenVersion>3.9.16</mavenVersion>
     <groovyVersion>5.1.2</groovyVersion>
     <maven.compiler.release>17</maven.compiler.release>
+    <version.njord>0.9.10</version.njord>
     <repaint.release>dev</repaint.release>
     <project.build.outputTimestamp>2026-07-30T00:11:33Z</project.build.outputTimestamp>
   </properties>
@@ -153,34 +154,6 @@
 
   <profiles>
     <profile>
-      <!-- activate the sonatype profile when a release is being done -->
-      <id>sonatype</id>
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.8</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
       <id>run-its</id>
       <build>
         <plugins>
@@ -222,7 +195,38 @@
   </profiles>
 
   <build>
-    <plugins>
+      <extensions>
+        <extension>
+          <groupId>eu.maveniverse.maven.njord</groupId>
+          <artifactId>extension3</artifactId>
+          <version>${version.njord}</version>
+        </extension>
+     </extensions>
+    <pluginManagement>
+   <plugins>
+     <plugin>
+       <groupId>eu.maveniverse.maven.plugins</groupId>
+       <artifactId>njord</artifactId>
+       <version>${version.njord}</version>
+     </plugin>
+   </plugins>
+ </pluginManagement>
+
+ <plugins>
+     <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-gpg-plugin</artifactId>
+         <version>3.2.8</version>
+         <executions>
+             <execution>
+                 <id>sign-artifacts</id>
+                 <phase>verify</phase>
+                 <goals>
+                     <goal>sign</goal>
+                 </goals>
+             </execution>
+         </executions>
+     </plugin>
       <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
@@ -243,10 +247,20 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.6.3</version>
         <!-- Invocation is defined by the release plugin goal set hence no executions -->
+        <executions>
+          <execution>
+            <id>enforcer</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+
         <configuration>
           <rules>
             <requireMavenVersion>
-              <version>[3.9.9,)</version>
+              <version>[3.9.16,)</version>
             </requireMavenVersion>
             <requireReleaseDeps>
               <!--  Don't allow releases with snapshot deps or parents -->
@@ -274,20 +288,6 @@
           <publishingServerId>central</publishingServerId>
           <autoPublish>true</autoPublish>
           <waitUntil>published</waitUntil>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>3.3.1</version>
-        <configuration>
-          <mavenExecutorId>forked-path</mavenExecutorId>
-          <arguments>-Drepaint.release=release</arguments>
-          <preparationGoals>clean enforcer:enforce verify</preparationGoals>
-          <goals>enforcer:enforce deploy</goals>
-          <tagBase>release/${project.groupId}/</tagBase>
-          <pushChanges>false</pushChanges>
-          <localCheckout>true</localCheckout>
         </configuration>
       </plugin>
 

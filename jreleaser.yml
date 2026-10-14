@@ -20,6 +20,7 @@ project:
 release:
   github:
     overwrite: true
+    branch: master
     tagName: tiles-maven-plugin-{{projectVersion}}
     changelog:
       skipMergeCommits: true

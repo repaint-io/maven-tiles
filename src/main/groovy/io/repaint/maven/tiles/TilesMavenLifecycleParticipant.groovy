@@ -141,7 +141,10 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	@Inject
 	MavenResourcesFiltering mavenResourcesFiltering
 
-	NotDefaultModelCache modelCache
+    @Inject
+    TileVersionFilter tileVersionFilter
+
+    NotDefaultModelCache modelCache
 
 	MavenSession mavenSession
 
@@ -164,6 +167,7 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 	Map<String, Artifact> unprocessedTiles = [:]
 	Map<String,TileModel> tilesByExecution = [:];
 
+    String tileVersionFilterParamValue;
 	String applyBeforeParent;
 
 	/**
@@ -960,7 +964,8 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			?.configuration
 
 		if (configuration) {
-			configuration.getChild("tiles")?.children?.each { tile ->
+            tileVersionFilterParamValue = configuration.getChild("tileVersionFilter")?.value
+            configuration.getChild("tiles")?.children?.each { tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
 			applyBeforeParent = configuration.getChild("applyBefore")?.value
@@ -1021,16 +1026,27 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		}
 	}
 
-	void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
-		def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
-			RepositoryUtils.toRepos(project?.remoteArtifactRepositories), null)
+    void resolveVersionRange(MavenProject project, Artifact tileArtifact) {
+        def versionRangeRequest = new VersionRangeRequest(RepositoryUtils.toArtifact(tileArtifact),
+                RepositoryUtils.toRepos(project?.remoteArtifactRepositories), null)
 
-		def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession?.repositorySession, versionRangeRequest)
+        def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession?.repositorySession, versionRangeRequest)
 
-		if (versionRangeResult?.versions) {
-			tileArtifact.version = versionRangeResult.highestVersion
-		}
-	}
+        if (versionRangeResult?.versions) {
+            if (tileVersionFilter.isApplicable()) {
+                tileVersionFilter.init(tileVersionFilterParamValue)
+                tileArtifact.version = tileVersionFilter.latestFilteredVersion(versionRangeRequest, versionRangeResult)
+            } else {
+                if (tileVersionFilterParamValue) {
+                    logger.warn("""Tile version filter is configured for tile plugin but current maven version '{}' does not support version filtering. Please update maven to 3.10.0 or newer.""",
+                            mavenSession.getProperties().get("systemProperties").getAt("maven.version"))
+                }
+
+                tileArtifact.version = versionRangeResult.highestVersion
+            }
+        }
+
+    }
 
 	/**
 	 * Checks if the reactor model has been built fully. The strongest indicator is the existence of

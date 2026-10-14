@@ -2,12 +2,19 @@ package io.repaint.maven.tiles
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
-import groovy.xml.XmlUtil
+import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlSlurper
 import org.apache.maven.artifact.Artifact
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+
+import javax.xml.XMLConstants
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.Transformer
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
 
 /**
  * This will parse a tile.xml file with the intent of removing extra syntax, holding onto it and then
@@ -41,10 +48,31 @@ class TileModel {
 			}
 
 			StringWriter writer = new StringWriter()
-			XmlUtil.serialize(slurper, writer)
+			prettyPrinter().transform(
+				new StreamSource(new StringReader(new StreamingMarkupBuilder().bindNode(slurper).toString())),
+				new StreamResult(writer))
 
 			return new StringReader(writer.toString())
 		}
+	}
+
+	/**
+	 * Equivalent of the transformer used by Groovy's XmlUtil.serialize. Groovy 6 hardens that factory with
+	 * the Xerces-only disallow-doctype-decl feature, which the JDK's TransformerFactory rejects, logging a
+	 * warning for every tile loaded - so we configure it ourselves.
+	 */
+	private static Transformer prettyPrinter() {
+		TransformerFactory factory = TransformerFactory.newInstance()
+		factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
+		factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
+		factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "")
+		factory.setAttribute("indent-number", 2)
+
+		Transformer transformer = factory.newTransformer()
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml")
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
+		return transformer
 	}
 
 	void loadTile(File tilePom) {

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+ == 2.46
+
+ - Updated groovy to 6.0 
+
  == 2.45
 
  Bumped dependency and build plugin versions:

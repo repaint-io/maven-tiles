@@ -15,7 +15,7 @@ if (!content.contains("[INFO] configuring report plugin org.apache.maven.plugins
   throw new Exception("Tile not injected fully");
 }
 
-File file = new File( basedir, "target/site/github-report.html" );
+File file = new File( basedir, "target/site/changes-report.html" );
 if ( !file.isFile() ) {
-    throw new FileNotFoundException( "Could not find github-report: " + file );
+    throw new FileNotFoundException( "Could not find changes-report: " + file );
 }

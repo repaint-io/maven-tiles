@@ -346,8 +346,20 @@ There are two mojos in the plugin, attach-tile and validate. attach-tile is only
 process and attaches the tile.xml. validate is for your use to ensure your tile is valid before releasing it - this
 ensures it can be read and any errors or warnings about content will appear.
 
+== Tile Resolution Filterinng
+
+Tiles declared with a version range always resolved to the highest
+version available. The new <tileVersionFilter> plugin configuration
+takes a Maven resolver version filter expression (e.g. "l", "h(2)",
+"e([1.1,1.2))", "nosnapshot") and applies it to the resolved range,
+selecting the highest version the filter accepts.
+
+Version filtering relies on resolver support added in Maven 3.10.0;
+on older versions a warning is logged and the highest version in the
+range is used as before.
 
 == Merging Tiles
+
 Tiles can provide configuration fragments to other tiles:
 
 * tile-merge-source: a tile that contributes configuration fragments to other tiles

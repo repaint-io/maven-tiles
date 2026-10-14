@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 https://maven.apache.org/xsd/changes-1.0.0.xsd">
+  <properties>
+    <title>Reporting Maven Tiles Test</title>
+  </properties>
+  <body>
+    <release version="0.1.0" date="2026-10-15" description="Test release">
+      <action dev="test" type="add">Reporting plugins injected from a tile.</action>
+    </release>
+  </body>
+</document>

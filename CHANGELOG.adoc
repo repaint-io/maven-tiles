@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+ == 2.47
+
+ - `tileVersionFilter` support contributed by @vetal-d
+
  == 2.46
 
  - Updated groovy to 6.0 

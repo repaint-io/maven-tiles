@@ -463,6 +463,9 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 		unprocessedTiles.clear()
 		tilesByExecution.clear()
 
+		// the version filter only comes from the project itself, not from any tiles it pulls in
+		tileVersionFilterParamValue = readTileVersionFilter(project.model)
+
 		// collect the first set of tiles
 		parseConfiguration(project.model, project.file)
 
@@ -964,12 +967,21 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 			?.configuration
 
 		if (configuration) {
-            tileVersionFilterParamValue = configuration.getChild("tileVersionFilter")?.value
-            configuration.getChild("tiles")?.children?.each { tile ->
+			configuration.getChild("tiles")?.children?.each { tile ->
 				processConfigurationTile(model, tile.value, pomFile)
 			}
 			applyBeforeParent = configuration.getChild("applyBefore")?.value
 		}
+	}
+
+	@CompileStatic(TypeCheckingMode.SKIP)
+	protected static String readTileVersionFilter(Model model) {
+		return model.build?.plugins
+			?.find({ Plugin plugin -> plugin.groupId == TILEPLUGIN_GROUP && plugin.artifactId == TILEPLUGIN_ARTIFACT})
+			?.configuration
+			?.getChild("tileVersionFilter")
+			?.value
+			?.trim()
 	}
 
 	/**
@@ -1033,17 +1045,18 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
         def versionRangeResult = versionRangeResolver.resolveVersionRange(mavenSession?.repositorySession, versionRangeRequest)
 
         if (versionRangeResult?.versions) {
-            if (tileVersionFilter.isApplicable()) {
-                tileVersionFilter.init(tileVersionFilterParamValue)
-                tileArtifact.version = tileVersionFilter.latestFilteredVersion(versionRangeRequest, versionRangeResult)
-            } else {
-                if (tileVersionFilterParamValue) {
+            String filteredVersion = null
+            if (tileVersionFilterParamValue) {
+                if (tileVersionFilter.isApplicable()) {
+                    filteredVersion = tileVersionFilter.latestFilteredVersion(tileVersionFilterParamValue,
+                            versionRangeRequest, versionRangeResult)
+                } else {
                     logger.warn("""Tile version filter is configured for tile plugin but current maven version '{}' does not support version filtering. Please update maven to 3.10.0 or newer.""",
                             mavenSession.getProperties().get("systemProperties").getAt("maven.version"))
                 }
-
-                tileArtifact.version = versionRangeResult.highestVersion
             }
+
+            tileArtifact.version = filteredVersion ?: versionRangeResult.highestVersion.toString()
         }
 
     }

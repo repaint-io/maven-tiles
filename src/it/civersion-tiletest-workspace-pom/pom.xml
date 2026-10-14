@@ -5,7 +5,7 @@
 
   <groupId>com.test</groupId>
   <artifactId>civersion-workspace-test</artifactId>
-  <version>SNAPSHOT</version>
+  <version>1-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 

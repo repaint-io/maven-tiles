@@ -1,0 +1,23 @@
+import java.io.*;
+
+File file = new File( basedir, "build.log" );
+if ( !file.isFile() ) {
+    throw new FileNotFoundException( "Could not find build log: " + file );
+}
+
+String content = new Scanner(file).useDelimiter("\\Z").next();
+
+// tileVersionFilter "l" picks the lowest version in the range
+if (!content.contains("[INFO] Mixed 'com.test:tile-version-filter-lowest:1.0.0-SNAPSHOT' with tile 'net.stickycode.tile:sticky-tile-library:1.1' as its new parent.")) {
+  throw new Exception("tileVersionFilter not applied, expected sticky-tile-library:1.1");
+}
+
+// a different filter in a later project of the same reactor is honoured rather than the first one seen
+if (!content.contains("[INFO] Mixed 'com.test:tile-version-filter-exclude:1.0.0-SNAPSHOT' with tile 'net.stickycode.tile:sticky-tile-library:1.2' as its new parent.")) {
+  throw new Exception("tileVersionFilter 'e([1.1,1.2))' not applied, expected sticky-tile-library:1.2");
+}
+
+// a project without a filter still gets the highest version, even after a filtered project in the same reactor
+if (!content.contains("[INFO] Mixed 'com.test:tile-version-filter-nofilter:1.0.0-SNAPSHOT' with tile 'net.stickycode.tile:sticky-tile-library:1.2' as its new parent.")) {
+  throw new Exception("tileVersionFilter leaked into project without a filter, expected sticky-tile-library:1.2");
+}

@@ -2,7 +2,7 @@ project:
   name: tiles-maven-plugin
   description: Tiles Maven Plugin
   longDescription: Project Mixins for Apache Maven
-  version: "2.47"
+  version: "2.47.0"
   links:
     homepage: https://github.com/repaint-io/maven-tiles
   authors:
@@ -21,7 +21,8 @@ release:
   github:
     overwrite: true
     branch: master
-    tagName: tiles-maven-plugin-{{projectVersion}}
+    tagName: v{{projectVersion}}
+    skipTag: true
     changelog:
       skipMergeCommits: true
       formatted: ALWAYS

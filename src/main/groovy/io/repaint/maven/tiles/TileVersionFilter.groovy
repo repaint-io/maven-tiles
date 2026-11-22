@@ -1,6 +1,5 @@
 package io.repaint.maven.tiles
 
-import com.google.inject.internal.Nullable
 import org.apache.maven.MavenExecutionException
 import org.eclipse.aether.RepositorySystemSession
 import org.eclipse.aether.collection.VersionFilter
@@ -12,7 +11,6 @@ import org.eclipse.aether.util.version.GenericVersionScheme
 import org.eclipse.aether.version.InvalidVersionSpecificationException
 import org.eclipse.aether.version.Version
 
-import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -24,13 +22,15 @@ class TileVersionFilter {
 
     static final DEFAULT_SCOPE = "scope"
 
-    @Inject
-    @Nullable
-    RepositorySystemSession repositorySystemSession
-
     GenericVersionScheme versionScheme = new GenericVersionScheme();
 
-    boolean isApplicable() {
+    /**
+     * The repository session is passed in rather than injected: this component is a singleton created
+     * when the extension is loaded, which may happen outside a Maven session scope (e.g. IntelliJ IDEA
+     * instantiating lifecycle participants during import), where injecting the session-scoped
+     * RepositorySystemSession throws.
+     */
+    boolean isApplicable(RepositorySystemSession repositorySystemSession) {
         return repositorySystemSession != null &&
                 DefaultVersionFilterContext.metaClass.getMetaMethod(INITIALIZE_METHOD_NAME,
                         new Object[]{Dependency.class, VersionRangeResult.class})
@@ -44,7 +44,8 @@ class TileVersionFilter {
      *
      * @return the highest version accepted by the filter, or null if the expression contains no filters
      */
-    String latestFilteredVersion(String filter, VersionRangeRequest request, VersionRangeResult result)
+    String latestFilteredVersion(String filter, VersionRangeRequest request, VersionRangeResult result,
+                                 RepositorySystemSession repositorySystemSession)
             throws MavenExecutionException {
         def artifact = request.getArtifact()
         def gav = "${artifact.groupId}:${artifact.artifactId}:${artifact.version}"

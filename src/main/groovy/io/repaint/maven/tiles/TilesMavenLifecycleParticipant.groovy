@@ -1047,9 +1047,13 @@ class TilesMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
         if (versionRangeResult?.versions) {
             String filteredVersion = null
             if (tileVersionFilterParamValue) {
-                if (tileVersionFilter.isApplicable()) {
+                def repositorySession = mavenSession?.repositorySession
+                if (repositorySession == null) {
+                    logger.warn("No repository session available, tileVersionFilter '{}' ignored for tile {}",
+                            tileVersionFilterParamValue, tileArtifact)
+                } else if (tileVersionFilter.isApplicable(repositorySession)) {
                     filteredVersion = tileVersionFilter.latestFilteredVersion(tileVersionFilterParamValue,
-                            versionRangeRequest, versionRangeResult)
+                            versionRangeRequest, versionRangeResult, repositorySession)
                 } else {
                     logger.warn("""Tile version filter is configured for tile plugin but current maven version '{}' does not support version filtering. Please update maven to 3.10.0 or newer.""",
                             mavenSession.getProperties().get("systemProperties").getAt("maven.version"))

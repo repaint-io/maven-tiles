@@ -1,0 +1,29 @@
+[tools]
+# Build on Temurin 17 (pinned to an exact release for reproducible builds).
+java = "temurin-17.0.21.1+2"
+"aqua:restechnica/semverbot" = "latest"
+
+[tasks.release]
+usage = '''
+arg "[mode]" help="semverbot bump mode passed to sbot as -m MODE" default="patch"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  echo "error: working copy or index has uncommitted changes; commit or stash them before releasing" >&2
+  git status --short --untracked-files=no >&2
+  exit 1
+fi
+
+jj b m master -t @-
+
+sbot release version -m "${usage_mode}"
+mvn clean install deploy njord:publish
+'''
+
+[tasks.github-release]
+run = '''
+mvn njord:publish -Dnjord.publisher=jreleaser
+'''
+

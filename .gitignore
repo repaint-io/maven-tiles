@@ -5,6 +5,7 @@
 
 # Ignore backups
 *.versionsBackup
+*.orig
 
 # Ignore target directory
 target

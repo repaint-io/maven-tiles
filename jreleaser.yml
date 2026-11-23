@@ -2,7 +2,6 @@ project:
   name: tiles-maven-plugin
   description: Tiles Maven Plugin
   longDescription: Project Mixins for Apache Maven
-  version: "2.47.0"
   links:
     homepage: https://github.com/repaint-io/maven-tiles
   authors:
@@ -16,12 +15,12 @@ project:
       version: "17"
       groupId: io.repaint.maven
       artifactId: tiles-maven-plugin
-
 release:
   github:
     overwrite: true
     branch: master
     tagName: v{{projectVersion}}
+    releaseName: 'Release v{{projectVersion}}'
     skipTag: true
     changelog:
       skipMergeCommits: true
